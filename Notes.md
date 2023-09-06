@@ -1,5 +1,5 @@
 # Proposed Title
-** Within-host dynamical models of acute respiratory viruses: A review of approaches and methods **
+**Within-host dynamical models of acute respiratory viruses: A review of approaches and methods**
 
 # Readings
 [Adaptive immunity to SARS-CoV-2 and COVID-19](https://pubmed.ncbi.nlm.nih.gov/33497610/)
@@ -15,15 +15,14 @@ clinical disease, hospitalization, and death. How do these things wane?
 
 # To do (Ningrui)
 
-- ~~ Make a repo for your thesis and share it with me ~~ (done)
-- ~~ Add these notes! ~~ (done)
+- ~~Make a repo for your thesis and share it with me~~ (done)
+- ~~Add these notes!~~ (done)
 - Look at your "project" and "ideas" documents to see if any of that should be on the repo
 - Let me know what you think of the SARS paper (maybe write a notes document about it on the repo and send me a link or just let me know the name)
 
 # To do (Jonathan)
 
 Reach out to within-host group
-
 
 
 
