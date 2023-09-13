@@ -3,7 +3,9 @@
 
 # Readings
 [Adaptive immunity to SARS-CoV-2 and COVID-19](https://pubmed.ncbi.nlm.nih.gov/33497610/)
+
 [Dawn Bowdish grant](https://mcmasteru365-my.sharepoint.com/:f:/g/personal/xien6_mcmaster_ca/EgAXnNQUnjdHr5uDwCUVkucBKblk85ETDEA_jaEdvbnR2Q)
+
 [Immune boosting bridges leaky and polarized vaccination models (our paper)](https://www.medrxiv.org/content/10.1101/2023.07.14.23292670v2)
 
 # Ideas
