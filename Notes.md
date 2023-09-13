@@ -17,12 +17,11 @@
 # To do (Ningrui)
 
 Let me know what you think of the SARS paper (maybe write a notes document about it on the repo and send me a link or just let me know the name)
-* [Adaptive immunity to SARS-CoV-2 and COVID-19](https://pubmed.ncbi.nlm.nih.gov/33497610/)
-* For now, just spend one hour consolidating your _current_ thoughts and questions
+* For now, just spend one hour consolidating your _current_ thoughts and questions ✓
 
 Finally, let JD know thoughts about the Dawn Bowdish grant
 * ~/Downloads/vaccResponseGrant.pdf ✓
-* For now, just spend one hour consolidating your _current_ thoughts and questions
+* For now, just spend one hour consolidating your _current_ thoughts and questions ✓
 
 And similarly for [our paper](https://www.medrxiv.org/content/10.1101/2023.07.14.23292670v2)
 * For now, just spend one hour consolidating your _current_ thoughts and questions
