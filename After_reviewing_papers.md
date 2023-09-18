@@ -40,13 +40,37 @@
 - Mentioned the effect of 'mixed vaccine', but different vaccines have different compositions (other than the antigens). Should we consider the interactions between 'other substances' in the vaccine and their impact on the subjects?
 - Is there any trade-offs between the protection acquired from multiple vaccinations (or more antigen, as an initial step considering all the vaccine are from the same company) and adverse effects (side effects are not mentioned in the paper)
 - Moderna: Adverse effects may potentially contribute to the onset of additional health conditions in the elderly population (not mentioned)  (??)
-- The order of experiment 3.1, 3.2
+- The order of experiments 3.1, 3.2
 
 
 ## Immune boosting bridges leaky and polarized vaccination models (our paper)
 [Immune boosting bridges leaky and polarized vaccination models](https://www.medrxiv.org/content/10.1101/2023.07.14.23292670v2)
+### Points
+- **Leaky vaccination model:** assumes all vaccinated individuals experience a reduced force of infection by the same amount
+  - Drawback: unrealistic assumption that vaccinated individuals who are exposed to infection can still remain susceptible, independent of previous exposures
+- **Polarized vaccination Model:** Some factions of vaccinated individuals are completely protected, while the remaining fraction remains completely susceptible
+  - Drawback: Extreme assumption that a fraction of vaccinated individuals do not receive any protection
+- Outbreak size (P) <  (L)
+- **Immune boosting Model:** Vaccinated, yet susceptible, individuals can gain protection without developing a transmissible infection
+- The boasting model predicts identical epidemic dynamics as the polarized vaccination model (build connection)
+- **Generalized vaccination model:** Combine the previous three models -- explore how the assumption of immunity affects epidemic dynamics and estimates of vaccine effectiveness
+- Different outcomes: for a high force of infection, almost all individuals eventually get infected (L), whereas many individuals are permanently protected in the polarized model.
+- Fact that the leaky model doesn’t consider: vaccinated individuals who successfully fight exposures (no infectious or developing symptoms) can experience immune boosting -> become less susceptible to future infections
+- Leaky vaccine — history based: susceptibility of an individual depends only on their history of infections (?)
+- Polarized vaccine — status based: keep tract of immune statuses of individuals, rather than their infection histories (?)
+- Immune boosting model assumes that unsuccessful challenges elicit immune response -> move individuals from S(v) to R(v) at rate VE(L)λ(t)
+- Epidemic dynamics are independent of the shape of the *susceptibility distribution* under immune boosting; epidemic dynamics are sensitive to the susceptibility distribution under a leaky vaccination model (?)
+- Two ways of estimating vaccine effectiveness: cumulative incidence & instantaneous hazard (?)
+- Cumulative incidence based effectiveness estimates will reflect initial efficacy for polarized vaccination and immune boosting models; Hazard based estimates reflect efficacy for the leaky vaccination model
 
-
+### Thoughts & Questions
+- Consider the n^th infection by adding a new parameter
+- Why assume a different recovery rate?
+- History/status bases?
+- Susceptibility distribution and what impact (beneficial?) does this have on the model's predictions?
+- Not quite understand why define immune-status as R(u), S(v), R(v) in leaky model
+- *logics behind the formula* — Generalized model
+- Equations: (26-33) 
 
 
 
