@@ -24,8 +24,8 @@ Finally, let JD know thoughts about the Dawn Bowdish grant
 * For now, just spend one hour consolidating your _current_ thoughts and questions ✓
 
 And similarly for [our paper](https://www.medrxiv.org/content/10.1101/2023.07.14.23292670v2)
-* For now, just spend one hour consolidating your _current_ thoughts and questions
-* Also, work on the math and/or simulation side to see what you can learn
+* For now, just spend one hour consolidating your _current_ thoughts and questions ✓
+* Also, work on the math and/or simulation side to see what you can learn ✓
 
 * Set up a oneDrive folder, share it with JD, and add the grant pdf ✓
 * This one is very hard, but try to come up with some questions or thoughts
