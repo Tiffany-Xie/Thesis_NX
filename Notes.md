@@ -8,6 +8,12 @@
 
 [Immune boosting bridges leaky and polarized vaccination models (our paper)](https://www.medrxiv.org/content/10.1101/2023.07.14.23292670v2)
 
+**Linear Chain Trick**
+
+[Generalizations of the ‘Linear Chain Trick’: incorporating more flexible dwell time distributions into mean field ODE models](10.1007/s00285-019-01412-w)
+
+[Building mean field ODE models using the generalized linear chain trick & Markov chain theory](https://doi.org/10.1080/17513758.2021.1912418)
+
 # Ideas
 - Tropism: What do we know about how or whether tetrapods (or mammals?) have evolved various mechanisms to induce a tradeoff between viral success in lower or upper airways
 - Immunity: How do we measure or define immunity? How careful are people in talking about it? We can have protection against infection, the ability to transmit, clinical disease, hospitalization, and death. How do these things wane?
