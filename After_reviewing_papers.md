@@ -71,9 +71,3 @@
 - Not quite understand why define immune-status as R(u), S(v), R(v) in leaky model
 - *logics behind the formula* — Generalized model
 - Equations: (26-33) 
-
-
-
-<p>&nbsp;</p>
-
-
