@@ -10,7 +10,9 @@
 
 **Linear Chain Trick**
 
-[Generalizations of the ‘Linear Chain Trick’: incorporating more flexible dwell time distributions into mean field ODE models](10.1007/s00285-019-01412-w)
+[Olga's thesis](https://macsphere.mcmaster.ca/bitstream/11375/11231/1/fulltext.pdf)
+
+[Generalizations of the ‘Linear Chain Trick’: incorporating more flexible dwell time distributions into mean field ODE models](https://link.springer.com/article/10.1007/s00285-019-01412-w)
 
 [Building mean field ODE models using the generalized linear chain trick & Markov chain theory](https://doi.org/10.1080/17513758.2021.1912418)
 
