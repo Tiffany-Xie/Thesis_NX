@@ -70,4 +70,20 @@
 - Susceptibility distribution and what impact (beneficial?) does this have on the model's predictions?
 - Not quite understand why define immune-status as R(u), S(v), R(v) in leaky model
 - *logics behind the formula* — Generalized model
-- Equations: (26-33) 
+- Equations: (26-33)
+
+
+## Effects of the infectious period distribution on predicted transitions in childhood disease dynamics
+### Thoughts & Questions
+- On page 16 of Olga Krylova's thesis, it noted that 'division into n subclasses is purely a mathematical device and has no biological meaning'. Isn't the reason we opt for the Erlang distribution over the intrinsic exponential distribution because it brings us closer to modeling real-world phenomena?
+- How to find the shape parameter? By plugging in different values to see the best fit of the data?
+- Erlang distribution parameters: how can the scale parameter (nγ) be [larger than 1](https://www.desmos.com/calculator/cqc0io7uvb)?
+- Parameter effect on the distribution (shape & scale)
+- Instead of finding the shape parameter, can we do sampling to get the stage duration? 
+
+
+
+
+
+
+
