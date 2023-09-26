@@ -4,7 +4,7 @@
 # Readings
 [Adaptive immunity to SARS-CoV-2 and COVID-19](https://pubmed.ncbi.nlm.nih.gov/33497610/)
 
-[Dawn Bowdish grant](https://mcmasteru365-my.sharepoint.com/:f:/g/personal/xien6_mcmaster_ca/EgAXnNQUnjdHr5uDwCUVkucBKblk85ETDEA_jaEdvbnR2Q)
+[Dawn Bowdish grant](https://mcmasteru365-my.sharepoint.com/:b:/g/personal/xien6_mcmaster_ca/EWOYlawx391Gowrq2UV190UB3B_kw_RTMskuOeI9vxClmg?e=3hXkjt)
 
 [Immune boosting bridges leaky and polarized vaccination models (our paper)](https://www.medrxiv.org/content/10.1101/2023.07.14.23292670v2)
 
@@ -12,9 +12,11 @@
 
 [Olga's thesis](https://macsphere.mcmaster.ca/bitstream/11375/11231/1/fulltext.pdf)
 
+[Olga's thesis (view without download)](https://mcmasteru365-my.sharepoint.com/:b:/g/personal/xien6_mcmaster_ca/Efmc21R_qWROkq4QHVNRNZQBUZsCMQQqdSqahHd9SJr3NQ?e=e9bQ1r)
+
 [Generalizations of the ‘Linear Chain Trick’: incorporating more flexible dwell time distributions into mean field ODE models](https://link.springer.com/article/10.1007/s00285-019-01412-w)
 
-[Building mean field ODE models using the generalized linear chain trick & Markov chain theory](https://doi.org/10.1080/17513758.2021.1912418)
+[Building mean field ODE models using the generalized linear chain trick & Markov chain theory](https://www.tandfonline.com/doi/full/10.1080/17513758.2021.1912418)
 
 # Ideas
 - Tropism: What do we know about how or whether tetrapods (or mammals?) have evolved various mechanisms to induce a tradeoff between viral success in lower or upper airways
