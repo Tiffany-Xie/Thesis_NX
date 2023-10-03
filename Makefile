@@ -12,6 +12,14 @@ vim_session:
 ######################################################################
 
 Sources += $(wildcard *.md)
+## After_reviewing_papers.md Notes.md README.md
+
+######################################################################
+
+Sources += $(wildcard Code/*.R)
+
+Code/Erlang_simulation.Rout: Code/Erlang_simulation.R
+	$(wrapR)
 
 ######################################################################
 
@@ -29,6 +37,8 @@ makestuff/%.stamp:
 	touch $@
 
 -include makestuff/os.mk
+
+-include makestuff/pipeR.mk
 
 -include makestuff/git.mk
 -include makestuff/visual.mk

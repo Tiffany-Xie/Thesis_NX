@@ -4,7 +4,6 @@ library(viridis)
 library(ggplot2)
 library(deSolve)
 
-
 # Exact Distribution ####
 erlang <- function(x, n, γ) {
   (n*γ)^n*x^(n-1)*exp(-n*γ*x)/factorial(n-1)
@@ -12,7 +11,7 @@ erlang <- function(x, n, γ) {
 
 plot_erlang <- function(x, n, γ) {
   if (length(n) > 1 & length(γ) > 1) {
-    return("Only one parameter variable everytime :)")
+    return("Only one parameter can vary at a time ☺")
   }
   df <- expand.grid(Time = x, Shape = n, Rate = γ)
   df$P <- with(df, erlang(Time, Shape, Rate))
@@ -46,7 +45,7 @@ plot_erlang <- function(x, n, γ) {
 # Parameters
 x <- seq(0,30, by=0.1)
 n <- c(1,2,3,4,5,10,20,50,100)
-γ <- 0.077
+γ <- 1/10
 #n <- 10
 #γ <- seq(0.1, 0.7, by=0.1)
 #n <- 2
@@ -54,7 +53,19 @@ n <- c(1,2,3,4,5,10,20,50,100)
 plot_erlang(x, n, γ)
 
 
-# Exact vs. Expact ####
+newmodel <- function(t, states, params) {
+  with(as.list(c(params)), {
+		boxes <- length(states) - 2
+		I <- states[1:boxes]
+		R <- states[boxes+1]
+		C <- states[boxes+2]
+
+		dI <- -(boxes*x+μ)*I
+		dI[2:boxes] <- dI[2:boxes]
+	})
+}
+
+# Exact vs. Expect ####
 model <- function(t, states, params) {
   with(as.list(c(states, params)), {
     dI1 <- -(10*γ + μ)*I1
@@ -67,10 +78,11 @@ model <- function(t, states, params) {
     dI8 <- 10*γ*I7 - (10*γ + μ)*I8
     dI9 <- 10*γ*I8 - (10*γ + μ)*I9
     dI10 <- 10*γ*I9 - (10*γ + μ)*I10
-    dR <- 10*γ*I10 - μ*R
-    dR_delta <- dR - R_delta
-    R_delta <- dR
-    list(c(dI1, dI2, dI3, dI4, dI5, dI6, dI7, dI8, dI9, dI10, dR, dR_delta)) # dR_delta 
+    dR <- 10*γ*i10 - μ*R
+    dC <-  10*γ*I10
+
+    ## R_delta <- dR
+    list(c(dI1, dI2, dI3, dI4, dI5, dI6, dI7, dI8, dI9, dI10, dR, dC))
   })
 }
 
@@ -93,7 +105,7 @@ compare <- function(time, n, γ, μ, states, model) {
 states <- c(I1 = 1, I2 = 0, I3 = 0, 
             I4 = 0, I5 = 0, I6 = 0,
             I7 = 0, I8 = 0, I9 = 0,
-            I10 = 0, R = 0, R_delta = 0)
+            I10 = 0, R = 0, C = 0)
 time <- seq(0,30,by=0.1)
 n <- 10
 γ <- 0.1
