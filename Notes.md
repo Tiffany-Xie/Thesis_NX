@@ -38,7 +38,12 @@ And similarly for [our paper](https://www.medrxiv.org/content/10.1101/2023.07.14
 * Also, work on the math and/or simulation side to see what you can learn ✓
 
 * Set up a oneDrive folder, share it with JD, and add the grant pdf ✓
-* This one is very hard, but try to come up with some questions or thoughts
+* This one is very hard, but try to come up with some questions or thoughts ✓
+
+Oct 3, 2023
+* Test Erlang using Gamma
+* Match the Estimated P to the exact P (approximate using small interval OR *other method*)
+* Find better ways to dynamically change the *dI* equations in the model
 
 # To do (Jonathan)
 
