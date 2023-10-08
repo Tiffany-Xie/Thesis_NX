@@ -41,9 +41,9 @@ And similarly for [our paper](https://www.medrxiv.org/content/10.1101/2023.07.14
 * This one is very hard, but try to come up with some questions or thoughts ✓
 
 Oct 3, 2023
-* Test Erlang using Gamma
-* Match the Estimated P to the exact P (approximate using small interval OR *other method*)
-* Find better ways to dynamically change the *dI* equations in the model
+* Test Erlang using Gamma ✓
+* Match the Estimated P to the exact P (approximate using small interval OR *other method*) ✓
+* Find better ways to dynamically change the *dI* equations in the model ✓
 
 # To do (Jonathan)
 
