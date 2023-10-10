@@ -94,7 +94,7 @@ compare <- function(time, n, γ, μ, states, model) {
   ggplot(df, aes(x=Time)) +
     geom_line(aes(y = P, col = "Exact P"), linewidth = 1) +
     geom_line(aes(y = P_est, col = "Estimated P"), linewidth = 2, linetype = "twodash") +
-    labs(title = paste("Probability density functions with 1/γ =", 1/γ, "and n =", n), 
+    labs(title = paste("Probability density functions with D =", 1/γ, "and stage =", n), 
          x = "Stage duration (days)",
          y = "Probability Density")
 }
