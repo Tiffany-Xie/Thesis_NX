@@ -66,49 +66,49 @@ plot_erlang(x, n, γ)
 #}
 
 # Exact vs. Expact ####
-model <- function(t, states, params) {
-  with(as.list(c(states, params)), {
-    dI <- numeric(n)
-    #states <- c(states[1], numeric(n-1), states[2])
-    dI[1] <- -(n*γ + μ)*states[1]
-    if (n>1) {
-      for (i in 2:n) {
-        dI[i] <- n*γ*states[i-1] - (n*γ + μ)*states[i]
-      }
-    }
-    dR <- n*γ*states[n] - μ*R
-    list(c(dI, dR))
-  })
+SInR <- function(t, states, params) {
+	with(as.list(c(params)), {
+		I <- states[1:n]
+		R <- states[[n+1]]
+		
+		Iprev <- c(0, I[1:(n-1)])
+		dI <- n*γ*Iprev - (n*γ+μ)*I
+		dR <- n*γ*I[[n]] - μ*R
+		return(list(c(dI, dR)))
+	})
 }
 
-compare <- function(time, n, γ, μ, states, model) {
+compare <- function(time, n, γ, μ, states, SInR) {
   params <- c(γ = γ, μ = μ, n = n)
   df <- data.frame(Time = time)
   df$P <- erlang(time, n, γ)
   soln <- ode(y = states,
               times = time, 
-              func = model, 
+              func = SInR, 
               parms = params)
   
   df$P_est <- c(diff(soln[,"R"])/diff(time), NA)
   ggplot(df, aes(x=Time)) +
     geom_line(aes(y = P, col = "Exact P"), linewidth = 1) +
     geom_line(aes(y = P_est, col = "ODE"), linewidth = 2, linetype = "twodash") +
-    labs(title = paste("Probability density functions with 1/γ =", 1/γ, "and n =", n), 
+    labs(title = paste("Probability density functions with D =", 1/γ, "and stage =", n), 
          x = "Stage duration (days)",
          y = "Probability Density")
 }
 
 
-states <- c(I1 = 1, I2 = 0, I3 = 0, 
-            I4 = 0, I5 = 0, I6 = 0,
-            I7 = 0, R = 0)
 time <- seq(0,30,by=0.01)
 n <- 7
 γ <- 0.1
 μ <- 0
-compare(time, n, γ, μ, states, model)
 
+states <- c(1, numeric(n))
+names(states) <- c(
+	paste ("N", 1:n, sep="")
+	, "R"
+)
+
+compare(time, n, γ, μ, states, SInR)
 
 # Gamma vs. Erlang (check)
 #library(tidyr)
@@ -146,5 +146,4 @@ print(
 		, y = "Probability Density"
 	)
 )
-
 
