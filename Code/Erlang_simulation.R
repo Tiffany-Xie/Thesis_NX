@@ -93,7 +93,7 @@ compare <- function(time, n, γ, μ, states, model) {
   df$P_est <- c(diff(soln[,"R"])/diff(time), NA)
   ggplot(df, aes(x=Time)) +
     geom_line(aes(y = P, col = "Exact P"), linewidth = 1) +
-    geom_line(aes(y = P_est, col = "Estimated P"), linewidth = 2, linetype = "twodash") +
+    geom_line(aes(y = P_est, col = "ODE"), linewidth = 2, linetype = "twodash") +
     labs(title = paste("Probability density functions with 1/γ =", 1/γ, "and n =", n), 
          x = "Stage duration (days)",
          y = "Probability Density")
@@ -128,13 +128,23 @@ df <- data.frame(Time = times,
 #  theme_minimal()
 
 ggplot(df, aes(x=Time)) +
-  geom_line(aes(y = Gamma, col = "Gamma"), linewidth = 1) +
-  geom_line(aes(y = Erlang, col = "Erlang"), linewidth = 2, linetype = "twodash") +
+  geom_line(aes(y = Gamma, col = "dgamma"), linewidth = 1) +
+  geom_line(aes(y = Erlang, col = "formula"), linewidth = 2, linetype = "twodash") +
   labs(title = paste("Gamma vs. Erlang, with shape(n) =", n, "and rate(γ) =", γ), 
        x = "Stage duration (days)",
        y = "Probability Density")
 
-
-
+print(
+	ggplot(df) + aes(x=Time)
+	+ geom_line(aes(y = Gamma, col = "dgamma"), linewidth = 1)
+	+ geom_line(aes(y = Erlang, col = "formula")
+		, linewidth = 2, linetype = "twodash"
+	)
+	+ labs(
+		title = paste("Gamma vs. Erlang, with shape(n) =", n, "and rate(γ) =", γ) 
+		, x = "Stage duration (days)"
+		, y = "Probability Density"
+	)
+)
 
 
