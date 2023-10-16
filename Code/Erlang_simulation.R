@@ -79,10 +79,10 @@ names(states) <- c(
 
 # Geometric: r = 2, a = 3/16, γ_i ascending = TRUE, D = 10, n = 4
 r <- 2
-a <- 3/16
+a <- 3/16 # 127/640
 compare(time, n, γ, μ, a, r, states, SInR_geom)
 
-# Geometric: different r values, to maintain D, a = (1/r^n-1)*γ/(1/r-1)
+# Geometric: different r values, to maintain D, a = (1/r^n-1)*γ/(1/r-1), D = 10, n =  4
 r <- seq(1.2,3,by=0.2)
 df <- expand.grid(Time = time, n = n, γ = γ, r = r)
 df$a <- with(df, (1/r^n-1)*γ/(1/r-1)) 
@@ -101,6 +101,28 @@ ggplot(df, aes(x = Time, y = ODE, color = factor(r))) +
   geom_line() +
   scale_color_manual(values = viridis(length(r))) +
   geom_vline(xintercept = 1/γ, color = "red", linetype = "dashed", linewidth = 1) +
-  geom_line(aes(x = Time, y = P), color = "black", linewidth = 1.5)
+  geom_line(aes(x = Time, y = P), color = "black", linewidth = 1.5) +
+  labs(title = paste0("Compare different r: D=", 1/γ[1], ", n=", n[1]),
+       x = "Stage duration (days)",
+       y = "Probability Density")
+
+# Geometric: same r, D; different n
+library(gridExtra)
+N <- seq(2,7)
+r <- 2
+plots <- list()
+i = 1
+for (n in N) {
+  a = (1/r^n-1)*γ/(1/r-1)
+  states <- c(1, numeric(n))
+  names(states) <- c(
+    paste ("I", 1:n, sep="")
+    , "R"
+  )
+  p <- compare(time, n, γ, μ, a, r, states, SInR_geom)
+  plots[[i]] <- p
+  i <- i+1
+}
+grid.arrange(grobs = plots, ncol = 2)
 
 
