@@ -49,8 +49,14 @@ Oct 3, 2023
 * Match the Estimated P to the exact P (approximate using small interval OR *other method*) ✓
 * Find better ways to dynamically change the *dI* equations in the model ✓
 
-# To do (Jonathan)
+## 2023 Oct 17 (Tue)
 
-Reach out to within-host group ✓
+We want to be able to fix the number of boxes and change r and see if that's a better overall approach than changing the number of boxes.
 
-Send some notes about the boxcar thing
+Our starting point is going to be Erlang distributions with n=2, 4 and 8. What values of r match these distributions if we use the pseudo-Erlang with 12 boxes?
+
+We can look both at visual matches and also at shape parameters (for now, we will always keep the mean duration constant).
+
+Our main shape parameter is κ = σ²/μ. We can calculate that analytically from the formulas on the paper. It might be fun to also calculate it numerically from the model output, but that is probably not necessary unless we run into trouble.
+
+After we do visual comparisons, we can also try to go backward. Given a number of boxes and a desired value of κ, it should be possible to numerically find the value of r that matches κ. The best way to do this is probably with the r function `uniroot`. If we do this for κ=1/n_erlang, we can compare pseudo-Erlang and Erlang distributions with the same D and the same κ (we will typically adjust a as the last step to make the values of D match).

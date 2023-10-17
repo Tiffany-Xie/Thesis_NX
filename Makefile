@@ -18,6 +18,8 @@ Sources += $(wildcard *.md)
 
 Sources += $(wildcard Code/*.R)
 
+## Code/
+
 Code/Erlang_simulation.Rout: Code/Erlang_simulation.R
 	$(pipeR)
 

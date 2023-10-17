@@ -3,6 +3,9 @@ library(viridis)
 library(ggplot2)
 library(deSolve)
 
+library(shellpipes)
+startGraphics(width=10)
+
 # Erlang Distribution ####
 erlang <- function(x, n, γ) {
   (n*γ)^n*x^(n-1)*exp(-n*γ*x)/factorial(n-1)
