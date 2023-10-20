@@ -60,3 +60,20 @@ We can look both at visual matches and also at shape parameters (for now, we wil
 Our main shape parameter is κ = σ²/μ. We can calculate that analytically from the formulas on the paper. It might be fun to also calculate it numerically from the model output, but that is probably not necessary unless we run into trouble.
 
 After we do visual comparisons, we can also try to go backward. Given a number of boxes and a desired value of κ, it should be possible to numerically find the value of r that matches κ. The best way to do this is probably with the r function `uniroot`. If we do this for κ=1/n_erlang, we can compare pseudo-Erlang and Erlang distributions with the same D and the same κ (we will typically adjust a as the last step to make the values of D match).
+
+2023 Oct 20 (Fri)
+=================
+
+For proposal: review a little bit about SInR modeling (linear chains). You can rely mostly on the friendly parts of Olga's thesis. Briefly explain your own understanding of what's going on.
+
+Look to see if Gholami and/or Heffernan has done anything with fitting multiple models with different numbers of boxes. See for example https://pubmed.ncbi.nlm.nih.gov/36773843/, there may also be others on archives?
+
+Find out about our lab's SIR fitting stuff? https://github.com/bbolker/fitsir/
+
+Here is some background about how different kinds of models come together. Do NOT worry about the math details; if the overview helps you, or you find something to cite, that's great. Otherwise you can ignore the whole thing.
+
+Biological parameters are D and κ
+
+Erlang mechanistic parameters are γ and n [clumsy and discrete]
+
+PE mechanistic parameters [fix n]: a and r

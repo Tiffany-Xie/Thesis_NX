@@ -12,7 +12,7 @@ vim_session:
 ######################################################################
 
 Sources += $(wildcard *.md)
-## After_reviewing_papers.md Notes.md README.md
+## After_reviewing_papers.md Notes.md README.md todo.md
 
 ######################################################################
 
