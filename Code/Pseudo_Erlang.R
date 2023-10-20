@@ -2,6 +2,7 @@
 library(viridis)
 library(ggplot2)
 library(deSolve)
+library(gridExtra)
 
 # Models ####
 erlang <- function(x, n, γ) {
@@ -42,7 +43,7 @@ EP_compare <- function(time, γ, μ, r, nE, nPE, model) {
 
   df_PE$P_PE <- P_PE 
   
-  ggplot(df_PE, aes(x=Time, y=P_PE, color=factor(r))) +
+  p1 <- ggplot(df_PE, aes(x=Time, y=P_PE, color=factor(r))) +
     geom_line() +
     scale_color_manual(values = viridis(length(r))) +
     geom_vline(xintercept = 1/γ, color = "red", linetype = "dashed", linewidth = 1) +
@@ -50,6 +51,21 @@ EP_compare <- function(time, γ, μ, r, nE, nPE, model) {
     labs(title = paste0("Compare different r: D=", 1/γ, ", nE=", nE, ", nPE=", nPE),
          x = "Stage duration (days)",
          y = "Probability Density")
+  
+  df_r <- data.frame(r = r)
+  df_r$a <- with(df_r, (1/r^nPE-1)*γ/(1/r-1))
+  df_r$var <- with(df_r, 1/a^2*(1/r^(2*nPE)-1)/(1/r^2-1))
+  df_r$mean <- with(df_r, 1/a*(1/r^nPE-1)/(1/r-1))
+  df_r$K <- with(df_r, var/mean^2)
+  p2 <- ggplot(df_r, aes(x=r, y=K)) + geom_line() +
+    geom_hline(yintercept = 1/(nE), color = "red", linetype = "dashed", linewidth = 1) +
+    labs(title="Coefficient of Variation^2 (K)")
+  
+  plots <- list()
+  plots[[1]] <- p1
+  plots[[2]] <- p2
+  grid.arrange(grobs = plots, ncol = 2)
+  
 }
 
 # Simulation ####
@@ -59,7 +75,7 @@ time = seq(0,30,by=0.01)
 nPE <- 12
 
 # nE == 2
-r <- seq(3.2, 4.5, by=0.1)
+r <- seq(2.5, 3.5, by=0.1)
 nE <- 2
 EP_compare(time, γ, μ, r, nE, nPE, SInR_geom)
 
@@ -72,6 +88,7 @@ EP_compare(time, γ, μ, r, nE, nPE, SInR_geom)
 r <- seq(1.2, 1.30, by=0.01)
 nE <- 8
 EP_compare(time, γ, μ, r, nE, nPE, SInR_geom)
+
 
 
 
