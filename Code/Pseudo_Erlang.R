@@ -4,6 +4,9 @@ library(ggplot2)
 library(deSolve)
 library(gridExtra)
 
+library(shellpipes)
+startGraphics(width=11)
+
 # Models ####
 erlang <- function(x, n, γ) {
   (n*γ)^n*x^(n-1)*exp(-n*γ*x)/factorial(n-1)
