@@ -80,10 +80,12 @@ formula <- as.formula(c(y1, y2) ~ x[1] + x[2])
 # Initial guess
 initial_guess <- c(x1 = 0, x2 = 0)
 
-quit()
-
 # Solve the system of nonlinear equations
 solution <- nls(formula, start = initial_guess)
 
 # Print the result
 print(summary(solution))
+
+
+
+
