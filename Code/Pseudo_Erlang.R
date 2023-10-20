@@ -23,7 +23,7 @@ SInR_geom <- function(t, states, params) {
 # Compare ####
 EP_compare <- function(time, γ, μ, r, nE, nPE, model) {
   df_E <- data.frame(Time = time)
-  df_E$P_E <- erlang(time, nE, γ)
+  df_E$P_E <- erlang(time, nE, γ) 
   
   df_PE <- expand.grid(Time = time, nPE= nPE, nE = nE, γ = γ, r = r)
   df_PE$a <- with(df_PE, (1/r^nPE-1)*γ/(1/r-1)) #sqrt(nE*γ^2*((1/r^2)^nPE - 1)/(1/r^2-1))
@@ -31,7 +31,7 @@ EP_compare <- function(time, γ, μ, r, nE, nPE, model) {
   names(states) <- c(paste ("I", 1:nPE, sep=""), "R")
   P_PE <- c()
   for (i in r) {
-    a <- sqrt(nE*γ^2*((1/i^2)^nSE - 1)/(1/i^2-1))
+    a <- (1/i^nPE-1)*γ/(1/i-1)
     params <- c(γ = γ, μ = μ, n = nPE, a = a, r = i)
     soln <- ode(y = states,
                 times = time, 
@@ -40,7 +40,7 @@ EP_compare <- function(time, γ, μ, r, nE, nPE, model) {
     P_PE <- c(P_PE, c(diff(soln[,"R"])/diff(time), NA))
   }
 
-  df_PE$P_PE <- P_PE
+  df_PE$P_PE <- P_PE 
   
   ggplot(df_PE, aes(x=Time, y=P_PE, color=factor(r))) +
     geom_line() +
@@ -59,17 +59,17 @@ time = seq(0,30,by=0.01)
 nPE <- 12
 
 # nE == 2
-r <- seq(2.5, 3.3, by=0.1)
+r <- seq(3.2, 4.5, by=0.1)
 nE <- 2
 EP_compare(time, γ, μ, r, nE, nPE, SInR_geom)
 
 # nE == 4
-r <- seq(1.1, 1.7, by=0.1)
+r <- seq(1.5, 2.5, by=0.1)
 nE <- 4
 EP_compare(time, γ, μ, r, nE, nPE, SInR_geom)
 
 # nE == 8
-r <- seq(1.15, 1.25, by=0.01)
+r <- seq(1.2, 1.30, by=0.01)
 nE <- 8
 EP_compare(time, γ, μ, r, nE, nPE, SInR_geom)
 
