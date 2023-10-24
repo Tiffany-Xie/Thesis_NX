@@ -27,6 +27,11 @@ Pseudo_Erlang.Rout: Code/Pseudo_Erlang.R
 
 ######################################################################
 
+simulate.Rout: Code/simulate.R
+	$(pipeR)
+
+######################################################################
+
 ### Makestuff
 
 Sources += Makefile

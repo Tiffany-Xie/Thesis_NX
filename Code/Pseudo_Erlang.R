@@ -1,6 +1,6 @@
 # Packages ####
 library(viridis)
-library(ggplot2)
+library(ggplot2); theme_set(theme_bw(base_size=14))
 library(deSolve)
 library(gridExtra)
 
@@ -30,7 +30,7 @@ EP_compare <- function(time, γ, μ, r, nE, nPE, model) {
   df_E$P_E <- erlang(time, nE, γ) 
   
   df_PE <- expand.grid(Time = time, nPE= nPE, nE = nE, γ = γ, r = r)
-  df_PE$a <- with(df_PE, (1/r^nPE-1)*γ/(1/r-1)) #sqrt(nE*γ^2*((1/r^2)^nPE - 1)/(1/r^2-1))
+  df_PE$a <- with(df_PE, (1/r^nPE-1)*γ/(1/r-1)) 
   states <- c(1, numeric(nPE))
   names(states) <- c(paste ("I", 1:nPE, sep=""), "R")
   P_PE <- c()
@@ -113,7 +113,7 @@ soln <- ode(y = states,
             times = time, 
             func = SInR_geom, 
             parms = params)
-df$P_PE <- c(diff(soln[,"R"])/diff(time), NA)
+df$P_PE <- c(diff(c(soln[,"R"]))/diff(time))
 
 ggplot(df, aes(x=Time)) + 
   geom_line(aes(y=P_E, col="Exact P"), linewidth=1) +
