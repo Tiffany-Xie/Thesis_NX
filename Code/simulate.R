@@ -19,20 +19,20 @@ SInR_geom <- function(t, states, params) {
 
 PEdens <- function(r, nPE, γ=0.1, maxTime=40, ts=0.1, μ=0)
 {	
-	states <- c(1, numeric(nPE))
-	names(states) <- c(paste ("I", 1:nPE, sep=""), "R")
-	time <- seq(0, maxTime, by=ts)
-
-	params <- c(γ = γ, μ = μ, n = nPE, a = nPE*γ, r = r)
-	soln <- ode(y = states,
-		times = time, 
-		func = SInR_geom, 
-		parms = params
-	)
-	return(data.frame(
-		t = (time[-1] + time[-length(time)])/2
-		, d = diff(soln[, "R"]/ts)
-	))
+  states <- c(1, numeric(nPE))
+  names(states) <- c(paste ("I", 1:nPE, sep=""), "R")
+  time <- seq(0, maxTime, by=ts)
+  
+  params <- c(γ = γ, μ = μ, n = nPE, a = (1/r^nPE-1)*γ/(1/r-1), r = r)
+  soln <- ode(y = states,
+              times = time, 
+              func = SInR_geom, 
+              parms = params
+  )
+  return(data.frame(
+    t = (time[-1] + time[-length(time)])/2
+    , d = diff(soln[, "R"])/ts
+  ))
 }
 
 ts <- 0.1
@@ -45,4 +45,3 @@ S <- sum(df$t^2*df$d*ts)
 
 print(c(check, mean, S))
 print(S/mean^2-1)
-
