@@ -1,1 +1,99 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\pagenumbering{arabic}
+\linespread{1.5}
+\setlength{\parskip}{12pt}
+\pagestyle{fancy}
+\fancyhf{}
 
+\lhead{ID: 400323416}
+\chead{BIO 4C12 Research Proposal}
+\rhead{Ningrui Xie}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+
+
+\begin{document}
+\begin{spacing}{1.0}
+\begin{center}
+    \Large
+    \textbf{Mathematical Approaches for Simulating Epidemic Progression: Addressing Limitations of the Linear Chain Trick in ODE Models}
+    
+    \large
+    \vspace{0.4cm}
+    Ningrui Xie \\ Supervisor: Dr. Jonathan Dushoff
+\end{center}
+\end{spacing}
+
+
+\section*{Abstract}
+Mathematical models play a pivotal role in epidemiology by offering insights into the dynamics of infectious disease spread and enabling predictions of future trends. Yet the commonly used SIR model relies on the unrealistic assumption of exponentially distributed infectious stage durations. The strategy used by modelers to solve this problem is to subdivide the infectious stage into an integer number of substages, each having exponentially distributed substage durations with the same recovery rate (SI$^n$R model). This technique, often referred to as the Linear Chain Trick (LCT), enables the modeling of the entire infectious period durations as Erlang-distributed, aligning more closely with biological realism. However, the LCT approach has limitations, including cumbersome shape parameter determination process and discrete parameter values. In this study, we propose a novel model that assumes a geometrically distributed recovery rate for each infectious substage. We aim to assess its performance, aligning with the established SI$^n$R model, determining optimal parameters, and evaluating its fitness with real-world data. This approach holds the potential to enhance model flexibility and to develop user-friendly tools for effective epidemic modeling and prediction.
+\pagebreak
+
+\section*{Introduction}
+In the realm of epidemiology, mathematical models serve as a powerful tool for understanding and effectively managing the spread of infectious disease. They enable us to identify critical factors influencing transmission and predict future trends.
+\par
+Among the prominent models employed in epidemiology studies, the SIR compartmental model stands as a prevalent choice \cite{McKendrick1927}\cite{Anderson1991}. This model categorizes the population into three compartments representing Susceptible, Infectious, and Recovered individuals. Central to this model is the assumption that the rate at which individuals exit the infectious compartment follows an exponential distribution with a mean time of $\frac{1}{\gamma}$, where $\gamma$ represent the individual recovery rate \cite{Hethcote2000}. However, this assumption, although mathematically convenient, deviates from the biological reality, as it fails to account for the duration of time individuals already spend in the infectious stage. A more biologically plausible approach would involve a probability distribution where the likelihood of exiting the infectious stage begins small but gradually increases as time approximates the mean duration of infection $\frac{1}{\gamma}$, eventually approaching zero as time extends infinitely. In other words, the probability distribution of the duration required to exit the infectious stage should exhibit a pronounced central tendency \cite{Sartwell1950}\cite{Simpson1952}\cite{Bailey1954}\cite{Gough1977}.
+\par
+To address this biological incongruity and to offer a more practical way of constructing ODE models, the Erlang distribution \cite{Anderson1980}\cite{Lloyd2001}\cite{Ma2006}, often described as the gamma distribution with integer shape parameters, becomes an instrumental choice for defining the duration of the infectious stage \cite{Olga2013}\cite{Nguyen2007}. This distribution allows us to employ the concept of subdividing the single infectious stage into $n$ substages, each following an exponential distribution with a recovery rate of $n \gamma$ ($\gamma_i = n \gamma$). The subdivision is made feasible by the property of the Erlang distribution, which is equivalent to a sequence of independent and identically distributed exponential distributions \cite{Tummal2011}. We represent the Erlang-distributed SIR model as SI$^n$R. The probability density of Erlang distribution with shape parameter $n$ and scale parameter $n \gamma$ have the following form: 
+\begin{equation*}
+    f(x; n,n\gamma) = \frac{(n\gamma)^n}{(n-1)!} x^{n-1} e^{-n\gamma x} \quad x>0, n \in \mathbb{N}
+\end{equation*}
+
+Note that the selection of the substage recovery rate as $n\gamma$ was to ensure that the subdivision of the infectious stage does not impact the mean recovery period ($\frac{1}{\gamma}$), as
+\begin{align*}
+    \frac{1}{\gamma} = \sum_{i=1}^{n} \frac{1}{\gamma_i} = \sum_{i=1}^{n} \frac{1}{n\gamma}
+\end{align*}
+
+This approach, often referred to as the Linear Chain Trick (LCT)\cite{MacDonald1978}, is a powerful technique used to transform continuous-time stochastic state transition models, where an individual's time spent in a specific state follows an Erlang distribution, into mean-field ODE models \cite{Kirosingh2019}. Importantly, the predictions obtained from the SI$^n$R model that incorporates the LCT for modeling infectious stages exhibit significant divergence from those of the original SIR model, even when the mean infectous stage duration remains the same. This disparity serves to rectify the tendency of overoptimistic predictions that suggest minimal control measures are sufficient to mitigate an epidemic in the SIR model\cite{Wearing2005}.
+\par
+Nonetheless, the utilization of the Linear Chain Trick to generate Erlang-distributed stage durations comes with certain limitations. Firstly, the process of determining the appropriate number of substages (shape parameter, $n$) is cumbersome and time-intensive. Previous research employing this technique necessitated data fitting for each model with varying substage counts \cite{Wearing2005}\cite{Hurtado2021}. Prior studies have explored methods for estimating the number of states in the linear chain through techniques like profile likelihood \cite{Raue2009} and model reduction \cite{Maiwald2016}. However, the inherent rigidity in the model's parameters remains a substantial limitation. As the infectious stage in the SI$^n$R model must be divided into an integer number of substages for incorporation into the ordinary differential equations (ODE), the parameters of interest, specifically the recovery rate of each substage ($n\gamma$) and the number of substages ($n$), are inherently governed by discrete values. These constraints substantially restrict the model's adaptability and performance in practical applications.
+\par
+In this study, we aim to address these limitations by introducing an innovative approach, which assumes a geometrically distributed recovery rate ($\gamma_i = ar^{i-1}$) from each infection substage rather than a constant rate of $n\gamma$. This transformative shift in perspective eliminates the need for using integers as the shape parameter to control the distribution, allowing us to maintain a constant value for $n$ while leveraging $a$ and $r$ to modify its shape, thereby transitioning our parameters of interest from discrete $n$ and $n\gamma$ to continuous $a$ and $r$. We refer this novel model as the SIgR model. In the initial phase of our study, we will test the performance of the proposed model by assessing its ability to align with the established SI$^n$R model. This will involve devise a method for determining the optimal values of $a$ and $r$ that most accurately match with the mean ($M$) and quadratic coefficient of variation ($\kappa$) of the SI$^n$R model across various substages, and evaluating the shape of the probability distribution for the duration of the infectious stage. We will subsequently conduct an empirical validation of the novel model through the process of data fitting. This evaluation will encompass aspects such as the model's alignment with real-world data and its predictive capabilities in projecting future trends. We will carry out this assessment alongside the established SI$^n$R model using the identical dataset to analyze the effectiveness of the SIgR model. We anticipate that this approach will enhance the model's flexibility and utility, thus paving the way for the development of user-friendly software tools that empower modelers to efficiently select and employ the most suitable models for describing and predicting future epidemic scenarios.
+\pagebreak
+
+
+\section*{Research Design}
+We begin our study by examing the distribution of the stage durations within an SI$^n$R model to determine whether it conforms to an Erlang distribution when dividing the infectious stage into a sequence of n substages, each exponentially distributed with a mean recovery rate of $n\gamma$. To achieve this, a simplified I$^n$R model has been created, assuming a fixed number of infected individuals at time 0, with no new infections occurring throughout the study period, and confers permanent immunity upon recovery:
+\begin{align*}
+    \frac{dI_1}{dt} &= -n \gamma I_1 \\
+    \frac{dI_2}{dt} &= n \gamma I_1 - n \gamma I_2 \\
+    &\vdots \\
+    \frac{dI_n}{dt} &= n \gamma I_{n-1} - n \gamma I_n \\
+    \frac{dR}{dt} &= n \gamma I_n 
+\end{align*}
+We employed the R package ‘deSlove’ to solve the I$^n$R model, enabling us to examine how the number of infected and recovered individuals changes over time. By setting the initial number of infected individuals to 1, we derived the cumulative distribution function (CDF) for both infected and recovered individuals. Taking the derivative of the CDF functions obtained form the model would give us the probability density function (PDF), which facilitates a comparison with the Erlang distribution, characterized by shape parameter (number of substages) $n$ and scale parameter (recovery rate of each substage) $n\gamma$. The outcomes of this analysis will serve to empirically validate the notion that the sum of an integer number of independent exponentially distributed random variables follows an Erlang distribution \cite{Tummal2011}. After achieving concordance between the Erlang distribution and the infectious stage duration distribution defined by the I$^n$R model, we will use these two interchangeably.
+\par
+Established epidemic models featuring Erlang-distributed infection stage durations use a constant recovery rate $n\gamma$ within each substage. In our next phase, we intend to replace this constant rate with a geometrically distributed sequence $\gamma_i = ar^{i-1}$. We begin by assessing if the modified model retains the conventional Erlang-distributed infectious stage duration shape of the while preserving $M$ and $\kappa$. For models involving geometric infection substage durations (SIgR), the parameters of interest shift from $n$ and $n\gamma$ to $a$ and $r$.
+\par
+Our initial approach involves fixing the number of substages for the geometric distribution ($n_{PE}$) at 12 and determining the optimal $r$ value to approximate the shape of the Erlang distribution with various infection stages ($n_E$). However, the presence of the power $n$ introduces complexity when attempting to explicitly determine $r$ and $a$ for achieving concordance in $M$ and $\kappa$ between the infectious stage defined by SIgR and the Erlang distribution, shown as follow: 
+\begin{align*}
+    &M: \quad \underbrace{\frac{1}{\gamma}}_{\text{SI$^n$R}} = \underbrace{\frac{\frac{1}{a} (\frac{1}{r^{n_{PE}}}-1)}{\frac{1}{r}-1}}_{\text{SIgR}} \\
+    &\kappa: \quad \underbrace{\frac{1}{n_E}}_{\text{SI$^n$R}} = \underbrace{\frac{\frac{\frac{1}{a^2} (\frac{1}{r^{2n_{PE}}}-1)}{\frac{1}{r^2}-1}}{M^2}}_{\text{SIgR}}
+\end{align*}
+Therefore, we plan to address $M$ and $\kappa$ separately. The approach involves fixing $M$ and determining the range of $r$ that satisfies the equalization of $\kappa$. To maintain the average recovery time as $\frac{1}{\gamma}$, certain constraints must be met: 
+\begin{equation*}
+    a = \frac{\gamma (\frac{1}{r^{n_{PE}}}-1)}{\frac{1}{r}-1}
+\end{equation*}
+Determining the range of values for the variable $r$ will faciliate the process of identifying the specific $r$ value, within that range, at which $K$ equals $\frac{1}{n_E}$.
+
+\par
+Upon successfully identifying $a$ and $r$ values that match $M$ and $\kappa$ of the infection stage durations distribution between the two models, we will take our approach further. Given a predetermined number of substages, a desired $\kappa$ value, and mean, we aim to numerically compute the $r$ value that matches $\kappa$. This approach will result in a novel methodology for characterizing the stage distribution, which offers increased flexibility compared to the conventional approach using a integer number of substage with identical rate, as the parameters $a$ and $r$ in the new model will be continuous rather than discrete, providing more refined control over the shape of the distribution.
+\par
+Following the initial theoretical evaluation of the viability of the SIgR model, our research will progress to the empirical phase, where data fitting will be undertaken to evaluate the model's efficacy. The dataset under consideration encompass disease outbreak data, vaccination records, and case-specific information. The fitting process entails the adjustment of model parameters to achieve the best fit. The assessment of model fitness will be executed through methodologies such as maximum likelihood estimation and Bayesian inference. Subsequently, the goodness-of-fit of each model will be calculate to compare their respective performance and suitability for the given dataset.
+
+\section*{Concluding Remarks}
+Our proposed projects and experiments will comprehensively assess the effectiveness of our novel model, which replaces the established constant substage recovery rate with a geometrically distributed one. The outcomes of these experiments promise to faciliate the selection process for modelers when characterizing diseases by reduce the data fitting processes and transition the model's parameter focus from discrete to continuous values, consequently augmenting its adaptability and practicality. This research holds the potential to guide more effective public health responses and decision-making during future epidemics.
+\pagebreak
+
+
+
+
+\bibliographystyle{unsrt}
+\bibliography{reference} 
+\end{document}
