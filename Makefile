@@ -15,10 +15,10 @@ Sources += $(wildcard *.md)
 ## After_reviewing_papers.md Notes.md README.md todo.md
 
 ######################################################################
+## Code
 
 Sources += $(wildcard Code/*.R)
 
-## Code/
 Code/Erlang_simulation.Rout: Code/Erlang_simulation.R
 	$(pipeR)
 
