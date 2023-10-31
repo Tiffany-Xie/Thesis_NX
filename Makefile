@@ -25,9 +25,15 @@ Code/Erlang_simulation.Rout: Code/Erlang_simulation.R
 Pseudo_Erlang.Rout: Code/Pseudo_Erlang.R
 	$(pipeR)
 
+
 ######################################################################
 
+## JD side projects
+
 simulate.Rout: Code/simulate.R
+	$(pipeR)
+
+functions.Rout: Code/functions.R
 	$(pipeR)
 
 ######################################################################

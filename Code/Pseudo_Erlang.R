@@ -47,7 +47,7 @@ PEdens <- function(time, γ, μ, r, nPE, model) {
     PPE <- c(PPE, c(diff(soln[,"R"])/diff(time), NA))
   }
   df$PPE <- PPE
-  return(na.omit(df))
+  return(na.omit(df)) ## Is this a trap for future Ningrui?
 }
 
 
@@ -160,7 +160,7 @@ Cfnum(dfE, dfPE, r, ts)
 #var = sum(df$Time^2 * df$P * ts) - mean^2
 #K = var/mean^2
 
-# Numerically find K
+# Numerically find r to match κ=1/n_E
 nPE <- 12
 γ <- 0.1
 nE <- 8
@@ -174,10 +174,13 @@ dfPE <- PEdens(time, γ, μ, r, nPE, SInR_geom)
 dfK <- Kappaf(r, γ, nPE) # dfK$K ≈ 1/nE = 0.125
 Cfdens(dfE, dfPE)
 
+check <- sum(dfPE$PPE * ts)
+dfPE$PPE = dfPE$PPE/check
 mean <- sum(dfPE$Time * dfPE$PPE * ts) # 9.949945
 var <- sum(dfPE$Time^2 * dfPE$PPE * ts) - mean^2 # 12.49957 
 K = var/mean^2 # 0.1262565
 
+print(c(check, mean, var, K))
 
 
 
