@@ -126,7 +126,7 @@ dfPE <- PEdens(time, γ, μ, r, nPE, SInR_geom)
 dfK <- Kappaf(r, γ, nPE)
 p1 <- Cfdens(dfE, dfPE)
 p2 <- Cfkappa(dfK)
-grid.arrange(p1, p2, ncol = 2)
+grid.arrange(p1, p2, ncol = 2) # r (2.75, 3.25)
 # Num
 Cfnum(dfE, dfPE, r, ts)
 
@@ -138,7 +138,7 @@ dfPE <- PEdens(time, γ, μ, r, nPE, SInR_geom)
 dfK <- Kappaf(r, γ, nPE)
 p1 <- Cfdens(dfE, dfPE)
 p2 <- Cfkappa(dfK)
-grid.arrange(p1, p2, ncol = 2)
+grid.arrange(p1, p2, ncol = 2) #r (1.5, 1.75)
 # Num
 Cfnum(dfE, dfPE, r, ts)
 
@@ -150,7 +150,7 @@ dfPE <- PEdens(time, γ, μ, r, nPE, SInR_geom)
 dfK <- Kappaf(r, γ, nPE)
 p1 <- Cfdens(dfE, dfPE)
 p2 <- Cfkappa(dfK)
-grid.arrange(p1, p2, ncol = 2)
+grid.arrange(p1, p2, ncol = 2) # r (1.2, 1.25)
 # Num
 Cfnum(dfE, dfPE, r, ts)
 
@@ -159,6 +159,26 @@ Cfnum(dfE, dfPE, r, ts)
 #mean = sum(df$Time * df$P * ts)
 #var = sum(df$Time^2 * df$P * ts) - mean^2
 #K = var/mean^2
+
+# Numerically find K
+nPE <- 12
+γ <- 0.1
+nE <- 8
+
+f <- function(r) 1/(γ*(1-1/r^nPE)/(1-1/r))^2 * (1-1/r^(2*nPE))/(1-1/r^2) * γ^2 - 1/nE
+root <- uniroot(f, interval = c(1.2, 1.25))
+r <- root$root # 1.241118
+
+dfE <- Edens(time, γ, nE)
+dfPE <- PEdens(time, γ, μ, r, nPE, SInR_geom)
+dfK <- Kappaf(r, γ, nPE) # dfK$K ≈ 1/nE = 0.125
+Cfdens(dfE, dfPE)
+
+mean <- sum(dfPE$Time * dfPE$PPE * ts) # 9.949945
+var <- sum(dfPE$Time^2 * dfPE$PPE * ts) - mean^2 # 12.49957 
+K = var/mean^2 # 0.1262565
+
+
 
 
 
