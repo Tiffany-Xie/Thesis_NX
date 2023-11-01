@@ -39,7 +39,7 @@ functions.Rout: Code/functions.R
 
 ## Proposal/Makefile
 
-alldirs += Proposal
+alldirs += docs
 
 ## Proposal.docs.pdf: docs/Proposal.tex
 Ignore += *.proposal.pdf
