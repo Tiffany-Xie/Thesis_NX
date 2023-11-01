@@ -16,8 +16,6 @@
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0pt}
 
-
-
 \begin{document}
 \begin{spacing}{1.0}
 \begin{center}
@@ -30,8 +28,8 @@
 \end{center}
 \end{spacing}
 
-
 \section*{Abstract}
+Hello!
 Mathematical models play a pivotal role in epidemiology by offering insights into the dynamics of infectious disease spread and enabling predictions of future trends. Yet the commonly used SIR model relies on the unrealistic assumption of exponentially distributed infectious stage durations. The strategy used by modelers to solve this problem is to subdivide the infectious stage into an integer number of substages, each having exponentially distributed substage durations with the same recovery rate (SI$^n$R model). This technique, often referred to as the Linear Chain Trick (LCT), enables the modeling of the entire infectious period durations as Erlang-distributed, aligning more closely with biological realism. However, the LCT approach has limitations, including cumbersome shape parameter determination process and discrete parameter values. In this study, we propose a novel model that assumes a geometrically distributed recovery rate for each infectious substage. We aim to assess its performance, aligning with the established SI$^n$R model, determining optimal parameters, and evaluating its fitness with real-world data. This approach holds the potential to enhance model flexibility and to develop user-friendly tools for effective epidemic modeling and prediction.
 \pagebreak
 
@@ -56,7 +54,6 @@ Nonetheless, the utilization of the Linear Chain Trick to generate Erlang-distri
 \par
 In this study, we aim to address these limitations by introducing an innovative approach, which assumes a geometrically distributed recovery rate ($\gamma_i = ar^{i-1}$) from each infection substage rather than a constant rate of $n\gamma$. This transformative shift in perspective eliminates the need for using integers as the shape parameter to control the distribution, allowing us to maintain a constant value for $n$ while leveraging $a$ and $r$ to modify its shape, thereby transitioning our parameters of interest from discrete $n$ and $n\gamma$ to continuous $a$ and $r$. We refer this novel model as the SIgR model. In the initial phase of our study, we will test the performance of the proposed model by assessing its ability to align with the established SI$^n$R model. This will involve devise a method for determining the optimal values of $a$ and $r$ that most accurately match with the mean ($M$) and quadratic coefficient of variation ($\kappa$) of the SI$^n$R model across various substages, and evaluating the shape of the probability distribution for the duration of the infectious stage. We will subsequently conduct an empirical validation of the novel model through the process of data fitting. This evaluation will encompass aspects such as the model's alignment with real-world data and its predictive capabilities in projecting future trends. We will carry out this assessment alongside the established SI$^n$R model using the identical dataset to analyze the effectiveness of the SIgR model. We anticipate that this approach will enhance the model's flexibility and utility, thus paving the way for the development of user-friendly software tools that empower modelers to efficiently select and employ the most suitable models for describing and predicting future epidemic scenarios.
 \pagebreak
-
 
 \section*{Research Design}
 We begin our study by examing the distribution of the stage durations within an SI$^n$R model to determine whether it conforms to an Erlang distribution when dividing the infectious stage into a sequence of n substages, each exponentially distributed with a mean recovery rate of $n\gamma$. To achieve this, a simplified I$^n$R model has been created, assuming a fixed number of infected individuals at time 0, with no new infections occurring throughout the study period, and confers permanent immunity upon recovery:
@@ -90,9 +87,6 @@ Following the initial theoretical evaluation of the viability of the SIgR model,
 \section*{Concluding Remarks}
 Our proposed projects and experiments will comprehensively assess the effectiveness of our novel model, which replaces the established constant substage recovery rate with a geometrically distributed one. The outcomes of these experiments promise to faciliate the selection process for modelers when characterizing diseases by reduce the data fitting processes and transition the model's parameter focus from discrete to continuous values, consequently augmenting its adaptability and practicality. This research holds the potential to guide more effective public health responses and decision-making during future epidemics.
 \pagebreak
-
-
-
 
 \bibliographystyle{unsrt}
 \bibliography{reference} 
