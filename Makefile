@@ -15,6 +15,7 @@ Sources += $(wildcard *.md)
 ## After_reviewing_papers.md Notes.md README.md todo.md
 
 ######################################################################
+
 ## Code
 
 Sources += $(wildcard Code/*.R)
@@ -39,7 +40,7 @@ functions.Rout: Code/functions.R
 
 ## Proposal/Makefile
 
-alldirs += docs
+pdirs += docs
 
 ## Proposal.docs.pdf: docs/Proposal.tex
 Ignore += *.proposal.pdf
@@ -48,6 +49,12 @@ Ignore += *.proposal.pdf
 	$(CP) docs/$*.pdf $@
 
 Ignore += $(alldirs)
+
+######################################################################
+
+psync = $(pdirs:%=%.sync) 
+psync: sync
+	$(psync)
 
 ######################################################################
 
