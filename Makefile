@@ -46,6 +46,8 @@ alldirs += Proposal
 	cd Proposal && $(MAKE) $*.pdf
 	$(CP) Proposal/$*.pdf $@
 
+Ignore += $(alldirs)
+
 ######################################################################
 
 ### Makestuff
