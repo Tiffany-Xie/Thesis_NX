@@ -42,6 +42,7 @@ functions.Rout: Code/functions.R
 alldirs += Proposal
 
 ## Proposal.proposal.pdf: Proposal/proposal.tex
+Ignore += *.proposal.pdf
 %.proposal.pdf: $(wildcard Proposal/*.*)
 	cd Proposal && $(MAKE) $*.pdf
 	$(CP) Proposal/$*.pdf $@
