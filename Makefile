@@ -54,7 +54,7 @@ Ignore += $(alldirs)
 
 psync = $(pdirs:%=%.sync) 
 psync: sync
-	$(psync)
+	$(MAKE) $(psync)
 
 ######################################################################
 
