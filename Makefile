@@ -25,7 +25,6 @@ Code/Erlang_simulation.Rout: Code/Erlang_simulation.R
 Pseudo_Erlang.Rout: Code/Pseudo_Erlang.R
 	$(pipeR)
 
-
 ######################################################################
 
 ## JD side projects
@@ -35,6 +34,17 @@ simulate.Rout: Code/simulate.R
 
 functions.Rout: Code/functions.R
 	$(pipeR)
+
+######################################################################
+
+## Proposal/Makefile
+
+alldirs += Proposal
+
+## Proposal.proposal.pdf: Proposal/proposal.tex
+%.proposal.pdf: $(wildcard Proposal/*.*)
+	cd Proposal && $(MAKE) $*.pdf
+	$(CP) Proposal/$*.pdf $@
 
 ######################################################################
 
