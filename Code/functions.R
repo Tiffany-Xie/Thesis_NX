@@ -10,7 +10,10 @@ r2kappaF <- function(r, n, offset=0){
 }
 
 kappa2r <- function(kappa, n){
-	u <- uniroot(r2kappa, interval=c(1, 10), n=n, offset=kappa)
+	rmax <- 7 ## BAD CODE, XNR please fix
+	if(kappa>=1) return(NA)
+	if(kappa<1/n) return(NA)
+	u <- uniroot(r2kappa, interval=c(1, rmax), n=n, offset=kappa)
 	return(u$root)
 }
 
@@ -23,6 +26,6 @@ r2kappa(2, 10)
 r2kappaF(1, 5)
 r2kappaF(2, 10)
 
-k <- kappa2r(0.4, 10)
-print(k)
-r2kappa(k, 10)
+kappa2r(1, 10)
+kappa2r(0.1, 10)
+kappa2r(0.4, 2)

@@ -41,11 +41,11 @@ functions.Rout: Code/functions.R
 
 alldirs += Proposal
 
-## Proposal.proposal.pdf: Proposal/proposal.tex
+## Proposal.pdf: docs/Proposal.tex
 Ignore += *.proposal.pdf
-%.proposal.pdf: $(wildcard Proposal/*.*)
-	cd Proposal && $(MAKE) $*.pdf
-	$(CP) Proposal/$*.pdf $@
+%.docs.pdf: $(wildcard Proposal/*.*)
+	cd docs && $(MAKE) $*.pdf
+	$(CP) docs/$*.pdf $@
 
 Ignore += $(alldirs)
 
