@@ -48,7 +48,7 @@ Ignore += *.docs.pdf
 	cd docs && $(MAKE) $*.pdf
 	$(CP) docs/$*.pdf $@
 
-Ignore += $(alldirs)
+Ignore += $(pdirs)
 
 ######################################################################
 
