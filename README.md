@@ -1,2 +1,4 @@
 # Thesis_NX
-Temp: Thesis - Ningrui Xie 
+Temp: Thesis - Ningrui Xie
+Hello World
+Testing 
