@@ -1,3 +1,0 @@
-## Use this call to make Pseudo_Erlang.Rout independently
-rpcall("Pseudo_Erlang.Rout .pipestar Code/Pseudo_Erlang.R")
-
