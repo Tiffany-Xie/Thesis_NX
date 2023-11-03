@@ -1,0 +1,26 @@
+
+R version 4.2.2 (2022-10-31) -- "Innocent and Trusting"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R是自由软件，不带任何担保。
+在某些条件下你可以将其自由散布。
+用'license()'或'licence()'来看散布的详细条件。
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+用'demo()'来看一些示范程序，用'help()'来阅读在线帮助文件，或
+用'help.start()'通过HTML浏览器来看帮助文件。
+用'q()'退出R.
+
+> # Packages ####
+> library(viridis)
+> library(ggplot2)
+> library(deSolve)
+> library(gridExtra)
+> 
+> library(shellpipes)
