@@ -80,7 +80,11 @@ This will involve devising a method to choose values of $a$ and $r$ to accuratel
 %% \pagebreak
 
 \section*{Research Design}
-We begin our study by examing the distribution of the stage durations within an SI$^n$R model to determine whether it conforms to an Erlang distribution when dividing the infectious stage into a sequence of n substages, each exponentially distributed with a mean recovery rate of $n\gamma$. To achieve this, a simplified I$^n$R model has been created, assuming a fixed number of infected individuals at time 0, with no new infections occurring throughout the study period, and confers permanent immunity upon recovery:
+We begin our study by examing the distribution of the stage durations
+\jd{What does this mean? I think we're interested in the overall duration, not the stage durations.}
+within an SI$^n$R model to determine whether it conforms to an Erlang distribution when dividing the infectious stage into a sequence of n substages, each exponentially distributed with a mean recovery rate of $n\gamma$. 
+\jd{This is a good step for us to confirm what we think is already known, right? We're not determining that it conforms, just that we're doing it right, I think.}
+To achieve this, a simplified I$^n$R model has been created, assuming a fixed number of infected individuals at time 0, with no new infections occurring throughout the study period, and confers permanent immunity upon recovery:
 \begin{align*}
     \frac{dI_1}{dt} &= -n \gamma I_1 \\
     \frac{dI_2}{dt} &= n \gamma I_1 - n \gamma I_2 \\
@@ -88,7 +92,9 @@ We begin our study by examing the distribution of the stage durations within an 
     \frac{dI_n}{dt} &= n \gamma I_{n-1} - n \gamma I_n \\
     \frac{dR}{dt} &= n \gamma I_n 
 \end{align*}
-We employed the R package ‘deSolve’ to solve the I$^n$R model, enabling us to examine how the number of infected and recovered individuals changes over time. By setting the initial number of infected individuals to 1, we derived the cumulative distribution function (CDF) for both infected and recovered individuals. Taking the derivative of the CDF functions obtained form the model would give us the probability density function (PDF), which facilitates a comparison with the Erlang distribution, characterized by shape parameter (number of substages) $n$ and scale parameter (recovery rate of each substage) $n\gamma$. The outcomes of this analysis will serve to empirically validate the notion that the sum of an integer number of independent exponentially distributed random variables follows an Erlang distribution \cite{Tummal2011}. After achieving concordance between the Erlang distribution and the infectious stage duration distribution defined by the I$^n$R model, we will use these two interchangeably.
+We employed the R package ‘deSolve’ to solve the I$^n$R model, enabling us to examine how the number of infected and recovered individuals changes over time. By setting the initial number of infected individuals to 1, we derived the cumulative distribution function (CDF) for both infected and recovered individuals.
+\jd{I think we have the CDF for recovered individuals only. If I were being more technical, what we're really interested in is the CDF of who has \emph{left} the infectious class. It corresponds to recovered in this case, but it would be good to consider the question more generally.}
+Taking the derivative of the CDF functions obtained form the model would give us the probability density function (PDF), which facilitates a comparison with the Erlang distribution, characterized by shape parameter (number of substages) $n$ and scale parameter (recovery rate of each substage) $n\gamma$. The outcomes of this analysis will serve to empirically validate the notion that the sum of an integer number of independent exponentially distributed random variables follows an Erlang distribution \cite{Tummal2011}. After achieving concordance between the Erlang distribution and the infectious stage duration distribution defined by the I$^n$R model, we will use these two interchangeably.
 
 Established epidemic models featuring Erlang-distributed infection stage durations use a constant recovery rate $n\gamma$ within each substage. In our next phase, we intend to replace this constant rate with a geometrically distributed sequence $\gamma_i = ar^{i-1}$. We begin by assessing if the modified model retains the conventional Erlang-distributed infectious stage duration shape of the while preserving $M$ and $\kappa$. For models involving geometric infection substage durations (SIgR), the parameters of interest shift from $n$ and $n\gamma$ to $a$ and $r$.
 
@@ -102,13 +108,15 @@ Therefore, we plan to address $M$ and $\kappa$ separately. The approach involves
     a = \frac{\gamma (\frac{1}{r^{n_{PE}}}-1)}{\frac{1}{r}-1}
 \end{equation*}
 Determining the range of values for the variable $r$ will faciliate the process of identifying the specific $r$ value, within that range, at which $K$ equals $\frac{1}{n_E}$.
+\jd{It would be great to rewrite the math here to be simple and clear, matching what we did when we were coding together. The key points are: there are simple equations; we can match $\kappa$ without worrying about the mean; we can the scale the mean to the desired value without changing $\kappa$. Next of course we want robust functions that can validate that the simulation gives us the desired values of $\mu$ and $\kappa$, and then we want to compare what the pseudo-Erlang and Erlang distributions look like.}
 
 Upon successfully identifying $a$ and $r$ values that match $M$ and $\kappa$ of the infection stage durations distribution between the two models, we will take our approach further. Given a predetermined number of substages, a desired $\kappa$ value, and mean, we aim to numerically compute the $r$ value that matches $\kappa$. This approach will result in a novel methodology for characterizing the stage distribution, which offers increased flexibility compared to the conventional approach using a integer number of substage with identical rate, as the parameters $a$ and $r$ in the new model will be continuous rather than discrete, providing more refined control over the shape of the distribution.
 
 Following the initial theoretical evaluation of the viability of the SIgR model, our research will progress to the empirical phase, where data fitting will be undertaken to evaluate the model's efficacy. The dataset under consideration encompass disease outbreak data, vaccination records, and case-specific information. The fitting process entails the adjustment of model parameters to achieve the best fit. The assessment of model fitness will be executed through methodologies such as maximum likelihood estimation and Bayesian inference. Subsequently, the goodness-of-fit of each model will be calculate to compare their respective performance and suitability for the given dataset.
+\jd{I am not sure why you are talking about goodness-of-fit here; it's OK to be very brief, more important to be clear than to write long sections.}
 
 \section*{Concluding Remarks}
-Our proposed projects and experiments will comprehensively assess the effectiveness of our novel model, which replaces the established constant substage recovery rate with a geometrically distributed one. The outcomes of these experiments promise to faciliate the selection process for modelers when characterizing diseases by reduce the data fitting processes and transition the model's parameter focus from discrete to continuous values, consequently augmenting its adaptability and practicality. This research holds the potential to guide more effective public health responses and decision-making during future epidemics.
+Our proposed projects and experiments will assess the effectiveness of our model. Eventually, these methods may making it easier for modelers to fit model with flexible time distributions in an ODE framework. This research holds the potential to guide more effective public health responses and decision-making during future epidemics.
 %% \pagebreak
 
 \bibliographystyle{unsrt}

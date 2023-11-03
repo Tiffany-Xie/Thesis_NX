@@ -13,6 +13,8 @@ vim_session:
 
 Sources += $(wildcard *.bib *.tex)
 
+## Proposal.ld.pdf: Proposal.tex Proposal.ld.tex
+
 ######################################################################
 
 ### Makestuff
