@@ -41,7 +41,6 @@ functions.Rout: Code/functions.R
 ## Docs subdirectory
 ## docs/Makefile
 
-
 pdirs += docs
 
 ## Proposal.docs.pdf: docs/Proposal.tex
@@ -57,7 +56,8 @@ alldirs += $(pdirs)
 
 propsub: docs/Proposal.tex.16571ad84.oldfile
 
-## Proposal.ld.docs.pdf: docs/Proposal.tex
+## Proposal.ld.docs.pdf: docs/Proposal.ld.tex
+## docs/Proposal.ld.tex: docs/Proposal.tex
 
 ######################################################################
 
