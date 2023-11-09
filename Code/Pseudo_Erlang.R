@@ -167,7 +167,8 @@ nE <- 8
 
 f <- function(r) 1/(γ*(1-1/r^nPE)/(1-1/r))^2 * (1-1/r^(2*nPE))/(1-1/r^2) * γ^2 - 1/nE
 root <- uniroot(f, interval = c(1.2, 1.25))
-r <- root$root # 1.241118
+r <- root$root
+print(r)
 
 dfE <- Edens(time, γ, nE)
 dfPE <- PEdens(time, γ, μ, r, nPE, SInR_geom)
@@ -195,7 +196,7 @@ r2kappa <- function(r, n, offset=0){
 }
 
 kappa2r <- function(kappa, n){
-  rmax <- 2*(1+kappa)/(1-kappa) ## BAD CODE, XNR please fix
+  rmax <- 2*(1+kappa)/(1-kappa)
   if(kappa>=1) return(NA)
   if(kappa<1/n) return(NA)
   u <- uniroot(r2kappa, interval=c(1, rmax), n=n, offset=kappa)
@@ -220,16 +221,16 @@ PEdens <- function(time, r, a, n, model) {
 }
 
 parComp <- function(df, mean, kappa, a, r, nPE) {
+  numTot <- sum(df$PPE * ts)
   numM <- sum(df$Time * df$PPE * ts)
   numV <- sum(df$Time^2 * df$PPE * ts) - numM^2
   numK <- numV/numM^2
   fM <- 1/a *(1-1/r^nPE)/(1-1/r)
   fV <- 1/a^2 *(1-1/r^(2*nPE))/(1-1/r^2)
   fK <- fV/fM^2
-  df <- data.frame(TheoMean = mean, 
-                   FormulaMean = fM,
+  df <- data.frame(total = numTot, 
+  	                FormulaMean = fM,
                    ActualMean = numM,
-                   TheoKappa = kappa,
                    FormulaKappa = fK,
                    ActualKappa = numK)
   return(df)
@@ -273,12 +274,3 @@ a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
-
-
-
-
-
-
-
-
-

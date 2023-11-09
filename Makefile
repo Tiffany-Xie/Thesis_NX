@@ -38,6 +38,12 @@ functions.Rout: Code/functions.R
 
 ######################################################################
 
+## Modularize XNR's stuff? No progress 2023 Nov 09 (Thu)
+
+peFuns.Rout: Code/peFuns.R
+
+######################################################################
+
 ## Docs subdirectory
 ## docs/Makefile
 
