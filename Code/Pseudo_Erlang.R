@@ -6,7 +6,7 @@ library(gridExtra)
 
 library(shellpipes)
 startGraphics(width=11)
-
+ 
 # Models ####
 erlang <- function(x, n, γ) {
   (n*γ)^n*x^(n-1)*exp(-n*γ*x)/factorial(n-1)
@@ -47,7 +47,7 @@ PEdens <- function(time, γ, μ, r, nPE, model) {
     PPE <- c(PPE, c(diff(soln[,"R"])/diff(time), NA))
   }
   df$PPE <- PPE
-  return(na.omit(df)) ## Is this a trap for future Ningrui?
+  return(na.omit(df))
 }
 
 
@@ -160,7 +160,7 @@ Cfnum(dfE, dfPE, r, ts)
 #var = sum(df$Time^2 * df$P * ts) - mean^2
 #K = var/mean^2
 
-# Numerically find r to match κ=1/n_E
+# Numerically find K
 nPE <- 12
 γ <- 0.1
 nE <- 8
@@ -174,13 +174,106 @@ dfPE <- PEdens(time, γ, μ, r, nPE, SInR_geom)
 dfK <- Kappaf(r, γ, nPE) # dfK$K ≈ 1/nE = 0.125
 Cfdens(dfE, dfPE)
 
-check <- sum(dfPE$PPE * ts)
-dfPE$PPE = dfPE$PPE/check
 mean <- sum(dfPE$Time * dfPE$PPE * ts) # 9.949945
 var <- sum(dfPE$Time^2 * dfPE$PPE * ts) - mean^2 # 12.49957 
 K = var/mean^2 # 0.1262565
 
-print(c(check, mean, var, K))
+
+
+# Functions & Compare ####
+Edens <- function(time, γ, nE) {
+  df <- data.frame(Time = time)
+  df$PE <- erlang(time, nE, γ)
+  return(df)
+}
+
+r2kappa <- function(r, n, offset=0){
+  delta <- (1:n) - (n+1)/2
+  res <- exp(delta*log(r))
+  kappa <- sum(res^2)/(sum(res)^2)
+  return(kappa - offset)
+}
+
+kappa2r <- function(kappa, n){
+  rmax <- 2*(1+kappa)/(1-kappa) ## BAD CODE, XNR please fix
+  if(kappa>=1) return(NA)
+  if(kappa<1/n) return(NA)
+  u <- uniroot(r2kappa, interval=c(1, rmax), n=n, offset=kappa)
+  return(u$root)
+}
+
+r2a <- function(r, n, mean) {
+  return((1-1/r^n)/(mean*(1-1/r)))
+}
+
+PEdens <- function(time, r, a, n, model) {
+  df <- data.frame(Time = time)
+  states <- c(1, numeric(n))
+  names(states) <- c(paste0("I", 1:n), "R")
+  params <- c(n = n, a = a, r = r)
+  soln <- ode(y = states,
+              times = time, 
+              func = model, 
+              parms = params)
+  df$PPE <- c(diff(soln[,"R"])/diff(time), NA)
+  return(na.omit(df))
+}
+
+parComp <- function(df, mean, kappa, a, r, nPE) {
+  numM <- sum(df$Time * df$PPE * ts)
+  numV <- sum(df$Time^2 * df$PPE * ts) - numM^2
+  numK <- numV/numM^2
+  fM <- 1/a *(1-1/r^nPE)/(1-1/r)
+  fV <- 1/a^2 *(1-1/r^(2*nPE))/(1-1/r^2)
+  fK <- fV/fM^2
+  df <- data.frame(TheoMean = mean, 
+                   FormulaMean = fM,
+                   ActualMean = numM,
+                   TheoKappa = kappa,
+                   FormulaKappa = fK,
+                   ActualKappa = numK)
+  return(df)
+}
+
+Cfplot <- function(dfE, dfPE, mean) {
+  ggplot(dfE, aes(x=Time, y=PE, color = "Erlang")) + geom_line(linewidth=1.5) +
+    geom_vline(xintercept = mean, color = "red", linetype = "dashed", linewidth = 1) +
+    geom_line(data=dfPE, aes(x=Time, y=PPE, color="ODE"))
+}
+
+# Simulation
+nPE <- 12
+ts <- 0.1
+time <- seq(1,40,by=ts)
+γ <- 0.1
+μ <- 0
+
+nE <- 2
+dfE <- Edens(time, γ, nE)
+r <- kappa2r(1/nE, nPE)
+a <- r2a(r, nPE, 1/γ)
+dfPE <- PEdens(time, r, a, nPE, SInR_geom)
+parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+Cfplot(dfE, dfPE, 1/γ)
+
+
+
+nE <- 4
+dfE <- Edens(time, γ, nE)
+r <- kappa2r(1/nE, nPE)
+a <- r2a(r, nPE, 1/γ)
+dfPE <- PEdens(time, r, a, nPE, SInR_geom)
+parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+Cfplot(dfE, dfPE, 1/γ)
+
+nE <- 8
+dfE <- Edens(time, γ, nE)
+r <- kappa2r(1/nE, nPE)
+a <- r2a(r, nPE, 1/γ)
+dfPE <- PEdens(time, r, a, nPE, SInR_geom)
+parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+Cfplot(dfE, dfPE, 1/γ)
+
 
 
 
