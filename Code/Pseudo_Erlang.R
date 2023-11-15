@@ -234,7 +234,9 @@ kappa2r <- function(kappa, n){
   return(u$root)
 }
 
-
+r2a <- function(r, n, mean) {
+        return((1-1/r^n)/(mean*(1-1/r)))
+}
 
 PEdens <- function(time, r, a, n, model) {
   df <- expand.grid(Time = time, a = a, r = r, n = n)
