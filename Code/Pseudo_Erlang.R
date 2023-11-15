@@ -214,7 +214,7 @@ K = var/mean^2 # 0.1262565
 
 # Functions & Compare ####
 Edens <- function(time, γ, nE) {
-  df <- data.frame(Time = time)
+  df <- data.frame(Time = time, nE = nE)
   df$PE <- erlang(time, nE, γ)
   return(df)
 }
@@ -235,14 +235,15 @@ kappa2r <- function(kappa, n){
 }
 
 r2a <- function(r, n, mean) {
-        return((1-1/r^n)/(mean*(1-1/r)))
+        #return((1-1/r^n)/(mean*(1-1/r)))
+        return((1/r^n - 1)/(mean*(1/r - 1)))
 }
 
-PEdens <- function(time, r, a, n, model) {
-  df <- expand.grid(Time = time, a = a, r = r, n = n)
-  states <- c(1, numeric(n))
-  names(states) <- c(paste0("I", 1:n), "R")
-  params <- c(n = n, a = a, r = r)
+PEdens <- function(time, r, a, nPE, model) {
+  df <- expand.grid(Time = time, a = a, r = r, nPE = nPE)
+  states <- c(1, numeric(nPE))
+  names(states) <- c(paste0("I", 1:nPE), "R")
+  params <- c(n = nPE, a = a, r = r)
   soln <- ode(y = states,
               times = time,
               func = model,
@@ -270,13 +271,14 @@ parComp <- function(df, mean, kappa, a, r, nPE) {
 Cfplot <- function(dfE, dfPE, mean) {
   ggplot(dfE, aes(x=Time, y=PE, color = "Erlang")) + geom_line(linewidth=1.5) +
     geom_vline(xintercept = mean, color = "red", linetype = "dashed", linewidth = 1) +
-    geom_line(data=dfPE, aes(x=Time, y=PPE, color="ODE"))
+    geom_line(data=dfPE, aes(x=Time, y=PPE, color="ODE")) +
+        labs(title = paste0("Erlang vs. Pseudo-Erlang: Same Mean and Kappa (nE=", dfE$nE[1], ", nPE=", dfPE$nPE[1], ")"))
 }
 
 # Simulation
 nPE <- 12
 ts <- 0.1
-time <- seq(1,70,by=ts)
+time <- seq(0,50,by=ts)
 γ <- 0.1
 μ <- 0
 
@@ -287,7 +289,6 @@ a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
-
 
 
 nE <- 4
@@ -307,14 +308,6 @@ parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
 
 
-
-
-f <- function(x) x^2 - 4*x + 1
-uniroot(f, interval = c(3, 4)) #3.732064
-uniroot(f, interval = c(3, 10))$root #3.732051
-uniroot(f, interval = c(3, 100))$root #3.732042
-uniroot(f, interval = c(3, 1000))$root # 3.732051
-uniroot(f, interval = c(3, 10000))$root #3.732049
 
 
 
