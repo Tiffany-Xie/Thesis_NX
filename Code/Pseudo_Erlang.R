@@ -6,7 +6,7 @@ library(gridExtra)
 
 library(shellpipes)
 startGraphics(width=11)
- 
+
 # Models ####
 erlang <- function(x, n, γ) {
   (n*γ)^n*x^(n-1)*exp(-n*γ*x)/factorial(n-1)
@@ -16,7 +16,7 @@ SInR_geom <- function(t, states, params) {
   with(as.list(c(params)), {
     I <- states[1:n]
     R <- states[[n+1]]
-    
+
     Iprev <- c(0, I[1:(n-1)])
     dI <- a*r^(c(0,0:(n-2)))*Iprev - (a*r^(0:(n-1))+μ)*I
     dR <- a*r^(n-1)*I[[n]] - μ*R
@@ -41,8 +41,8 @@ PEdens <- function(time, γ, μ, r, nPE, model) {
     a <- (1/i^nPE-1)*γ/(1/i-1)
     params <- c(γ = γ, μ = μ, n = nPE, a = a, r = i)
     soln <- ode(y = states,
-                times = time, 
-                func = model, 
+                times = time,
+                func = model,
                 parms = params)
     PPE <- c(PPE, c(diff(soln[,"R"])/diff(time), NA))
   }
@@ -52,7 +52,7 @@ PEdens <- function(time, γ, μ, r, nPE, model) {
 
 
 Cfdens <- function(dfE, dfPE) {
-  ggplot(dfPE, aes(x=Time, y = PPE, color=factor(r))) + 
+  ggplot(dfPE, aes(x=Time, y = PPE, color=factor(r))) +
     geom_line() +
     scale_color_manual(values = viridis(length(unique(r)))) +
     geom_vline(xintercept = 1/dfPE$γ[1], color = "red", linetype = "dashed", linewidth = 1) +
@@ -97,12 +97,12 @@ Cfnum <- function(dfE, dfPE, r, ts) {
   }
   dfPEmean$PEmean <- tempm
   dfPEK$PEK <- tempK
-  
+
   p1 <- ggplot(dfPEmean, aes(x=r, y=PEmean)) + geom_line() +
     geom_hline(yintercept=Emean, color="red", linetype = "dashed", linewidth = 1) +
     labs(title=paste0("Compare numerically calculated mean, nE=", nE, ", nPE=", nPE),
          y="mean")
-  
+
   p2 <- ggplot(dfPEK, aes(x=r, y=PEK)) + geom_line() +
     geom_hline(yintercept=EK, color="red", linetype = "dashed", linewidth = 1) +
     labs(title=paste0("Compare numerically calculated K, nE=", nE, ", nPE=", nPE),
@@ -112,8 +112,8 @@ Cfnum <- function(dfE, dfPE, r, ts) {
 
 
 # Simulation ####
-time = seq(0,40,by=0.1) 
-γ <- 0.1 
+time = seq(0,40,by=0.1)
+γ <- 0.1
 μ <- 0
 nPE <- 12
 ts <- 0.1
@@ -129,6 +129,38 @@ p2 <- Cfkappa(dfK)
 grid.arrange(p1, p2, ncol = 2) # r (2.75, 3.25)
 # Num
 Cfnum(dfE, dfPE, r, ts)
+
+FvsN <- function(n, dfPE) {
+        df <- data.frame(r = unique(dfPE$r), a = unique(dfPE$a))
+        df$Fmean <- with(df, 1/a*(1-1/r^n)/(1-1/r))
+        df$Fvar <- with(df, 1/a^2*(1-1/r^(2*n))/(1-1/r^2))
+        df$Fkappa <- df$Fvar/df$Fmean^2
+        tempm <- c()
+        tempK <- c()
+        for (i in df$r) {
+                rows <- dfPE[dfPE$r == i,]
+                NumMean <- sum(rows$Time * rows$PPE * ts)
+                NumVar <- sum(rows$Time^2 * rows$PPE * ts) - NumMean^2
+                NumK = NumVar/NumMean^2
+                tempm <- c(tempm, NumMean)
+                tempK <- c(tempK, NumK)
+        }
+        df$NumMean <- tempm
+        df$NumK <- tempK
+        return(df)
+}
+df <- FvsN(12, dfPE)
+
+ggplot(df, aes(x=r)) +
+        geom_line(aes(y=Fmean, color="Formula Mean"), linewidth=1) +
+        geom_point(aes(y=NumMean, color="Numerical Mean")) +
+        geom_hline(yintercept = 10, color='red', linewidth=1, linetype = "dashed") +
+        labs(title = "Num vs Formula Mean", y = "Mean")
+ggplot(df, aes(x=r)) +
+        geom_line(aes(y=Fkappa, color="Formula Kappa"), linewidth=1) +
+        geom_point(aes(y=NumK, color="Numerical Kappa")) +
+        geom_hline(yintercept = 1/2, color='red', linewidth=1, linetype = "dashed") +
+        labs(title = "Num vs Formula Kappa", y = "Kappa")
 
 # nE == 4
 r <- seq(1.5, 2.5, by=0.1)
@@ -167,8 +199,7 @@ nE <- 8
 
 f <- function(r) 1/(γ*(1-1/r^nPE)/(1-1/r))^2 * (1-1/r^(2*nPE))/(1-1/r^2) * γ^2 - 1/nE
 root <- uniroot(f, interval = c(1.2, 1.25))
-r <- root$root
-print(r)
+r <- root$root # 1.241118
 
 dfE <- Edens(time, γ, nE)
 dfPE <- PEdens(time, γ, μ, r, nPE, SInR_geom)
@@ -176,7 +207,7 @@ dfK <- Kappaf(r, γ, nPE) # dfK$K ≈ 1/nE = 0.125
 Cfdens(dfE, dfPE)
 
 mean <- sum(dfPE$Time * dfPE$PPE * ts) # 9.949945
-var <- sum(dfPE$Time^2 * dfPE$PPE * ts) - mean^2 # 12.49957 
+var <- sum(dfPE$Time^2 * dfPE$PPE * ts) - mean^2 # 12.49957
 K = var/mean^2 # 0.1262565
 
 
@@ -196,41 +227,39 @@ r2kappa <- function(r, n, offset=0){
 }
 
 kappa2r <- function(kappa, n){
-  rmax <- 2*(1+kappa)/(1-kappa)
+  rmax <- 2*(1+kappa)/(1-kappa) ## BAD CODE, XNR please fix
   if(kappa>=1) return(NA)
   if(kappa<1/n) return(NA)
   u <- uniroot(r2kappa, interval=c(1, rmax), n=n, offset=kappa)
   return(u$root)
 }
 
-r2a <- function(r, n, mean) {
-  return((1-1/r^n)/(mean*(1-1/r)))
-}
+
 
 PEdens <- function(time, r, a, n, model) {
-  df <- data.frame(Time = time)
+  df <- expand.grid(Time = time, a = a, r = r, n = n)
   states <- c(1, numeric(n))
   names(states) <- c(paste0("I", 1:n), "R")
   params <- c(n = n, a = a, r = r)
   soln <- ode(y = states,
-              times = time, 
-              func = model, 
+              times = time,
+              func = model,
               parms = params)
   df$PPE <- c(diff(soln[,"R"])/diff(time), NA)
   return(na.omit(df))
 }
 
 parComp <- function(df, mean, kappa, a, r, nPE) {
-  numTot <- sum(df$PPE * ts)
   numM <- sum(df$Time * df$PPE * ts)
   numV <- sum(df$Time^2 * df$PPE * ts) - numM^2
   numK <- numV/numM^2
   fM <- 1/a *(1-1/r^nPE)/(1-1/r)
   fV <- 1/a^2 *(1-1/r^(2*nPE))/(1-1/r^2)
   fK <- fV/fM^2
-  df <- data.frame(total = numTot, 
-  	                FormulaMean = fM,
+  df <- data.frame(TheoMean = mean,
+                   FormulaMean = fM,
                    ActualMean = numM,
+                   TheoKappa = kappa,
                    FormulaKappa = fK,
                    ActualKappa = numK)
   return(df)
@@ -245,7 +274,7 @@ Cfplot <- function(dfE, dfPE, mean) {
 # Simulation
 nPE <- 12
 ts <- 0.1
-time <- seq(1,40,by=ts)
+time <- seq(1,70,by=ts)
 γ <- 0.1
 μ <- 0
 
@@ -274,3 +303,19 @@ a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
+
+
+
+
+f <- function(x) x^2 - 4*x + 1
+uniroot(f, interval = c(3, 4)) #3.732064
+uniroot(f, interval = c(3, 10))$root #3.732051
+uniroot(f, interval = c(3, 100))$root #3.732042
+uniroot(f, interval = c(3, 1000))$root # 3.732051
+uniroot(f, interval = c(3, 10000))$root #3.732049
+
+
+
+
+
+
