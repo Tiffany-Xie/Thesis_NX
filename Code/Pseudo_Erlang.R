@@ -292,14 +292,12 @@ Cfplot(dfE, dfPE, 1/γ)
 
 time <- seq(0,100,by=ts)
 dfE <- Edens(time, γ, nE)
-r <- kappa2r(1/nE, nPE)
-a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
 
 
-
+time <- seq(0,50,by=ts)
 nE <- 4
 dfE <- Edens(time, γ, nE)
 r <- kappa2r(1/nE, nPE)
@@ -316,8 +314,16 @@ dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
 
+# K = 0.8
+nE <- 1/0.8
+dfE <- Edens(time, γ, nE)
+r <- kappa2r(1/nE, nPE)
+a <- r2a(r, nPE, 1/γ)
+dfPE <- PEdens(time, r, a, nPE, SInR_geom)
+parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+Cfplot(dfE, dfPE, 1/γ)
 
-\
+
 
 
 
