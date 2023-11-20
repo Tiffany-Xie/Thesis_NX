@@ -112,7 +112,7 @@ Cfnum <- function(dfE, dfPE, r, ts) {
 
 
 # Simulation ####
-time = seq(0,40,by=0.1)
+time = seq(0,100,by=0.1)
 γ <- 0.1
 μ <- 0
 nPE <- 12
@@ -290,6 +290,15 @@ dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
 
+time <- seq(0,100,by=ts)
+dfE <- Edens(time, γ, nE)
+r <- kappa2r(1/nE, nPE)
+a <- r2a(r, nPE, 1/γ)
+dfPE <- PEdens(time, r, a, nPE, SInR_geom)
+parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+Cfplot(dfE, dfPE, 1/γ)
+
+
 
 nE <- 4
 dfE <- Edens(time, γ, nE)
@@ -306,6 +315,11 @@ a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
+
+
+\
+
+
 
 
 
