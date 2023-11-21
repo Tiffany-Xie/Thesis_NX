@@ -227,7 +227,7 @@ r2kappa <- function(r, n, offset=0){
 }
 
 kappa2r <- function(kappa, n){
-  rmax <- 2*(1+kappa)/(1-kappa) ## BAD CODE, XNR please fix
+  rmax <- 2*(1+kappa)/(1-kappa)
   if(kappa>=1) return(NA)
   if(kappa<1/n) return(NA)
   u <- uniroot(r2kappa, interval=c(1, rmax), n=n, offset=kappa)
