@@ -252,19 +252,24 @@ PEdens <- function(time, r, a, nPE, model) {
   return(na.omit(df))
 }
 
-parComp <- function(df, mean, kappa, a, r, nPE) {
-  numM <- sum(df$Time * df$PPE * ts)
-  numV <- sum(df$Time^2 * df$PPE * ts) - numM^2
-  numK <- numV/numM^2
+parComp <- function(dfE, dfPE, mean, kappa, a, r, nPE) {
+  odeM <- sum(dfPE$Time * dfPE$PPE * ts)
+  odeV <- sum(dfPE$Time^2 * dfPE$PPE * ts) - odeM^2
+  odeK <- odeV/odeM^2
+  erlM <- sum(dfE$Time * dfE$PE * ts)
+  erlV <- sum(dfE$Time^2 * dfE$PE * ts) - erlM^2
+  erlK <- erlV/erlM^2
   fM <- 1/a *(1-1/r^nPE)/(1-1/r)
   fV <- 1/a^2 *(1-1/r^(2*nPE))/(1-1/r^2)
   fK <- fV/fM^2
   df <- data.frame(TheoMean = mean,
                    FormulaMean = fM,
-                   ActualMean = numM,
+                   erlMean = erlM,
+                   odeMean = odeM,
                    TheoKappa = kappa,
                    FormulaKappa = fK,
-                   ActualKappa = numK)
+                   erlKappa = erlK,
+                   odeKappa = odeK)
   return(df)
 }
 
@@ -287,14 +292,18 @@ dfE <- Edens(time, γ, nE)
 r <- kappa2r(1/nE, nPE)
 a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
-parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+parComp(dfE, dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
 
-time <- seq(0,100,by=ts)
+time <- seq(0,500,by=ts)
 dfE <- Edens(time, γ, nE)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
-parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
-Cfplot(dfE, dfPE, 1/γ)
+parComp(dfE, dfPE, 1/γ, 1/nE, a, r, nPE)
+
+time <- seq(0,2000,by=ts)
+dfE <- Edens(time, γ, nE)
+dfPE <- PEdens(time, r, a, nPE, SInR_geom)
+parComp(dfE, dfPE, 1/γ, 1/nE, a, r, nPE)
 
 
 time <- seq(0,50,by=ts)
@@ -303,15 +312,16 @@ dfE <- Edens(time, γ, nE)
 r <- kappa2r(1/nE, nPE)
 a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
-parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+parComp(dfE, dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
+
 
 nE <- 8
 dfE <- Edens(time, γ, nE)
 r <- kappa2r(1/nE, nPE)
 a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
-parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+parComp(dfE, dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
 
 # K = 0.8
@@ -320,7 +330,7 @@ dfE <- Edens(time, γ, nE)
 r <- kappa2r(1/nE, nPE)
 a <- r2a(r, nPE, 1/γ)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
-parComp(dfPE, 1/γ, 1/nE, a, r, nPE)
+parComp(dfE, dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
 
 
