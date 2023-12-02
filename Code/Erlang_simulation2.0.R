@@ -1,0 +1,50 @@
+library(deSolve)
+library(devtools)
+#install_github("Tiffany-Xie/pseudoErlang")
+library(pseudoErlang)
+library(ggplot2)
+
+######################################################################
+nPE <- 12
+ts <- 0.1
+T <- 200
+mu <- 10
+μ <- 0
+
+######################################################################
+
+kappa <- 1/4 ## nE == 4
+ode <- Integration(nPE, mu, kappa, ts, T)
+gamm <- pgamma(timeSeq(ts, T, FALSE), 1/kappa, 1/(mu*kappa))
+
+compPlot(gamm, ode, ts, T)
+compPlotDens(gamm, ode, ts, T)
+
+parCheck(gamm, ts, T)
+parCheck(ode, ts, T)
+ 
+######################################################################
+
+kappa <- 1/8 ## nE == 8
+ode <- Integration(nPE, mu, kappa, ts, T)
+gamm <- pgamma(timeSeq(ts, T, FALSE), 1/kappa, 1/(mu*kappa))
+
+compPlot(gamm, ode, ts, T)
+compPlotDens(gamm, ode, ts, T)
+
+parCheck(gamm, ts, T)
+parCheck(ode, ts, T)
+
+######################################################################
+kappa <- 1/2 ## nE == 2
+ode <- Integration(nPE, mu, kappa, ts, T)
+gamm <- pgamma(timeSeq(ts, T, FALSE), 1/kappa, 1/(mu*kappa))
+
+compPlot(gamm, ode, ts, T)
+compPlotDens(gamm, ode, ts, T)
+
+parCheck(gamm, ts, T)
+parCheck(ode, ts, T)
+
+
+
