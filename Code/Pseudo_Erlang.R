@@ -248,7 +248,7 @@ PEdens <- function(time, r, a, nPE, model) {
               times = time,
               func = model,
               parms = params)
-  df$PPE <- c(diff(soln[,"R"])/diff(time), NA)
+  df$PPE <- c(NA, diff(soln[,"R"])/diff(time))
   return(na.omit(df))
 }
 
@@ -306,11 +306,11 @@ dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfE, dfPE, 1/γ, 1/nE, a, r, nPE)
 
 
-time <- seq(0,50,by=ts)
+time <- seq(0,200,by=ts)
 nE <- 4
 dfE <- Edens(time, γ, nE)
 r <- kappa2r(1/nE, nPE)
-a <- r2a(r, nPE, 1/γ)
+a <- r2a(r, nPE, 5)
 dfPE <- PEdens(time, r, a, nPE, SInR_geom)
 parComp(dfE, dfPE, 1/γ, 1/nE, a, r, nPE)
 Cfplot(dfE, dfPE, 1/γ)
