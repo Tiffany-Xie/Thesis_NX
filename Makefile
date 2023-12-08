@@ -42,6 +42,8 @@ peFuns.Rout: Code/peFuns.R
 
 ######################################################################
 
+Ignore += .DS_Store
+
 ## Docs subdirectory
 ## docs/Makefile
 
