@@ -20,20 +20,18 @@ Sources += $(wildcard *.md)
 
 Sources += $(wildcard Code/*.R)
 
-Code/Erlang_simulation.Rout: Code/Erlang_simulation.R
-	$(pipeR)
-
-Pseudo_Erlang.Rout: Code/Pseudo_Erlang.R
+## Depends on package
+simulation.Rout: Code/simulation.R
 	$(pipeR)
 
 ######################################################################
 
 ## JD side projects
 
-simulate.Rout: Code/simulate.R
+simulate.Rout: jd/simulate.R
 	$(pipeR)
 
-functions.Rout: Code/functions.R
+functions.Rout: jd/functions.R
 	$(pipeR)
 
 ######################################################################
