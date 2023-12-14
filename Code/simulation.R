@@ -110,6 +110,14 @@ sinner <- function(time, states, params) {
   })
 }
 
+angel <- function(){
+	rates <- something
+	flows <-  something
+	flowPrev <-  something
+	dI <- something_about_the_flows
+	dI[[1]] <- dI[[1]] + extraTerm
+}
+
 n = 12
 mu = 10
 kappa = 1/4
