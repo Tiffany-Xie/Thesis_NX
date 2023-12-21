@@ -24,6 +24,9 @@ Sources += $(wildcard Code/*.R)
 simulation.Rout: Code/simulation.R
 	$(pipeR)
 
+SeIR.Rout: Code/SeIR.R
+	$(pipeR)
+
 ######################################################################
 
 ## JD side projects

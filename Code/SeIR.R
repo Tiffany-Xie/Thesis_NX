@@ -7,6 +7,9 @@ library(ggplot2)#; theme_set(theme_bw(base_size=14))
 
 ###################################################################### 
 
+library(shellpipes)
+startGraphics(width=10)
+
 Integration <- function(params, states, ts, T, model) {
   time <- timeSeq(ts, T, FALSE)
   soln <- ode(y = states,
@@ -140,7 +143,7 @@ sinner <- sinnerFlow(β, mu, kappa, fixn, μ, ts, T)
 #head(rowSums(soln[,-1]))
 sinr <- SInRFlow(β, mu, n, μ, ts, T)
 
-compare(sinr, sinner, ts, T, title="SInR & Geom SInR")
+# compare(sinr, sinner, ts, T, title="SInR & Geom SInR")
 
 ######################################################################
 
@@ -159,8 +162,16 @@ seminar <- seminarFlow(β, muE, muI, kappaE, kappaI, fixm, fixn, μ, ts, T)
 #head(rowSums(soln[,-1]))
 seminr <- SEmInRFlow(β, muE, muI, m, n, μ, ts, T)
 
-compare(seminr, seminar, ts, T, title="SEmInR & Geom SEmInR")
+## compare(seminr, seminar, ts, T, title="SEmInR & Geom SEmInR")
 
+e2 <- SEmInRFlow(β, muE, muI, m, n=2, μ, ts, T)
+e3 <- SEmInRFlow(β, muE, muI, m, n=3, μ, ts, T)
+e4 <- SEmInRFlow(β, muE, muI, m, n=4, μ, ts, T)
 
+p2 <- seminarFlow(β, muE, muI, kappaE, kappaI=1/2, fixm, fixn, μ, ts, T)
+p3 <- seminarFlow(β, muE, muI, kappaE, kappaI=1/3, fixm, fixn, μ, ts, T)
+p4 <- seminarFlow(β, muE, muI, kappaE, kappaI=1/4, fixm, fixn, μ, ts, T)
 
-
+compare(e2, p2, ts=ts, T=T, title="")
+compare(e2, e4, ts=ts, T=T, title="")
+compare(e4, p4, ts=ts, T=T, title="")
