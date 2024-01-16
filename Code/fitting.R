@@ -86,19 +86,19 @@ plot(timeSeq(ts, T), inc, type="l")
 # inc correct?
 stop("Draft")
 ######################################################################
-library(remotes)
+#library(remotes)
 library(fitR)
-install_github("sbfnk/fitR", dependencies = TRUE)
+#install_github("sbfnk/fitR", dependencies = TRUE)
 library(bbmle)
 data(epi)
 ts = 0.1
-T = 38
+T = 3
+n=4
 plot(obs~time,data=epi1, type='b', xlab='Day', ylab='I(t)')
 
 sir.nll <- function(β, mu, μ){
-  params <- c(β, mu, μ)
-  out <- as.data.frame(SInRFlow(β, mu, n, μ, ts, T))
-  nll<--sum(dpois(x=epi1$obs, lambda=tail(out$I4,14), log=TRUE))
+  out <- as.data.frame(SInRFlow(β=β, mu=mu, n=4, μ=μ, ts=1, T=38))
+  nll <- -sum(dpois(x=epi1$obs, lambda=tail(out$I4,15), log=TRUE))
 }
 
 params0 <-list(β=0.005, mu=7, μ=0.04)
@@ -107,10 +107,11 @@ fit <- mle2(sir.nll, start=as.list(coef(fit0))); fit
 p<-profile(fit)
 
 plot(p, absVal=TRUE)
-plot(obs~time,data=epi1, type='b', xlab='Day', ylab='I(t)', col='red')
-timeSeq()
-mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=0.001194045, mu=3.590678810, n=4, μ=0.089549146, ts, T)))
+plot(obs~time,data=epi1, type='b', xlab='Day', ylab='I(t)', col='red', ylim=c(0, 150))
+t <- timeSeq(ts=1, T=38, FALSE)
+mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=0.001194045, mu=3.590678810, n=4, μ=0.089549146, ts=1, T=38)))
 lines(mod.prep$I4~t)
+ylim=c(0, 150)
 
 
 ######################################################################
