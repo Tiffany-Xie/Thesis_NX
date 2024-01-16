@@ -1,6 +1,6 @@
 library(deSolve)
 library(devtools)
-#install_github("Tiffany-Xie/pseudoErlang")
+install_github("Tiffany-Xie/pseudoErlang")
 library(pseudoErlang)
 library(ggplot2)#; theme_set(theme_bw(base_size=14))
 
@@ -24,10 +24,10 @@ plotSeries <- function(gamm, ode, tbound, title="Comparison plot", tmax=NA) {
   )
   return(ggplot(inc)
          + aes(x=Time) 
-         + geom_line(aes(y=Gamma, color = "gamma"))
+         + geom_line(aes(y=Gamma, color = "Gamma"))
          + geom_line(aes(y=ODE, color = "ODE"))
          + xlim(c(0, tmax))
-         + labs(y = "incidence", title=title)
+         + labs(y = "Incidence", title=title)
   )
 } 
 
@@ -110,12 +110,15 @@ sinner <- function(time, states, params) {
   })
 }
 
+#in flow and out flow of the model separate.
+######################################################################
+######################################################################
 angel <- function(){
-	rates <- something
-	flows <-  something
-	flowPrev <-  something
-	dI <- something_about_the_flows
-	dI[[1]] <- dI[[1]] + extraTerm
+  rates <- something
+  flows <-  something
+  flowPrev <-  something
+  dI <- something_about_the_flows
+  dI[[1]] <- dI[[1]] + extraTerm
 }
 
 n = 12
@@ -205,9 +208,9 @@ mu2 = 10 # gamma
 kappa1 = 1/4
 kappa2 = 1/3
 r1 <- kappa2r(kappa1, m)
-a1 <- (1-1/r^m)/(mu1*(1-1/r1))
+a1 <- (1-1/r1^m)/(mu1*(1-1/r1))
 r2 <- kappa2r(kappa2, n)
-a2 <- (1-1/r^n)/(mu2*(1-1/r2))
+a2 <- (1-1/r2^n)/(mu2*(1-1/r2))
 
 params <- c(β=0.1,μ = 0.001, a1=a1, a2=a2, r1=r1, r2=r2, n = n, m = m)
 states <- c(0.9, numeric(m), 0.1, numeric(n-1), 0)
@@ -222,5 +225,28 @@ plot(time, soln[,"S"], type = "l")
 head(rowSums(soln[,-1])) # Checking
 
 
+######################################################################
+cgs <- function(r, n){
+  delta <- (1:n) - (n+1)/2
+  return(exp(delta*log(r)))
+}
+
+geomFlow <- function(mu, n, kappa, ts, T){
+  r <- kappa2r(kappa, n)
+  D = cgs(r, n)
+  D = D*mu/(sum(D))
+  return(1/D)
+}
+
+ts <- 0.1
+n <- 4
+T <- 200
+mu <- 5
+pen <- 12
+kappa <- 1/4
+
+geomFlow(mu, pen, kappa, ts, T)
 
 
+
+ 

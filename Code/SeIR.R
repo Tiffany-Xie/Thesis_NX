@@ -7,9 +7,6 @@ library(ggplot2)#; theme_set(theme_bw(base_size=14))
 
 ###################################################################### 
 
-library(shellpipes)
-startGraphics(width=10)
-
 Integration <- function(params, states, ts, T, model) {
   time <- timeSeq(ts, T, FALSE)
   soln <- ode(y = states,
@@ -22,21 +19,13 @@ Integration <- function(params, states, ts, T, model) {
 compare <- function(flat, geom, ts, T, title) {
   time <- timeSeq(ts, T, FALSE)
   df <- data.frame(Time = time, 
-                   FlatS = flat[,"S"],
-                   GeomS = geom[,"S"],
-                   FlatR = flat[,"R"],
-                   GeomR = geom[,"R"])
-  p1<- ggplot(df, aes(x=Time)) +
-    geom_line(aes(y=FlatS, color = "Flat")) +
-    geom_line(aes(y=GeomS, color = "Geom")) +
+                   FlatI = rowSums(flat[,3:(ncol(flat)-1)]),
+                   GeomI = rowSums(geom[,3:(ncol(geom)-1)]))
+  ggplot(df, aes(x=Time)) +
+    geom_line(aes(y=FlatI, color = "Flat")) +
+    geom_line(aes(y=GeomI, color = "Geom")) +
     labs(y = "Density", 
-         title = paste(title, "(S)"))
-  p2<- ggplot(df, aes(x=Time)) +
-    geom_line(aes(y=FlatR, color = "Flat")) +
-    geom_line(aes(y=GeomR, color = "Geom")) +
-    labs(y = "Density", 
-         title = paste(title, "(R)"))
-  grid.arrange(p1, p2, ncol = 2)
+         title = paste(title, "Infectious"))
 }
 
 ######################################################################
@@ -95,6 +84,7 @@ SInRFlow <- function(β, mu, n, μ, ts, T) {
 sinnerFlow <- function(β, mu, kappa, n, μ, ts, T) {
   r <- kappa2r(kappa, n)
   a <- (1-1/r^n)/(mu*(1-1/r))
+  #print(c(r, a))
   outrate <- a*r^(0:(n-1)) + μ
   
   params <- list(β=β, n=n, μ=μ, outrate=outrate)
@@ -137,13 +127,46 @@ fixn <- 12
 n <- 4
 μ <- 0.001
 ts <- 0.1
-T <- 100
+T <- 70
 
 sinner <- sinnerFlow(β, mu, kappa, fixn, μ, ts, T)
 #head(rowSums(soln[,-1]))
 sinr <- SInRFlow(β, mu, n, μ, ts, T)
 
-# compare(sinr, sinner, ts, T, title="SInR & Geom SInR")
+compare(sinr, sinner, ts, T, title="")
+#######
+
+n <- 2
+kappa <- 1/2
+time <- timeSeq(ts, T, FALSE)
+sinner <- sinnerFlow(β, mu, kappa, fixn, μ, ts, T)
+sinr <- SInRFlow(β, mu, n, μ, ts, T)
+dfn4 <- data.frame(Time = time, 
+                   Flat = rowSums(sinr[,3:(ncol(sinr)-1)]),
+                   Geom = rowSums(sinner[,3:(ncol(sinner)-1)]))
+
+dfn2$id <- 'n=2'
+dfn4$id <- 'n=4'
+combined_df <- rbind(dfn2, dfn4)
+long_df <- combined_df %>% 
+  pivot_longer(cols = c(Flat, Geom), names_to = "variable", values_to = "value")
+
+ggplot(long_df, aes(x = Time, y = value, group = interaction(id, variable), color = variable)) +
+  geom_line(aes(linetype = variable), linewidth=1) +
+  scale_linetype_manual(values = c("solid", "dashed")) +
+  facet_wrap(~id) +
+  labs(color = "Variable", linetype = "Variable",
+       x = "Time, (days)",
+       y = "Density")
+
+ggplot(long_df, aes(x = Time, y = value, color = id, linetype = variable)) +
+  geom_line(linewidth=1) +
+  scale_color_manual(values = c('n=2' = 'blue', 'n=4' = 'orange')) +
+  scale_linetype_manual(values = c("solid", "dashed")) +
+  labs(color = "n", linetype = "Model Type",
+       x = "Time, (days)",
+       y = "Density")
+
 
 ######################################################################
 
@@ -151,27 +174,19 @@ sinr <- SInRFlow(β, mu, n, μ, ts, T)
 muE <- 5
 muI <- 10
 kappaE <- 1/4
-kappaI <- 1/3
+kappaI <- 1/2
 fixm <- 6
 fixn <- 7
 m <- 4
-n <- 3
+n <- 2
 μ <- 0.001
 
 seminar <- seminarFlow(β, muE, muI, kappaE, kappaI, fixm, fixn, μ, ts, T)
 #head(rowSums(soln[,-1]))
 seminr <- SEmInRFlow(β, muE, muI, m, n, μ, ts, T)
 
-## compare(seminr, seminar, ts, T, title="SEmInR & Geom SEmInR")
+compare(seminr, seminar, ts, T, title="SEmInR & Geom SEmInR")
 
-e2 <- SEmInRFlow(β, muE, muI, m, n=2, μ, ts, T)
-e3 <- SEmInRFlow(β, muE, muI, m, n=3, μ, ts, T)
-e4 <- SEmInRFlow(β, muE, muI, m, n=4, μ, ts, T)
+######################################################################
 
-p2 <- seminarFlow(β, muE, muI, kappaE, kappaI=1/2, fixm, fixn, μ, ts, T)
-p3 <- seminarFlow(β, muE, muI, kappaE, kappaI=1/3, fixm, fixn, μ, ts, T)
-p4 <- seminarFlow(β, muE, muI, kappaE, kappaI=1/4, fixm, fixn, μ, ts, T)
 
-compare(e2, p2, ts=ts, T=T, title="")
-compare(e2, e4, ts=ts, T=T, title="")
-compare(e4, p4, ts=ts, T=T, title="")
