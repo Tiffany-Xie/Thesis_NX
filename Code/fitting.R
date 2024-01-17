@@ -62,19 +62,23 @@ sinnerFlow <- function(β, mu, kappa, n, μ, S0, I0, ts, T) {
 }
 
 ######################################################################
-
+# Parameters
 β <- 0.001
 mu <- 10
-kappa <- 1/4
-fixn <- 12
+#kappa <- 1/4
+#fixn <- 12
 n <- 4
 μ <- 0.01
+
+# Initial Value
 S0 <- 999
 I0 <- 1
-ts <- 0.1
+
+# Time
+ts <- 1
 T <- 30
 
-sinner <- sinnerFlow(β, mu, kappa, fixn, μ, ts, T)
+#sinner <- sinnerFlow(β, mu, kappa, fixn, μ, ts, T)
 sinr <- SInRFlow(β, mu, n, μ, S0, I0, ts, T)
 head(rowSums(sinr[,c(-1, -dim(sinr)[2])]))
 
@@ -83,63 +87,46 @@ nbs <- 1000
 inc <- diff(sinr[,"inc"])
 obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
-plot(timeSeq(ts, T), inc, type="l", xlab='Time, (Days)', ylab='I(t)')
-plot(timeSeq(ts, T), obs, type="l", xlab='Time, (Days)', ylab='I(t)')
-
-#sir.nll <- function(βe, mue, μe, n=4){
-#  S0 <- 999
-#   I0 <- 1
-#  out <- as.data.frame(SInRFlow(β=exp(βe), mu=exp(mue), n=n, μ=exp(μe), S0=S0, I0=I0, ts,T))
-#  nll <- -sum(dpois(x=obs, lambda=diff(out$inc), log=TRUE))
-#}
-
-sir.nll <- function(β, mu, μ){
-  S0 <- 999
-  I0 <- 1
-  out <- as.data.frame(SInRFlow(β=β, mu=mu, n=4, μ=μ, S0=S0, I0=I0, ts,T))
+sir.nll <- function(βe, mu=10, n=4, μ=0.01, S0=999, I0=1, ts=0.1, T=30){
+  out <- as.data.frame(SInRFlow(β=exp(βe), mu=mu, n=n, μ=μ, S0=S0, I0=I0, ts=ts, T=T))
   nll <- -sum(dpois(x=obs, lambda=diff(out$inc), log=TRUE))
 }
 
-params0 <-list(β=0.04, mu=7, μ=0.006)
-fit0 <- mle2(sir.nll, start=params0); fit0
-fit <- mle2(sir.nll, start=as.list(coef(fit0))); fit
-p<-profile(fit)
-
-
-t <- timeSeq(ts, T)
-mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=0.001346902, mu=15.000000137, n=4, μ=0.025714185, S0=999, I0=1, ts, T)))
-lines(diff(mod.prep$inc)~t, col = "red")
-
-
-# inc correct?
-stop("Draft")
-######################################################################
-#library(remotes)
-library(fitR)
-#install_github("sbfnk/fitR", dependencies = TRUE)
-library(bbmle)
-data(epi)
-ts = 0.1
-T = 3
-n=6
-plot(obs~time,data=epi1, type='b', xlab='Day', ylab='I(t)')
-
-sir.nll <- function(β, mu, μ){
-  out <- as.data.frame(SInRFlow(β=β, mu=mu, n=6, μ=μ, ts=1, T=38))
-  nll <- -sum(dpois(x=epi1$obs, lambda=out$I4, log=TRUE))
+sir.nll <- function(βe){
+  out <- as.data.frame(SInRFlow(β=exp(βe), mu=10, n=4, μ=0.01, S0=999, I0=1, ts, T))
+  nll <- -sum(dpois(x=obs, lambda=diff(out$inc), log=TRUE))
 }
 
-params0 <-list(β=0.005, mu=13, μ=0.004)
+sir.nll <- function(βe){
+  out <- as.data.frame(SInRFlow(β=exp(βe), mu=10, n=4, μ=0.01, S0=999, I0=1, ts, T))
+  nll <- -sum(dpois(x=obs, lambda=diff(out$inc), log=TRUE))
+}
+
+params0 <-list(βe=-5)
 fit0 <- mle2(sir.nll, start=params0); fit0
 fit <- mle2(sir.nll, start=as.list(coef(fit0))); fit
 p<-profile(fit)
 
 plot(p, absVal=TRUE)
-plot(obs~time,data=epi1, type='b', xlab='Day', ylab='I(t)', col='red', ylim=c(0, 150))
-t <- timeSeq(ts=1, T=38, FALSE)
-mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=0.001194045, mu=3.590678810, n=4, μ=0.089549146, ts=1, T=38)))
-lines(mod.prep$I4~t)
-ylim=c(0, 150)
+plot(timeSeq(ts, T), inc, type="l", xlab='Time, (Days)', ylab='I(t)')
+plot(timeSeq(ts, T), obs, type="l", xlab='Time, (Days)', ylab='I(t)')
+
+t <- timeSeq(ts, T)
+mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=coef(fit)[["β"]], mu=10, n=4, μ=0.01, S0=999, I0=1, ts, T)))
+lines(diff(mod.prep$inc)~t, col = "red")
+
+# change time
+# change to exponential 
+
+
+# inc correct?
+#poisson?
+# change time/ts influence result (very)
+stop("Draft")
+######################################################################
+temp <- function(x=2,y,z){
+  return(x+y+z)
+}
 
 
 ######################################################################
