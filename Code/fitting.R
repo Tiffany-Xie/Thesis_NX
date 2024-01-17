@@ -2,6 +2,7 @@ library(deSolve)
 library(pseudoErlang)
 library(gridExtra)
 library(ggplot2) 
+library(bbmle)
 theme_set(theme_minimal())
 
 ######################################################################
@@ -28,7 +29,7 @@ SIR <- function(time, states, params) {
     inrate <- outrate-μ
     inflow <- c(β*S*sum(I), (I*inrate)[1:(n-1)])
     
-    dS <- μ*1000 - β*S*sum(I) - μ*S
+    dS <- μ*N - β*S*sum(I) - μ*S
     dI <- inflow - outflow
     dR <- inrate[n]*I[[n]] - μ*R
     inc <- β*S*sum(I)
@@ -38,24 +39,24 @@ SIR <- function(time, states, params) {
 
 ######################################################################
 
-SInRFlow <- function(β, mu, n, μ, ts, T) {
+SInRFlow <- function(β, mu, n, μ, S0, I0, ts, T) {
   gamma <- 1/mu
   outrate <- rep(n*gamma + μ, times=n)
   
-  params <- list(β=β, n=n, μ=μ, outrate=outrate)
-  states <- c(900, 100, numeric(n-1), 0, 0)
+  params <- list(β=β, n=n, μ=μ, N = S0+I0, outrate=outrate)
+  states <- c(S0, I0, numeric(n-1), 0, 0)
   names(states) <- c("S", paste0("I", 1:n), "R", "inc")
   return(Integration(params, states, ts, T, SIR))
 }
 
-sinnerFlow <- function(β, mu, kappa, n, μ, ts, T) {
+sinnerFlow <- function(β, mu, kappa, n, μ, S0, I0, ts, T) {
   r <- kappa2r(kappa, n)
   a <- (1-1/r^n)/(mu*(1-1/r))
   #print(c(r, a))
   outrate <- a*r^(0:(n-1)) + μ
   
-  params <- list(β=β, n=n, μ=μ, outrate=outrate)
-  states <- c(9, 1, numeric(n-1), 0, 0)
+  params <- list(β=β, n=n, μ=μ, N=S0+I0, outrate=outrate)
+  states <- c(S0, I0, numeric(n-1), 0, 0)
   names(states) <- c("S", paste0("I", 1:n), "R", "inc")
   return(Integration(params, states, ts, T, SIR))
 }
@@ -68,20 +69,47 @@ kappa <- 1/4
 fixn <- 12
 n <- 4
 μ <- 0.01
+S0 <- 999
+I0 <- 1
 ts <- 0.1
-T <- 20
+T <- 30
 
 sinner <- sinnerFlow(β, mu, kappa, fixn, μ, ts, T)
-sinr <- SInRFlow(β, mu, n, μ, ts, T)
+sinr <- SInRFlow(β, mu, n, μ, S0, I0, ts, T)
 head(rowSums(sinr[,c(-1, -dim(sinr)[2])]))
 
 arp <- 0.9
+nbs <- 1000
 inc <- diff(sinr[,"inc"])
-nbs <- 100
 obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
+plot(timeSeq(ts, T), inc, type="l", xlab='Time, (Days)', ylab='I(t)')
+plot(timeSeq(ts, T), obs, type="l", xlab='Time, (Days)', ylab='I(t)')
 
-plot(timeSeq(ts, T), inc, type="l")
+sir.nll <- function(βe, mue, μe, n=6){
+  S0 <- 999
+  I0 <- 1
+  out <- as.data.frame(SInRFlow(β=exp(βe), mu=exp(mue), n=n, μ=exp(μe), S0=S0, I0=I0, ts,T))
+  nll <- -sum(dpois(x=obs, lambda=diff(out$inc), log=TRUE))
+}
+
+sir.nll <- function(β, mu, μ, n=6){
+  S0 <- 999
+  I0 <- 1
+  out <- as.data.frame(SInRFlow(β=β, mu=mu, n=n, μ=μ, S0=S0, I0=I0, ts,T))
+  nll <- -sum(dpois(x=obs, lambda=diff(out$inc), log=TRUE))
+}
+
+params0 <-list(β=0.04 , mu=7, μ=0.006)
+fit0 <- mle2(sir.nll, start=params0); fit0
+fit <- mle2(sir.nll, start=as.list(coef(fit0))); fit
+p<-profile(fit)
+
+
+t <- timeSeq(ts, T)
+mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=0.001346902, mu=15.000000137, n=4, μ=0.025714185, S0=999, I0=1, ts, T)))
+lines(diff(mod.prep$inc)~t, col = "red")
+
 
 # inc correct?
 stop("Draft")
@@ -93,15 +121,15 @@ library(bbmle)
 data(epi)
 ts = 0.1
 T = 3
-n=4
+n=6
 plot(obs~time,data=epi1, type='b', xlab='Day', ylab='I(t)')
 
 sir.nll <- function(β, mu, μ){
-  out <- as.data.frame(SInRFlow(β=β, mu=mu, n=4, μ=μ, ts=1, T=38))
-  nll <- -sum(dpois(x=epi1$obs, lambda=tail(out$I4,15), log=TRUE))
+  out <- as.data.frame(SInRFlow(β=β, mu=mu, n=6, μ=μ, ts=1, T=38))
+  nll <- -sum(dpois(x=epi1$obs, lambda=out$I4, log=TRUE))
 }
 
-params0 <-list(β=0.005, mu=7, μ=0.04)
+params0 <-list(β=0.005, mu=13, μ=0.004)
 fit0 <- mle2(sir.nll, start=params0); fit0
 fit <- mle2(sir.nll, start=as.list(coef(fit0))); fit
 p<-profile(fit)
