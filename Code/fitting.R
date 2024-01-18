@@ -75,7 +75,7 @@ S0 <- 999
 I0 <- 1
 
 # Time
-ts <- 0.1
+ts <- 1
 T <- 30
 
 #sinner <- sinnerFlow(β, mu, kappa, fixn, μ, ts, T)
@@ -113,7 +113,6 @@ lines(diff(mod.prep$inc)~t, col = "red", lwd=3)
 # change time
 # change to exponential 
 
-a =1
 # inc correct?
 #poisson?
 # change time/ts influence result (very)
