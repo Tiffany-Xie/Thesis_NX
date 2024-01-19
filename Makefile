@@ -27,6 +27,12 @@ simulation.Rout: Code/simulation.R
 SeIR.Rout: Code/SeIR.R
 	$(pipeR)
 
+fitting.Rout: Code/fitting.R
+	$(pipeR)
+
+multiFit.Rout: Code/multiFit.R
+	$(pipeR)
+
 ######################################################################
 
 ## JD side projects
