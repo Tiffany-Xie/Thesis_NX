@@ -75,7 +75,7 @@ S0 <- 999
 I0 <- 1
 
 # Time
-ts <- 1
+ts <- 0.1
 T <- 30
 
 #sinner <- sinnerFlow(β, mu, kappa, fixn, μ, ts, T)
@@ -87,19 +87,14 @@ nbs <- 1000
 inc <- diff(sinr[,"inc"])
 obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
-sir.nll <- function(βe){
-  out <- as.data.frame(SInRFlow(β=exp(βe), mu=10, n=4, μ=0.01, S0=999, I0=1, ts, T))
-  nll <- -sum(dpois(x=obs, lambda=diff(out$inc), log=TRUE))
+sir.nll <- function(βe, mue, obs){
+  out <- as.data.frame(SInRFlow(β=exp(βe), mu=exp(mue), n=4, μ=μ, S0=999, I0=1, ts, T))
+  nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
 }
 
-sir.nll <- function(βe, mue){
-  out <- as.data.frame(SInRFlow(β=exp(βe), mu=exp(mue), n=4, μ=0.01, S0=999, I0=1, ts, T))
-  nll <- -sum(dpois(x=obs, lambda=diff(out$inc), log=TRUE))
-}
-
-params0 <-list(βe=-5, mue=3)
-fit0 <- mle2(sir.nll, start=params0); fit0
-fit <- mle2(sir.nll, start=as.list(coef(fit0))); fit
+params0 <-list(βe=-6, mue=1)
+fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs)); fit0
+fit <- mle2(sir.nll, start=as.list(coef(fit0)), data=list(obs=obs)); fit
 p<-profile(fit)
 
 plot(p, absVal=TRUE)
@@ -114,12 +109,17 @@ lines(diff(mod.prep$inc)~t, col = "red", lwd=3)
 # change to exponential 
 
 # inc correct?
-#poisson?
-# change time/ts influence result (very)
+# change time/ts influence result
 stop("Draft")
 ######################################################################
-temp <- function(x=2,y,z){
-  return(x+y+z)
+load(system.file("vignetteData","orob1.rda",package="bbmle"))
+summary(orob1)
+
+X <- model.matrix(~dilution, data = orob1)
+ML1 <- function(prob1,prob2,prob3,theta,x) {
+  prob <- c(prob1,prob2,prob3)[as.numeric(x$dilution)]
+  size <- x$n
+  -sum(dbetabinom(x$m,prob,size,theta,log=TRUE))
 }
 
 
