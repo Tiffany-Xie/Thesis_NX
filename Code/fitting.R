@@ -1,6 +1,5 @@
 library(deSolve)
 library(pseudoErlang)
-library(gridExtra)
 library(ggplot2) 
 library(bbmle)
 theme_set(theme_minimal())
@@ -24,8 +23,8 @@ SIR <- function(time, states, params) {
     S <- states[[1]]
     I <- states[2:(n+1)]
     R <- states[[n+2]]
-
-	 inc <- β*S*sum(I)/N
+    
+    inc <- β*S*sum(I)/N
     
     outflow <- outrate*I
     inrate <- outrate-μ
@@ -34,7 +33,8 @@ SIR <- function(time, states, params) {
     dS <- μ*N - inc - μ*S
     dI <- inflow - outflow
     dR <- inrate[n]*I[[n]] - μ*R
-	 dC <- inc
+    dC <- inc
+    
     return(list(c(dS, dI, dR, dC)))
   })
 }
@@ -65,7 +65,7 @@ sinnerFlow <- function(β, D, kappa, n, μ, S0, I0, ts, T) {
 
 ######################################################################
 # Parameters
-β <- 0.2
+β <- 0.3
 D <- 10
 #kappa <- 1/4
 #fixn <- 12
@@ -73,12 +73,12 @@ n <- 4
 μ <- 0.01
 
 # Initial Value
-S0 <- 999
+S0 <- 9999
 I0 <- 1
 
 # Time
-ts <- 0.1
-T <- 30
+ts <- 1
+T <- 100
 
 #sinner <- sinnerFlow(β, D, kappa, fixn, μ, ts, T)
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
@@ -87,14 +87,14 @@ head(rowSums(sinr[,c(-1, -dim(sinr)[2])]))
 arp <- 0.9
 nbs <- 1000
 inc <- diff(sinr[,"inc"])
-obs <- rnbinom(D=arp*inc, size=nbs, n=length(inc))
+obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
-sir.nll <- function(βe, mue, obs){
-  out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(mue), n=4, μ=μ, S0=999, I0=1, ts, T))
-  nll <- -sum(dnbinom(x=obs, D=diff(out$inc), size=nbs, log=TRUE))
+sir.nll <- function(βe, De, obs){
+  out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=4, μ=μ, S0, I0, ts, T))
+  nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
 }
 
-params0 <-list(βe=-6, mue=1)
+params0 <-list(βe=-1, De=1)
 fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs)); fit0
 fit <- mle2(sir.nll, start=as.list(coef(fit0)), data=list(obs=obs)); fit
 p<-profile(fit)
@@ -104,5 +104,68 @@ plot(timeSeq(ts, T), inc, type="l", xlab='Time, (Days)', ylab='I(t)')
 plot(timeSeq(ts, T), obs, type="l", xlab='Time, (Days)', ylab='I(t)')
 
 t <- timeSeq(ts, T)
-mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(coef(fit)[["βe"]]), D=exp(coef(fit)[["mue"]]), n=4, μ=0.01, S0=999, I0=1, ts, T)))
+mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(coef(fit)[["βe"]]), D=exp(coef(fit)[["De"]]), n=4, μ=0.01, S0, I0, ts, T)))
 lines(diff(mod.prep$inc)~t, col = "red", lwd=3)
+
+######################################################################
+seeds <- seq(1,50)
+β <- 0.001
+D <- 10
+n <- 4
+μ <- 0.01
+S0 <- 999
+I0 <- 1
+ts <- 0.1
+T <- 50
+
+arp <- 0.9
+nbs <- 1000
+
+succ <- c()
+
+for (s in seeds) {
+  set.seed(s)
+  sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+  
+  inc <- diff(sinr[,"inc"])
+  obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+  
+  params0 <-list(βe=-6, De=1)
+  
+  ans <- tryCatch({
+    mle2(sir.nll, start=params0, data=list(obs=obs))
+    1
+  }, warning = function(w) {
+    0.5
+  }, error = function(e) {
+    0
+  }, finally = {
+    1
+  })
+  
+  succ <- c(succ, ans)
+
+}
+
+
+
+# Try
+
+tryCatch({
+
+  log(-3)
+  0
+}, warning = function(w) {
+  "A warning occurred"
+  
+}, error = function(e) {
+
+  "An error occurred"
+}, finally = {
+  "This always runs"
+})
+
+
+
+
+
