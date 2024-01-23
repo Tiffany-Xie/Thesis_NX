@@ -107,6 +107,7 @@ t <- timeSeq(ts, T)
 mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(coef(fit)[["βe"]]), D=exp(coef(fit)[["De"]]), n=4, μ=0.01, S0, I0, ts, T)))
 lines(diff(mod.prep$inc)~t, col = "red", lwd=3)
 
+quit()
 ######################################################################
 seeds <- seq(1,50)
 β <- 0.001
