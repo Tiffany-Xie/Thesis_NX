@@ -34,7 +34,7 @@ SIR <- function(time, states, params) {
     dI <- inflow - outflow
     dR <- inrate[n]*I[[n]] - μ*R
     dC <- inc
-    
+     
     return(list(c(dS, dI, dR, dC)))
   })
 }
@@ -65,7 +65,7 @@ sinnerFlow <- function(β, D, kappa, n, μ, S0, I0, ts, T) {
 
 ######################################################################
 # Parameters
-β <- 0.3
+β <- 0.8
 D <- 10
 #kappa <- 1/4
 #fixn <- 12
@@ -73,12 +73,12 @@ n <- 4
 μ <- 0.01
 
 # Initial Value
-S0 <- 9999
+S0 <- 999
 I0 <- 1
 
 # Time
-ts <- 1
-T <- 100
+ts <- 0.1
+T <- 50
 
 #sinner <- sinnerFlow(β, D, kappa, fixn, μ, ts, T)
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
@@ -94,7 +94,7 @@ sir.nll <- function(βe, De, obs){
   nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
 }
 
-params0 <-list(βe=-1, De=1)
+params0 <-list(βe=0, De=1)
 fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs)); fit0
 fit <- mle2(sir.nll, start=as.list(coef(fit0)), data=list(obs=obs)); fit
 p<-profile(fit)
@@ -165,6 +165,10 @@ tryCatch({
 }, finally = {
   "This always runs"
 })
+
+# how does thia 
+
+
 
 
 
