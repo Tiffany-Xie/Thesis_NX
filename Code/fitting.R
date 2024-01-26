@@ -88,7 +88,7 @@ set.seed(33) # 33 work -0.4/0.6 X
 fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
 
 
-###################################################################### Seeds
+###################################################################### Seeds - mle
 seeds <- seq(1,100) 
 β <- 0.4
 D <- 10
@@ -100,7 +100,7 @@ ts <- 1
 T <- 100
 
 
-succ <- c()
+succ_mle <- c()
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 inc <- diff(sinr[,"inc"]) /ts
 obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
@@ -120,13 +120,39 @@ for (s in seeds) {
     1
   })
   
-  succ <- c(succ, ans)
+  succ_mle <- c(succ_mle, ans)
 }
 
-#βE[which(succ==1)]
+succ_mle
 
+###################################################################### Seeds - NB
+seeds <- seq(1,100) 
+succ_nb <- c()
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+inc <- diff(sinr[,"inc"]) /ts
 
-######################################################################
+for (s in seeds) {
+  set.seed(s)
+  obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+  params0 <-list(βe=-0.5, De=2)
+  
+  ans <- tryCatch({
+    mle2(sir.nll, start=params0, data=list(obs=obs))
+    1
+  }, warning = function(w) {
+    0.5
+  }, error = function(e) {
+    0
+  }, finally = {
+    1
+  })
+  
+  succ_nb <- c(succ_nb, ans)
+}
+
+succ_nb
+
+###################################################################### Various initial value
 β <- 0.4
 D <- 10
 n <- 4
@@ -168,21 +194,21 @@ for (βe in βE) {
 βE[which(succ==1)]
 
 ###################################################################### Large value problem
-β <- 0.4
+β <- 1
 D <- 10
 n <- 4
 μ <- 0.01
 S0 <- 999
 I0 <- 1
 ts <- 1
-T <- 100
+T <- 50
 
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 inc <- diff(sinr[,"inc"]) /ts
 obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
-params0 <-list(βe=0.0001, De=1.1)
-set.seed(163) # 33 work -0.4/0.6 X
+params0 <-list(βe=2, De=2)
+set.seed(163) # 163 large value, but no error
 fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
 
 # Even after using set.seed, it still sometimes generates error messages!!
