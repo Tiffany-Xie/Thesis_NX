@@ -1,71 +1,13 @@
 library(deSolve)
+library(devtools)
+#install_github("Tiffany-Xie/pseudoErlang")
 library(pseudoErlang)
 library(ggplot2) 
 library(bbmle)
 theme_set(theme_minimal())
 
-######################################################################
-
-Integration <- function(params, states, ts, T, model) {
-  time <- timeSeq(ts, T, FALSE)
-  soln <- ode(y = states,
-              times = time,
-              func = model,
-              parms = params)
-  return(soln)
-}
-
-######################################################################
-
-SIR <- function(time, states, params) {
-  with(params, {
-    stopifnot(length(outrate)==n)
-    S <- states[[1]]
-    I <- states[2:(n+1)]
-    R <- states[[n+2]]
-    
-    inc <- β*S*sum(I)/N
-    
-    outflow <- outrate*I
-    inrate <- outrate-μ
-    inflow <- c(inc, (I*inrate)[1:(n-1)])
-    
-    dS <- μ*N - inc - μ*S
-    dI <- inflow - outflow
-    dR <- inrate[n]*I[[n]] - μ*R
-    dC <- inc
-     
-    return(list(c(dS, dI, dR, dC)))
-  })
-}
-
-######################################################################
-
-SInRFlow <- function(β, D, n, μ, S0, I0, ts, T) {
-  gamma <- 1/D
-  outrate <- rep(n*gamma + μ, times=n)
-  
-  params <- list(β=β, n=n, μ=μ, N = S0+I0, outrate=outrate)
-  states <- c(S0, I0, numeric(n-1), 0, 0)
-  names(states) <- c("S", paste0("I", 1:n), "R", "inc")
-  return(Integration(params, states, ts, T, SIR))
-}
-
-sinnerFlow <- function(β, D, kappa, n, μ, S0, I0, ts, T) {
-  r <- kappa2r(kappa, n)
-  a <- (1-1/r^n)/(D*(1-1/r))
-  #print(c(r, a))
-  outrate <- a*r^(0:(n-1)) + μ
-  
-  params <- list(β=β, n=n, μ=μ, N=S0+I0, outrate=outrate)
-  states <- c(S0, I0, numeric(n-1), 0, 0)
-  names(states) <- c("S", paste0("I", 1:n), "R", "inc")
-  return(Integration(params, states, ts, T, SIR))
-}
-
-######################################################################
-# Parameters
-β <- 0.8
+###################################################################### Always work
+β <- 0.4
 D <- 10
 #kappa <- 1/4
 #fixn <- 12
@@ -77,16 +19,17 @@ S0 <- 999
 I0 <- 1
 
 # Time
-ts <- 0.1
-T <- 50
+ts <- 1
+T <- 100
 
 #sinner <- sinnerFlow(β, D, kappa, fixn, μ, ts, T)
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 head(rowSums(sinr[,c(-1, -dim(sinr)[2])]))
 
+
 arp <- 0.9
 nbs <- 1000
-inc <- diff(sinr[,"inc"])
+inc <- diff(sinr[,"inc"]) /ts
 obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
 sir.nll <- function(βe, De, obs){
@@ -94,8 +37,9 @@ sir.nll <- function(βe, De, obs){
   nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
 }
 
-params0 <-list(βe=0, De=1)
-fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs)); fit0
+params0 <-list(βe=-0.5, De=2)
+set.seed(33) # 33 work -0.4/0.6 X
+fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
 fit <- mle2(sir.nll, start=as.list(coef(fit0)), data=list(obs=obs)); fit
 p<-profile(fit)
 
@@ -107,31 +51,63 @@ t <- timeSeq(ts, T)
 mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(coef(fit)[["βe"]]), D=exp(coef(fit)[["De"]]), n=4, μ=0.01, S0, I0, ts, T)))
 lines(diff(mod.prep$inc)~t, col = "red", lwd=3)
 
-quit()
-######################################################################
-seeds <- seq(1,50)
-β <- 0.001
+###################################################################### Change time
+T <- 200
+
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+inc <- diff(sinr[,"inc"]) /ts
+obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+
+params0 <-list(βe=-0.5, De=2)
+set.seed(33) # 33 work -0.4/0.6 X
+fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
+
+###################################################################### Change N
+T <- 100
+S0 <- 99999
+
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+inc <- diff(sinr[,"inc"]) /ts
+obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+
+params0 <-list(βe=-0.5, De=2)
+set.seed(33) # 33 work -0.4/0.6 X
+fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
+
+###################################################################### Change time span
+S0 <- 999
+ts <- 0.1
+
+
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+inc <- diff(sinr[,"inc"]) /ts
+obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+
+params0 <-list(βe=-0.5, De=2)
+set.seed(33) # 33 work -0.4/0.6 X
+fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
+
+
+###################################################################### Seeds
+seeds <- seq(1,100) 
+β <- 0.4
 D <- 10
 n <- 4
 μ <- 0.01
 S0 <- 999
 I0 <- 1
-ts <- 0.1
-T <- 50
+ts <- 1
+T <- 100
 
-arp <- 0.9
-nbs <- 1000
 
 succ <- c()
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+inc <- diff(sinr[,"inc"]) /ts
+obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
 for (s in seeds) {
   set.seed(s)
-  sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-  
-  inc <- diff(sinr[,"inc"])
-  obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
-  
-  params0 <-list(βe=-6, De=1)
+  params0 <-list(βe=-0.5, De=2)
   
   ans <- tryCatch({
     mle2(sir.nll, start=params0, data=list(obs=obs))
@@ -145,11 +121,76 @@ for (s in seeds) {
   })
   
   succ <- c(succ, ans)
-
 }
 
+#βE[which(succ==1)]
 
 
+######################################################################
+β <- 0.4
+D <- 10
+n <- 4
+μ <- 0.01
+S0 <- 999
+I0 <- 1
+ts <- 1
+T <- 100
+
+arp <- 0.9
+nbs <- 1000
+
+βE=seq(-1, 1, 0.01); De=2
+
+
+succ <- c()
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+inc <- diff(sinr[,"inc"])
+obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+
+for (βe in βE) { 
+  
+  params0 <-list(βe=-βe, De=De)
+  
+  ans <- tryCatch({
+    mle2(sir.nll, start=params0, data=list(obs=obs))
+    1
+  }, warning = function(w) {
+    0.5
+  }, error = function(e) {
+    0
+  }, finally = {
+    1
+  })
+  
+  succ <- c(succ, ans)
+}
+
+βE[which(succ==1)]
+
+###################################################################### Large value problem
+β <- 0.4
+D <- 10
+n <- 4
+μ <- 0.01
+S0 <- 999
+I0 <- 1
+ts <- 1
+T <- 100
+
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+inc <- diff(sinr[,"inc"]) /ts
+obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+
+params0 <-list(βe=0.0001, De=1.1)
+set.seed(163) # 33 work -0.4/0.6 X
+fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
+
+# Even after using set.seed, it still sometimes generates error messages!!
+
+
+
+quit()
+######################################################################
 # Try
 
 tryCatch({
@@ -166,7 +207,6 @@ tryCatch({
   "This always runs"
 })
 
-# how does thia 
 
 
 
