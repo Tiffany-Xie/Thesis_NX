@@ -12,7 +12,8 @@ sir.nll <- function(βe, De, obs, n, μ, S0, I0, ts, T){
   nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
 }
 
-simObs <- function(β, D, n, μ, S0, I0, ts, T, rp, nbsize){
+simObs <- function(β, D, n, μ, S0, I0, ts, T, rp, nbsize, seed){
+	set.seed(seed)
 	sim <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 	inc <- diff(sim[,"inc"])/ts
 	return(rnbinom(mu=rp*inc, size=nbs, n=length(inc)))
@@ -40,7 +41,7 @@ fixedPar <- list(
 	n = n, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T
 )
 
-obs <- simObs(β, D, n, μ, S0, I0, ts, T, rp, nbsize)
+obs <- simObs(β, D, n, μ, S0, I0, ts, T, rp, nbsize, seed)
 summary(obs)
 
 print(simpleFit(startPar, fixedPar, inc, seed))
