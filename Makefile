@@ -33,6 +33,9 @@ fitting.Rout: Code/fitting.R
 multiFit.Rout: Code/multiFit.R
 	$(pipeR)
 
+oneFit.Rout: Code/oneFit.R
+	$(pipeR)
+
 ######################################################################
 
 ## JD side projects

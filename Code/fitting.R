@@ -33,14 +33,17 @@ inc <- diff(sinr[,"inc"]) /ts
 obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
 sir.nll <- function(βe, De, obs){
+	## print(c(β=exp(βe), D=exp(De), n=4, μ=μ, S0, I0, ts, T))
   out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=4, μ=μ, S0, I0, ts, T))
   nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
 }
 
 params0 <-list(βe=-0.5, De=2)
 set.seed(33) # 33 work -0.4/0.6 X
-fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
-fit <- mle2(sir.nll, start=as.list(coef(fit0)), data=list(obs=obs)); fit
+fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs))
+print(fit0)
+fit <- mle2(sir.nll, start=as.list(coef(fit0)), data=list(obs=obs))
+print(fit)
 p<-profile(fit)
 
 plot(p, absVal=TRUE)
