@@ -107,6 +107,7 @@ obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
 for (s in seeds) {
   set.seed(s)
+  print("seed", s)
   params0 <-list(βe=-0.5, De=2)
   
   ans <- tryCatch({
