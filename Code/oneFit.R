@@ -19,6 +19,7 @@ simObs <- function(β, D, n, μ, S0, I0, ts, T, rp, nbsize){
 }
 
 simpleFit <- function(startPar, fixedPar, inc, seed){
+	set.seed(seed)
 	fit0 <- mle2(sir.nll, start=startPar, fixed=fixedPar, data=list(obs=obs))
 }
 
@@ -32,6 +33,7 @@ ts <- 1
 T <- 100
 rp <- 0.9
 nbs <- 1000
+seed <- 33
 
 startPar <-list(βe=-0.5, De=2)
 fixedPar <- list(
