@@ -6,6 +6,25 @@ library(ggplot2)
 library(bbmle)
 theme_set(theme_minimal())
 
+######################################################################
+
+simObs <- function(sinr, arp, nbs, seed) {
+  set.seed(seed)
+  inc <- diff(sinr[,"inc"]) # /ts
+  obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+  return(obs)
+}
+
+sir.nll.g <- function(obs, βe, De, n, μ, S0, I0, ts, T) {
+  sir.null <- function(βe, De, obs) {
+    out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=n, μ=μ, S0=S0, I0=I0, ts=ts, T=T))
+    nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
+  }
+}
+
+
+
+
 ###################################################################### Always work
 β <- 0.4
 D <- 10
@@ -33,7 +52,7 @@ inc <- diff(sinr[,"inc"]) /ts
 obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
 sir.nll <- function(βe, De, obs){
-	## print(c(β=exp(βe), D=exp(De), n=4, μ=μ, S0, I0, ts, T))
+  ## print(c(β=exp(βe), D=exp(De), n=4, μ=μ, S0, I0, ts, T))
   out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=4, μ=μ, S0, I0, ts, T))
   nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
 }
@@ -224,19 +243,18 @@ quit()
 # Try
 
 tryCatch({
-
+  
   log(-3)
   0
 }, warning = function(w) {
   "A warning occurred"
   
 }, error = function(e) {
-
+  
   "An error occurred"
 }, finally = {
   "This always runs"
 })
-
 
 
 
