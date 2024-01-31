@@ -10,105 +10,87 @@ theme_set(theme_minimal())
 
 simObs <- function(sinr, arp, nbs, seed) {
   set.seed(seed)
-  inc <- diff(sinr[,"inc"]) # /ts
+  inc <- diff(sinr[,"inc"]) #/ts
   obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
-  return(obs)
+  df <- data.frame(inc = inc,
+                   obs = obs)
+  return(df)
 }
 
-sir.nll.g <- function(obs, βe, De, n, μ, S0, I0, ts, T) {
-  sir.null <- function(βe, De, obs) {
+fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed) {
+  obs = df$obs
+  sir.nll <- function(βe, De, obs) {
     out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=n, μ=μ, S0=S0, I0=I0, ts=ts, T=T))
-    nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
+    nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=1000, log=TRUE))
   }
+  
+  params0 <-list(βe=βe, De=De)
+  set.seed(seed) 
+  tryCatch({
+    fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs))
+    plotting(df, fit0, ts, T)
+    return(fit0)
+  }, error = function(e) {
+    "That's unfortunate"
+  }, finally = {
+    1
+  })
+  
 }
 
+plotting <- function(df, fit, ts, T) {
+  plot(timeSeq(ts, T), df$obs, type="l", xlab='Time, (Days)', ylab='I(t)')
+  t <- timeSeq(ts, T)
+  mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(coef(fit)[["βe"]]), D=exp(coef(fit)[["De"]]), n, μ, S0, I0, ts, T)))
+  lines(diff(mod.prep$inc)~t, col = "red", lwd=3)
+  lines(df$inc, col = "blue")
+}
 
+## try ####################################################################  
 
+## Always works ####################################################################     
 
-###################################################################### Always work
 β <- 0.4
 D <- 10
-#kappa <- 1/4
-#fixn <- 12
 n <- 4
 μ <- 0.01
-
-# Initial Value
 S0 <- 999
 I0 <- 1
-
-# Time
 ts <- 1
 T <- 100
 
-#sinner <- sinnerFlow(β, D, kappa, fixn, μ, ts, T)
-sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-head(rowSums(sinr[,c(-1, -dim(sinr)[2])]))
-
-
 arp <- 0.9
 nbs <- 1000
-inc <- diff(sinr[,"inc"]) /ts
-obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
 
-sir.nll <- function(βe, De, obs){
-  ## print(c(β=exp(βe), D=exp(De), n=4, μ=μ, S0, I0, ts, T))
-  out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=4, μ=μ, S0, I0, ts, T))
-  nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=nbs, log=TRUE))
-}
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+df = simObs(sinr, arp, nbs, 77) # seed = 77
+ans <- fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 76) # seed = 76
 
-params0 <-list(βe=-0.5, De=2)
-set.seed(33) # 33 work -0.4/0.6 X
-fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs))
-print(fit0)
-fit <- mle2(sir.nll, start=as.list(coef(fit0)), data=list(obs=obs))
-print(fit)
-p<-profile(fit)
+## Change time #################################################################### Change time
 
-plot(p, absVal=TRUE)
-plot(timeSeq(ts, T), inc, type="l", xlab='Time, (Days)', ylab='I(t)')
-plot(timeSeq(ts, T), obs, type="l", xlab='Time, (Days)', ylab='I(t)')
-
-t <- timeSeq(ts, T)
-mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(coef(fit)[["βe"]]), D=exp(coef(fit)[["De"]]), n=4, μ=0.01, S0, I0, ts, T)))
-lines(diff(mod.prep$inc)~t, col = "red", lwd=3)
-
-###################################################################### Change time
 T <- 200
 
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-inc <- diff(sinr[,"inc"]) /ts
-obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+df = simObs(sinr, arp, nbs, 71) # seed = 71
+fit = fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 72) # seed = 72
 
-params0 <-list(βe=-0.5, De=2)
-set.seed(33) # 33 work -0.4/0.6 X
-fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
+## Change population (N) #################################################################### Change population (N)
 
-###################################################################### Change N
 T <- 100
 S0 <- 99999
 
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-inc <- diff(sinr[,"inc"]) /ts
-obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+df = simObs(sinr, arp, nbs, 70) # seed = 70
+fit = fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 69) # seed = 69
+ 
+## Change ts ####################################################################
 
-params0 <-list(βe=-0.5, De=2)
-set.seed(33) # 33 work -0.4/0.6 X
-fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
-
-###################################################################### Change time span
 S0 <- 999
 ts <- 0.1
 
-
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-inc <- diff(sinr[,"inc"]) /ts
-obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
-
-params0 <-list(βe=-0.5, De=2)
-set.seed(33) # 33 work -0.4/0.6 X
-fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
-
+df = simObs(sinr, arp, nbs, 67) # seed = 70
+fit = fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 66) # seed = 69
 
 ###################################################################### Seeds - mle
 seeds <- seq(1,100) 
