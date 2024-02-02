@@ -30,9 +30,11 @@ SeIR.Rout: Code/SeIR.R
 fitting.Rout: Code/fitting.R
 	$(pipeR)
 
+## JD
 multiFit.Rout: Code/multiFit.R
 	$(pipeR)
 
+## JD
 oneFit.Rout: Code/oneFit.R
 	$(pipeR)
 

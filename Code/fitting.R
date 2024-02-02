@@ -2,9 +2,8 @@ library(deSolve)
 library(devtools)
 #install_github("Tiffany-Xie/pseudoErlang")
 library(pseudoErlang)
-library(ggplot2) 
+library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
-theme_set(theme_minimal())
 
 ######################################################################
 
@@ -17,7 +16,7 @@ simObs <- function(sinr, arp, nbs, seed) {
   return(df)
 }
 
-fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed, plot=TRUE) {
+fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed, plot=TRUE, optMethod="Nelder-Mead") {
   obs = df$obs
   sir.nll <- function(βe, De, obs) {
     trace_betae <<- c(trace_betae, βe)
@@ -30,7 +29,7 @@ fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed, plot=TRUE) {
   params0 <-list(βe=βe, De=De)
   set.seed(seed) 
   tryCatch({
-    fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs))
+    fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs), method=optMethod)
     if (plot) {
       plotting(df, fit0, ts, T)
     }
@@ -66,11 +65,13 @@ arp <- 0.9
 nbs <- 1000
 
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-df = simObs(sinr, arp, nbs, 77) # seed = 77
+df = simObs(sinr, arp, nbs, seed=72)
 trace_betae <- c()
 trace_De <- c()
-ans <- fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 76) # seed = 76
-
+ans <- fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, seed=77
+	, optMethod="Nelder-Mead"
+)
+print(ans)
 
 pardf <- data.frame(order = seq(0:(length(trace_betae)-1)), 
                     betae = trace_betae,
@@ -80,10 +81,17 @@ ggplot(pardf, aes(x = De, y = betae)) +
   geom_point(aes(color = order)) +  # Color by Time
   geom_path(alpha = 0.5) +  # Trace path
   scale_color_gradient(low = "blue", high = "red") +  # Color gradient
-  theme_minimal() +
   labs(x = "D", y = "Beta", color = "Time", title = "success")
 
+print(ggplot(pardf)
+	+ aes(x = order, y = De)
+	+ geom_point() # Color by Time
+)
 
+print(ggplot(pardf)
+	+ aes(x = order, y = betae)
+	+ geom_point() # Color by Time
+)
 
 ## Change time #################################################################### Change time
 
@@ -106,7 +114,6 @@ tryCatch({
     geom_point(aes(color = order)) +  # Color by Time
     geom_path(alpha = 0.5) +  # Trace path
     scale_color_gradient(low = "blue", high = "red") +  # Color gradient
-    theme_minimal() +
     labs(x = "D", y = "Beta", color = "Time", title = "failure")
 }, error = function(e) {
   0
