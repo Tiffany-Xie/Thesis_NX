@@ -20,8 +20,8 @@ simObs <- function(sinr, arp, nbs, seed) {
 fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed, plot=TRUE) {
   obs = df$obs
   sir.nll <- function(βe, De, obs) {
-    process_betae <<- c(process_betae, βe)
-    process_De <<- c(process_De, De)
+    trace_betae <<- c(trace_betae, βe)
+    trace_De <<- c(trace_De, De)
     #print(c(βe=βe, De=De))
     out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=n, μ=μ, S0=S0, I0=I0, ts=ts, T=T))
     nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=1000, log=TRUE))
@@ -31,7 +31,9 @@ fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed, plot=TRUE) {
   set.seed(seed) 
   tryCatch({
     fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs))
-    if (plot) plotting(df, fit0, ts, T)
+    if (plot) {
+      plotting(df, fit0, ts, T)
+    }
     return(fit0)
   }, error = function(e) {
     "That's unfortunate"
@@ -65,31 +67,23 @@ nbs <- 1000
 
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 df = simObs(sinr, arp, nbs, 77) # seed = 77
-process_betae <- c()
-process_De <- c()
+trace_betae <- c()
+trace_De <- c()
 ans <- fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 76) # seed = 76
 
 
-pardf <- data.frame(order = seq(0:(length(process_betae)-1)), 
-                    betae = process_betae,
-                    De = process_De)
+pardf <- data.frame(order = seq(0:(length(trace_betae)-1)), 
+                    betae = trace_betae,
+                    De = trace_De)
 
-p <- ggplot(pardf, aes(x = De, y = betae)) +
+ggplot(pardf, aes(x = De, y = betae)) +
   geom_point(aes(color = order)) +  # Color by Time
   geom_path(alpha = 0.5) +  # Trace path
   scale_color_gradient(low = "blue", high = "red") +  # Color gradient
   theme_minimal() +
-  labs(x = "D", y = "Beta", color = "Time")
+  labs(x = "D", y = "Beta", color = "Time", title = "success")
 
-library(dplyr)
-pardf$lead_D <- dplyr::lead(pardf$De)
-pardf$lead_beta <- dplyr::lead(pardf$betae)
 
-# Filter for every nth row to avoid cluttering, adjust n as needed
-n <- 10  # For example, add an arrow every 10 points
-arrow_data <- pardf[seq(1, nrow(pardf), by = n), ]
-
-p + geom_segment(data = arrow_data, aes(xend = lead_D, yend = lead_beta), arrow = arrow(type = "closed", length = unit(0.15, "inches")), lineend = "round")
 
 ## Change time #################################################################### Change time
 
@@ -97,7 +91,30 @@ T <- 200
 
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 df = simObs(sinr, arp, nbs, 71) # seed = 71
-fit = fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 72) # seed = 72
+
+trace_betae <- c()
+trace_De <- c()
+tryCatch({
+  fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 72) # seed = 72
+  1
+}, warning = function(w) {
+  pardf <- data.frame(order = seq(0:(length(trace_betae)-1)), 
+                      betae = trace_betae,
+                      De = trace_De)
+  
+  ggplot(pardf, aes(x = De, y = betae)) +
+    geom_point(aes(color = order)) +  # Color by Time
+    geom_path(alpha = 0.5) +  # Trace path
+    scale_color_gradient(low = "blue", high = "red") +  # Color gradient
+    theme_minimal() +
+    labs(x = "D", y = "Beta", color = "Time", title = "failure")
+}, error = function(e) {
+  0
+}, finally = {
+  1
+})
+ 
+
 
 ## Change population (N) #################################################################### Change population (N)
 
