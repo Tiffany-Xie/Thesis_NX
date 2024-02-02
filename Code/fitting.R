@@ -17,9 +17,12 @@ simObs <- function(sinr, arp, nbs, seed) {
   return(df)
 }
 
-fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed) {
+fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed, plot=TRUE) {
   obs = df$obs
   sir.nll <- function(βe, De, obs) {
+    process_betae <<- c(process_betae, βe)
+    process_De <<- c(process_De, De)
+    #print(c(βe=βe, De=De))
     out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=n, μ=μ, S0=S0, I0=I0, ts=ts, T=T))
     nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=1000, log=TRUE))
   }
@@ -28,7 +31,7 @@ fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed) {
   set.seed(seed) 
   tryCatch({
     fit0 <- mle2(sir.nll, start=params0, data=list(obs=obs))
-    plotting(df, fit0, ts, T)
+    if (plot) plotting(df, fit0, ts, T)
     return(fit0)
   }, error = function(e) {
     "That's unfortunate"
@@ -43,10 +46,8 @@ plotting <- function(df, fit, ts, T) {
   t <- timeSeq(ts, T)
   mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(coef(fit)[["βe"]]), D=exp(coef(fit)[["De"]]), n, μ, S0, I0, ts, T)))
   lines(diff(mod.prep$inc)~t, col = "red", lwd=3)
-  lines(df$inc, col = "blue")
+  lines(timeSeq(ts, T), df$inc, col = "blue")
 }
-
-## try ####################################################################  
 
 ## Always works ####################################################################     
 
@@ -64,7 +65,31 @@ nbs <- 1000
 
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 df = simObs(sinr, arp, nbs, 77) # seed = 77
+process_betae <- c()
+process_De <- c()
 ans <- fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 76) # seed = 76
+
+
+pardf <- data.frame(order = seq(0:(length(process_betae)-1)), 
+                    betae = process_betae,
+                    De = process_De)
+
+p <- ggplot(pardf, aes(x = De, y = betae)) +
+  geom_point(aes(color = order)) +  # Color by Time
+  geom_path(alpha = 0.5) +  # Trace path
+  scale_color_gradient(low = "blue", high = "red") +  # Color gradient
+  theme_minimal() +
+  labs(x = "D", y = "Beta", color = "Time")
+
+library(dplyr)
+pardf$lead_D <- dplyr::lead(pardf$De)
+pardf$lead_beta <- dplyr::lead(pardf$betae)
+
+# Filter for every nth row to avoid cluttering, adjust n as needed
+n <- 10  # For example, add an arrow every 10 points
+arrow_data <- pardf[seq(1, nrow(pardf), by = n), ]
+
+p + geom_segment(data = arrow_data, aes(xend = lead_D, yend = lead_beta), arrow = arrow(type = "closed", length = unit(0.15, "inches")), lineend = "round")
 
 ## Change time #################################################################### Change time
 
@@ -86,36 +111,26 @@ fit = fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 69) # seed = 69
 ## Change ts ####################################################################
 
 S0 <- 999
-ts <- 0.1
+ts <- 0.1 # works
 
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 df = simObs(sinr, arp, nbs, 67) # seed = 70
 fit = fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 66) # seed = 69
 
-###################################################################### Seeds - mle
-seeds <- seq(1,100) 
-β <- 0.4
-D <- 10
-n <- 4
-μ <- 0.01
-S0 <- 999
-I0 <- 1
-ts <- 1
-T <- 100
+## Seeds mle #################################################################### Seeds - mle
 
+seeds <- seq(1,100) 
+ts <- 1
 
 succ_mle <- c()
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-inc <- diff(sinr[,"inc"]) /ts
-obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
+df = simObs(sinr, arp, nbs, 67)
+
+params0 <-list(βe=-0.5, De=2)
 
 for (s in seeds) {
-  set.seed(s)
-  print("seed", s)
-  params0 <-list(βe=-0.5, De=2)
-  
   ans <- tryCatch({
-    mle2(sir.nll, start=params0, data=list(obs=obs))
+    fit <- fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, s, FALSE)
     1
   }, warning = function(w) {
     0.5
@@ -128,7 +143,36 @@ for (s in seeds) {
   succ_mle <- c(succ_mle, ans)
 }
 
-succ_mle
+print(succ_mle)
+
+## Seeds NB ####################################################################
+
+seeds <- seq(1,100) 
+
+succ_nb <- c()
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+
+params0 <-list(βe=-0.5, De=2)
+
+for (s in seeds) {
+  df = simObs(sinr, arp, nbs, s)
+  
+  ans <- tryCatch({
+    fit <- fitting(df, βe=-0.5, De=2, n, μ, S0, I0, ts, T, 33, FALSE) #mle seed = 33
+    1
+  }, warning = function(w) {
+    0.5
+  }, error = function(e) {
+    0
+  }, finally = {
+    1
+  })
+  
+  succ_nb <- c(succ_nb, ans)
+}
+
+print(succ_nb)
+
 
 ###################################################################### Seeds - NB
 seeds <- seq(1,100) 
@@ -157,86 +201,10 @@ for (s in seeds) {
 
 succ_nb
 
-###################################################################### Various initial value
-β <- 0.4
-D <- 10
-n <- 4
-μ <- 0.01
-S0 <- 999
-I0 <- 1
-ts <- 1
-T <- 100
-
-arp <- 0.9
-nbs <- 1000
-
-βE=seq(-1, 1, 0.01); De=2
-
-
-succ <- c()
-sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-inc <- diff(sinr[,"inc"])
-obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
-
-for (βe in βE) { 
-  
-  params0 <-list(βe=-βe, De=De)
-  
-  ans <- tryCatch({
-    mle2(sir.nll, start=params0, data=list(obs=obs))
-    1
-  }, warning = function(w) {
-    0.5
-  }, error = function(e) {
-    0
-  }, finally = {
-    1
-  })
-  
-  succ <- c(succ, ans)
-}
-
-βE[which(succ==1)]
-
-###################################################################### Large value problem
-β <- 1
-D <- 10
-n <- 4
-μ <- 0.01
-S0 <- 999
-I0 <- 1
-ts <- 1
-T <- 50
-
-sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
-inc <- diff(sinr[,"inc"]) /ts
-obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
-
-params0 <-list(βe=2, De=2)
-set.seed(163) # 163 large value, but no error
-fit0 <- invisible(mle2(sir.nll, start=params0, data=list(obs=obs))); fit0
-
-# Even after using set.seed, it still sometimes generates error messages!!
-
 
 
 quit()
 ######################################################################
-# Try
-
-tryCatch({
-  
-  log(-3)
-  0
-}, warning = function(w) {
-  "A warning occurred"
-  
-}, error = function(e) {
-  
-  "An error occurred"
-}, finally = {
-  "This always runs"
-})
 
 
 
