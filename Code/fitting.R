@@ -17,6 +17,35 @@ simObs <- function(sinr, arp, nbs, seed) {
   return(df)
 }
 
+sir.nll <- function(βe, De, n, μ, S0, I0, ts, T, obs) {
+  
+  trace_betae <<- c(trace_betae, βe)
+  trace_De <<- c(trace_De, De)
+  
+  out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=n, μ=μ, S0=S0, I0=I0, ts=ts, T=T))
+  nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=1000, log=TRUE))
+}
+
+simplFit <- function(startPar, fixedPar, datadf, optMethod) {
+  obs <- datadf$obs
+  fit0 <- mle2(sir.nll, 
+               data=list(obs=obs),
+               start=startPar, 
+               fixed=fixedPar,
+               method=optMethod,
+               control=list(trace = 0))
+   return(fit0)
+}
+
+plotting <- function
+
+##
+startPar <- list(βe=-0.5, De=2)
+fixedPar <- list(n = n, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T)
+simplFit(startPar, fixedPar, df, "SANN")
+##
+
+
 fitting <- function(df, βe, De, n, μ, S0, I0, ts, T, seed, plot=TRUE, optMethod="Nelder-Mead") {
   obs = df$obs
   trace_betae <<- c()
@@ -97,7 +126,7 @@ plotting <- function(df, fit0, trace_betae, trace_De) {
 β <- 0.2
 D <- 10
 n <- 4
-μ <- 0.01
+μ <- 0.01  
 S0 <- 999
 I0 <- 1
 ts <- 1
@@ -111,7 +140,7 @@ df = simObs(sinr, arp, nbs, seed=72)
 trace_betae <- c()
 trace_De <- c()
 ans <- fitting(df, βe=-1, De=1, n, μ, S0, I0, ts, T, seed=77
-               , optMethod="Nelder-Mead"
+               , optMethod="Brent"
 )
 print(ans)
 
