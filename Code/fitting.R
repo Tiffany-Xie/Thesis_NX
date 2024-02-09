@@ -64,12 +64,13 @@ plotFit <- function(fitW, df, fPar, title = "Fitting Result") {
                                                    n=fPar$n, μ=fPar$μ, S0=fPar$S0, 
                                                    I0=fPar$I0, ts=fPar$ts, T=fPar$T)))
   df["fitInc"] = diff(mod.prep$inc)
+  mse <- mean((df$inc - df$fitInc)^2)
   
   p <- ggplot(df, aes(x=Time)) +
     geom_line(aes(y=obs, color='Observed')) +
     geom_line(aes(y=inc, color = 'Incidence'), linewidth=1) +
     geom_line(aes(y=fitInc, color = 'Fit Incidence'), linewidth=1.5, alpha=0.8) +
-    labs(title = title, x = "Time, (days)", y = "Incidence")
+    labs(title = paste(title, "| MSE =", mse), x = "Time, (days)", y = "Incidence")
   return(p)
 }
 
@@ -170,8 +171,12 @@ df <- simObs(sigr, arp, nbs, seed = 72)
 nfit <- 12
 startPar <- list(βe=-1, De=2, kappae=-1)
 fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
+fitW <- tempFit(sigr, df, startPar, fixedPar)
 
-fitW <- tempFit(sigr, df, startPar, fixedPar,)
+nfit <- 6
+startPar <- list(βe=-1, De=2, kappae=-1)
+fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
+fitW <- tempFit(sigr, df, startPar, fixedPar)
 
 ###################################################################### 
 # check what's wrong
@@ -222,8 +227,8 @@ startPar <- list(βe=-1, De=2, kappae=-0.1)
 fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g, "Nelder-Mead")
+plotFit(fitW, df, fixedPar, title = paste0("Fitting Erlang (n=4) with Pseudo Erlang n=",nfit))
 plotTrace(fitW)
-plotFit(fitW, df, fixedPar, title = "Fitting Erlang (n=4) with Pseudo Erlang (n=12)")
 
 
 
@@ -238,7 +243,11 @@ quit()
 
 # Erlang -> Pseudo Erlang did not meet expectations
 
-# check & change titles
+# In mle2(likelihood.m, data = list(obs = obs), start = startPar,  :
+# couldn't invert Hessian
+
+# In mle2(likelihood.m, data = list(obs = obs), start = startPar,  :
+# convergence failure: code=10 (degenerate Nelder-Mead simplex)
 
 
 
