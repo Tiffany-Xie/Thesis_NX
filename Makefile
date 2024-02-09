@@ -38,6 +38,9 @@ multiFit.Rout: Code/multiFit.R
 oneFit.Rout: Code/oneFit.R
 	$(pipeR)
 
+compare.Rout: Code/compare.R
+	$(pipeR)
+
 ######################################################################
 
 ## JD side projects

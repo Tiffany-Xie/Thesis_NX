@@ -1,14 +1,15 @@
 library(deSolve)
-library(devtools)
-install_github("Tiffany-Xie/pseudoErlang")
-library(pseudoErlang)
 library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
 
+## install_github("Tiffany-Xie/pseudoErlang")
+library(pseudoErlang)
+
 ######################################################################
 
-simObs <- function(sinr, arp, nbs, seed) {
-  set.seed(seed)
+## Make a data frame with interval incidence, and then observations sampled from that
+simObs <- function(sinr, arp, nbs, seed=NULL) {
+  if(!is.null(seed)) set.seed(seed)
   inc <- diff(sinr[,"inc"]) #/ts
   obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
   df <- data.frame(Time = (sinr[,"time"][-1] + sinr[,"time"][-dim(sinr)[1]])/2,
@@ -19,8 +20,9 @@ simObs <- function(sinr, arp, nbs, seed) {
 
 ######################################################################
 
+## likelihood function with parameter-trajectory tracing 🙂
+## FIXME: size needs to be _passed_ to this function
 sir.nll <- function(βe, De, n, μ, S0, I0, ts, T, obs) {
-  
   trace_betae <<- c(trace_betae, βe)
   trace_De <<- c(trace_De, De)
   
@@ -28,8 +30,8 @@ sir.nll <- function(βe, De, n, μ, S0, I0, ts, T, obs) {
   nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=1000, log=TRUE))
 }
 
+## Similar function for geometric pseudo-Erlang (different params)
 sir.nll.g <- function(βe, De, kappae, n, μ, S0, I0, ts, T, obs) {
-  
   trace_betae <<- c(trace_betae, βe)
   trace_De <<- c(trace_De, De)
   trace_kappae <<- c(trace_kappae, kappae)
@@ -38,6 +40,7 @@ sir.nll.g <- function(βe, De, kappae, n, μ, S0, I0, ts, T, obs) {
   nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=1000, log=TRUE))
 }
 
+## Wrapper function to fit the above likelihoods
 simplFit <- function(startPar, fixedPar, datadf, likelihood.m, optMethod) {
   obs <- round((datadf$obs)/arp)
   trace_betae <<- c()
@@ -90,16 +93,16 @@ plotTrace <- function(fitW) {
     labs(x = "log(D)", y = "log(beta)", color = "Time")
 }
 
-# Fit Erlang with Erlang
 ######################################################################
+# Fit Erlang with Erlang
 ######################################################################     
 
 β <- 0.2
 D <- 10
-n <- 4
+n <- 2
 μ <- 0.01  
-S0 <- 999
-I0 <- 1
+S0 <- 9990
+I0 <- 10
 ts <- 1
 T <- 200
 
@@ -111,12 +114,16 @@ nbs <- 1000
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 df = simObs(sinr, arp, nbs, seed = 73)
 
+## FIXME: don't call log β βe!! etc!!
 startPar <- list(βe=-1.5, De=2)
-fixedPar <- list(n = 4, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
+fixedPar <- list(n = 4, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T)
+# Consider estimating I0 (while fixing total pop size)
 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
 plotTrace(fitW)
 plotFit(fitW, df, fixedPar, title = "Fitting Result (n = 4)")
+
+print(fitW$fit)
 
 # with different n
 ###################################################################### 
@@ -128,6 +135,8 @@ plotFit(fitW, df, fixedPar, title = "SInR Fitting Result (n = 6)")
 fixedPar <- list(n = 10, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
 fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
 plotFit(fitW, df, fixedPar, title = "SInR Fitting Result (n = 10)")
+
+exp(coef(fitW$fit))
 
 fixedPar <- list(n = 12, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
 fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
