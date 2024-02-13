@@ -134,26 +134,25 @@ plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=2)")
 
 print(fitW$fit)
 
-# with different n
+# fit with different n
 ###################################################################### 
 
 fixedPar <- list(n = 6, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
-fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
+fitW <- simplFit(startPar, fixedPar, df, sir.nll)
 plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=6)")
 
-fixedPar <- list(n = 10, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
-fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
+fixedPar <- list(n = 10, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll)
 plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=10)")
 
 exp(coef(fitW$fit))
 
-fixedPar <- list(n = 12, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
-fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
+fixedPar <- list(n = 12, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll)
 plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=12)")
 
-
-# Fit Pseudo Erlang with Pseudo Erlang
 ######################################################################
+# Fit Pseudo Erlang with Pseudo Erlang
 ###################################################################### 
 
 kappa <- 2/9
@@ -166,6 +165,7 @@ nfit <- 12
 startPar <- list(logβ=-1, logD=2, logkappa=-1)
 fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+print(fitW$fit)
 plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=12)")
 
 
@@ -173,33 +173,34 @@ nfit <- 6
 startPar <- list(logβ=-1, logD=2, logkappa=-1)
 fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+print(fitW$fit)
 plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=6)")
 
 ######################################################################
 # check shape difference (while maintaining mean) influence simulation
+
 β <- 0.2
 D <- 10
-n <- 4
 μ <- 0.01 
 S0 <- 9990
-I0 <- 1
+I0 <- 10
 ts <- 1
 T <- 400
 
-sinr4 <- SInRFlow(β, D, n=4, μ, S0, I0, ts, T)
+sinr2 <- SInRFlow(β, D, n=2, μ, S0, I0, ts, T)
 sinr8 <- SInRFlow(β, D, n=8, μ, S0, I0, ts, T)
 time <- timeSeq(ts, T)
-plot(time, diff(sinr4[,"inc"]), 
-     main = "Erlang (n=4,8): how changes in substages affect incidence", 
+plot(time, diff(sinr2[,"inc"]), 
+     main = "Erlang (n=2,8): how changes in substages affect incidence", 
      type="l")
 lines(time, diff(sinr8[,"inc"]), col="red")
 
-# Fit Erlang with Pseudo Erlang
 ######################################################################
+# Fit Erlang with Pseudo Erlang
 ######################################################################
 β <- 0.2
 D <- 10
-n <- 4
+n <- 2
 μ <- 0.01  
 S0 <- 9990
 I0 <- 10
@@ -209,13 +210,33 @@ T <- 200
 sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
 df = simObs(sinr, arp, nbs, seed = 71)
 
+######################################################################
+# show that changing the nfix won't affect fitting
+
+nfit <- 6
+startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=2) -> PE (n=6)")
+
 nfit <- 12
 startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
 fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
-
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
-plotFit(fitW, df, fixedPar, type="SIgR", title = paste0("Fitting Erlang (n=4) with Pseudo Erlang n=",nfit))
-plotTrace(fitW)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=2) -> PE (n=12)")
+
+######################################################################
+# show that the observed data, when changed, can also be fitted using nfix=12
+
+n <- 10
+sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+df = simObs(sinr, arp, nbs, seed = 60)
+
+nfit <- 12
+startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=10) -> PE (n=12)")
 
 
 
