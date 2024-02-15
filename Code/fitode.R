@@ -43,44 +43,12 @@ SIR_model <- odemodel(
 
 #######
 
-SIR_start <- c(beta=0.2, gamma=0.1, μ = 0.01, N=10000, i0=10, phi=1000, n = n)
+SIR_start <- c(beta=0.2, gamma=0.1, μ = 0.01, N=10000, i0=10, phi=1000, n = 4)
 ss_SIR <- simulate(SIR_model,
                    parms=SIR_start, times=timeSeq(1,200, FALSE))
 head(ss_SIR)
 plot(ss_SIR$times, ss_SIR$Cinc, type="l")
-lines(df$Time, df$inc)
+lines(df$Time, df$inc, col="red")
 
-###################3
-SIR_model <- odemodel(
-  name="SIR (nbinom)",
-  model=list(
-    S ~ - beta * S * I/N,
-    I ~ beta * S * I/N - gamma * I,
-    R ~ gamma * I
-  ),
-  observation=list(
-    confirmed ~ dnbinom(mu=R, size=phi)
-  ),
-  initial=list(
-    S ~ N * (1 - i0),
-    I ~ N * i0,
-    R ~ 0
-  ),
-  diffnames="R",
-  par=c("beta", "gamma", "N", "i0", "phi"),
-  #link=c(i0="logit")
-)
-SIR_start <- c(beta=70, gamma=60, N=40000, i0=0.0004, phi=6)
-SierraLeone2014b <- rbind(
-  c(times=SierraLeone2014$times[1] -
-      diff(SierraLeone2014$times)[1], confirmed=NA),
-  SierraLeone2014
-)
-ss_SIR <- simulate(SIR_model,
-                   parms=SIR_start, times=SierraLeone2014b$times)
-plot(ss_SIR$times, ss_SIR$S, type="l")
-
-plot(SierraLeone2014)
-lines(ss_SIR$times, ss_SIR$R)
 
 
