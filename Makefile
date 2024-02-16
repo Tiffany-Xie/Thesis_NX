@@ -83,13 +83,6 @@ alldirs += $(pdirs)
 
 ######################################################################
 
-propsub: docs/Proposal.tex.16571ad84.oldfile
-
-## Proposal.ld.docs.pdf: docs/Proposal.ld.tex
-## docs/Proposal.ld.tex: docs/Proposal.tex
-
-######################################################################
-
 psync = $(pdirs:%=%.sync) 
 psync: sync
 	$(MAKE) $(psync)
