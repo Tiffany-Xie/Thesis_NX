@@ -70,9 +70,9 @@ Ignore += .DS_Store
 ## Docs subdirectory
 ## docs/Makefile
 
-pdirs += docs
+pdirs += Proposal Midyear
 
-## Proposal.docs.pdf: docs/Proposal.tex
+## Outdated
 Ignore += *.docs.pdf
 %.docs.pdf: $(wildcard docs/*.*)
 	cd docs && $(MAKE) $*.pdf
