@@ -1,8 +1,8 @@
 library(deSolve)
 library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
-
-## install_github("Tiffany-Xie/pseudoErlang")
+##library(devtools)
+##install_github("Tiffany-Xie/pseudoErlang")
 library(pseudoErlang)
 
 ######################################################################
@@ -10,7 +10,7 @@ library(pseudoErlang)
 ## Make a data frame with interval incidence, and then observations sampled from that
 simObs <- function(sinr, arp, nbs, seed=NULL) {
   if(!is.null(seed)) set.seed(seed)
-  inc <- diff(sinr[,"inc"]) #/ts
+  inc <- diff(sinr[,"Cinc"]) #/ts
   obs <- rnbinom(mu=arp*inc, size=nbs, n=length(inc))
   df <- data.frame(Time = (sinr[,"time"][-1] + sinr[,"time"][-dim(sinr)[1]])/2,
                    inc = inc,
@@ -21,31 +21,31 @@ simObs <- function(sinr, arp, nbs, seed=NULL) {
 ######################################################################
 
 ## likelihood function with parameter-trajectory tracing 🙂
-## FIXME: size needs to be _passed_ to this function
-sir.nll <- function(βe, De, n, μ, S0, I0, ts, T, obs) {
-  trace_betae <<- c(trace_betae, βe)
-  trace_De <<- c(trace_De, De)
+## FIXME: size needs to be _passed_ to this function √
+sir.nll <- function(logβ, logD, n, μ, N, I0, ts, T, nbs, obs) {
+  trace_logbeta <<- c(trace_logbeta, logβ)
+  trace_logD <<- c(trace_logD, logD)
   
-  out <- as.data.frame(SInRFlow(β=exp(βe), D=exp(De), n=n, μ=μ, S0=S0, I0=I0, ts=ts, T=T))
-  nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=1000, log=TRUE))
+  out <- as.data.frame(SInRFlow(β=exp(logβ), D=exp(logD), n=n, μ=μ, N=N, I0=I0, ts=ts, T=T))
+  nll <- -sum(dnbinom(x=obs, mu=diff(out$Cinc), size=nbs, log=TRUE))
 }
 
 ## Similar function for geometric pseudo-Erlang (different params)
-sir.nll.g <- function(βe, De, kappae, n, μ, S0, I0, ts, T, obs) {
-  trace_betae <<- c(trace_betae, βe)
-  trace_De <<- c(trace_De, De)
-  trace_kappae <<- c(trace_kappae, kappae)
+sir.nll.g <- function(logβ, logD, logkappa, n, μ, N, I0, ts, T, nbs, obs) {
+  trace_logbeta <<- c(trace_logbeta, logβ)
+  trace_logD <<- c(trace_logD, logD)
+  trace_logkappa <<- c(trace_logkappa, logkappa)
   
-  out <- as.data.frame(sinnerFlow(β=exp(βe), D=exp(De), kappa=exp(kappae), n=n, μ=μ, S0=S0, I0=I0, ts=ts, T=T))
-  nll <- -sum(dnbinom(x=obs, mu=diff(out$inc), size=1000, log=TRUE))
+  out <- as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa), n=n, μ=μ, N=N, I0=I0, ts=ts, T=T))
+  nll <- -sum(dnbinom(x=obs, mu=diff(out$Cinc), size=nbs, log=TRUE))
 }
 
 ## Wrapper function to fit the above likelihoods
-simplFit <- function(startPar, fixedPar, datadf, likelihood.m, optMethod) {
+simplFit <- function(startPar, fixedPar, datadf, likelihood.m, optMethod="Nelder-Mead") {
   obs <- round((datadf$obs)/arp)
-  trace_betae <<- c()
-  trace_De <<- c()
-  trace_kappae <<- c()
+  trace_logbeta <<- c()
+  trace_logD <<- c()
+  trace_logkappa <<- c()
   
   fit0 <- mle2(likelihood.m, 
                data=list(obs=obs),
@@ -54,39 +54,48 @@ simplFit <- function(startPar, fixedPar, datadf, likelihood.m, optMethod) {
                method=optMethod,
                control=list(trace = 0))
   
-  return(list(fit=fit0, trace_betae=trace_betae, trace_De=trace_De))
+  return(list(fit=fit0, trace_logbeta=trace_logbeta, trace_logD=trace_logD))
 }
 
 ######################################################################
 
-plotFit <- function(fitW, df, fPar, title = "Fitting Result") {
-  βe <- coef(fitW$fit)[["βe"]]
-  De <- coef(fitW$fit)[["De"]]
+plotFit <- function(fitW, df, fPar, type="SInR", title = "Fitting Result") {
+  logβ <- coef(fitW$fit)[["logβ"]]
+  logD <- coef(fitW$fit)[["logD"]]
   
-  mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(βe), D=exp(De), 
-                                                   n=fPar$n, μ=fPar$μ, S0=fPar$S0, 
-                                                   I0=fPar$I0, ts=fPar$ts, T=fPar$T)))
-  df["fitInc"] = diff(mod.prep$inc)
+  if (type=="SInR") {
+    mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(logβ), D=exp(logD), 
+                                                     n=fPar$n, μ=fPar$μ, N=fPar$N, 
+                                                     I0=fPar$I0, ts=fPar$ts, T=fPar$T)))
+  }
+  else if (type=="SIgR") {
+    logkappa <- coef(fitW$fit)[["logkappa"]]
+    mod.prep <- as.data.frame(as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa),
+                                                     n=fPar$n, μ=fPar$μ, N=fPar$N, 
+                                                     I0=fPar$I0, ts=fPar$ts, T=fPar$T)))
+  }
+  
+  df["fitInc"] = diff(mod.prep$Cinc)
   mse <- mean((df$inc - df$fitInc)^2)
   
   p <- ggplot(df, aes(x=Time)) +
     geom_line(aes(y=obs, color='Observed')) +
     geom_line(aes(y=inc, color = 'Incidence'), linewidth=1) +
     geom_line(aes(y=fitInc, color = 'Fit Incidence'), linewidth=1.5, alpha=0.8) +
-    labs(title = paste(title, "| MSE =", mse), x = "Time, (days)", y = "Incidence")
+    labs(title = paste(title, "| MSE =", round(mse, digits=3)), x = "Time, (days)", y = "Incidence")
   return(p)
 }
 
 
 plotTrace <- function(fitW) {
-  trace_betae <- fitW$trace_betae
-  trace_De <- fitW$trace_De
+  trace_logbeta <- fitW$trace_logbeta
+  trace_logD <- fitW$trace_logD
   
-  pardf <- data.frame(order = seq(0:(length(trace_betae)-1)), 
-                      betae = trace_betae,
-                      De = trace_De)
+  pardf <- data.frame(order = seq(0:(length(trace_logbeta)-1)), 
+                      logbeta = trace_logbeta,
+                      logD = trace_logD)
   
-  ggplot(pardf, aes(x = De, y = betae)) +
+  ggplot(pardf, aes(x = logD, y = logbeta)) +
     geom_point(aes(color = order)) +
     geom_path(alpha = 0.5) +
     scale_color_gradient(low = "blue", high = "red") +
@@ -101,7 +110,7 @@ plotTrace <- function(fitW) {
 D <- 10
 n <- 2
 μ <- 0.01  
-S0 <- 9990
+N <- 10000
 I0 <- 10
 ts <- 1
 T <- 200
@@ -111,133 +120,121 @@ nbs <- 1000
 
 ###################################################################### 
 
-sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
 df = simObs(sinr, arp, nbs, seed = 73)
 
-## FIXME: don't call log β βe!! etc!!
-startPar <- list(βe=-1.5, De=2)
-fixedPar <- list(n = 4, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T)
+## FIXME: don't call log β βe!! etc!! √
+startPar <- list(logβ=-1.5, logD=2)
+fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T)
 # Consider estimating I0 (while fixing total pop size)
 
-fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
+fitW <- simplFit(startPar, fixedPar, df, sir.nll)
 plotTrace(fitW)
-plotFit(fitW, df, fixedPar, title = "Fitting Result (n = 4)")
+plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=2)")
 
 print(fitW$fit)
 
-# with different n
+# fit with different n
 ###################################################################### 
 
-fixedPar <- list(n = 6, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
-fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
-plotFit(fitW, df, fixedPar, title = "SInR Fitting Result (n = 6)")
+fixedPar <- list(n = 6, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) # what if: initial pop <<>> actual pop
+fitW <- simplFit(startPar, fixedPar, df, sir.nll)
+plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=6)")
 
-fixedPar <- list(n = 10, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
-fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
-plotFit(fitW, df, fixedPar, title = "SInR Fitting Result (n = 10)")
+fixedPar <- list(n = 10, μ = μ, N = N, I0 = I0, ts = ts,  nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll)
+plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=10)")
 
-exp(coef(fitW$fit))
+fixedPar <- list(n = 12, μ = μ, N = N, I0 = I0, ts = ts,  nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll)
+plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=12)")
 
-fixedPar <- list(n = 12, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) # what if: initial pop <<>> actual pop
-fitW <- simplFit(startPar, fixedPar, df, sir.nll, "Nelder-Mead")
-plotFit(fitW, df, fixedPar, title = "SInR Fitting Result (n = 12)")
-
-
-# Fit Pseudo Erlang with Pseudo Erlang
 ######################################################################
-###################################################################### 
-
-tempFit <- function(sigr, df, startP, fixedP, plot=TRUE) {
-  fitW <- simplFit(startP, fixedP, df, sir.nll.g, "Nelder-Mead")
-  
-  βe <- coef(fitW$fit)["βe"]
-  De <- coef(fitW$fit)["De"]
-  kappae <- coef(fitW$fit)["kappae"]
-  mod.prep <- as.data.frame(as.data.frame(sinnerFlow(β=exp(βe), D=exp(De), kappa=exp(kappae),
-                                                     n=fixedP$n, μ=fixedP$μ, S0=fixedP$S0, 
-                                                     I0=fixedP$I0, ts=fixedP$ts, T=fixedP$T)))
-  df["fitInc"] = diff(mod.prep$inc)
-  
-  if (plot) {
-    print(ggplot(df, aes(x=Time)) +
-    geom_line(aes(y=obs, color='Observed')) +
-    geom_line(aes(y=inc, color = 'Incidence'), linewidth=1) +
-    geom_line(aes(y=fitInc, color = 'Fit Incidence'), linewidth=1.5, alpha=0.5) +
-    labs(title = paste0("SIgR, nfit =", fixedPar$n), x = "Time, (days)", y = "Incidence")
-  )}
-  
-  return(fitW)
-}
-
+# Fit Pseudo Erlang with Pseudo Erlang
 ###################################################################### 
 
 kappa <- 2/9
 nfix <- 12
 
-sigr <- sinnerFlow(β, D, kappa, nfix, μ, S0, I0, ts, T)
+sigr <- sinnerFlow(β, D, kappa, nfix, μ, N, I0, ts, T)
 df <- simObs(sigr, arp, nbs, seed = 72)
 
-nfit <- 12
-startPar <- list(βe=-1, De=2, kappae=-1)
-fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
-fitW <- tempFit(sigr, df, startPar, fixedPar)
+nfit <- 12  
+startPar <- list(logβ=-1, logD=2, logkappa=-1)
+fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+print(fitW$fit)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=12)")
 
-nfit <- 6
-startPar <- list(βe=-1, De=2, kappae=-1)
-fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
-fitW <- tempFit(sigr, df, startPar, fixedPar)
 
-###################################################################### 
-# check what's wrong
-sigr12 <- sinnerFlow(β=exp(-1.619631), D=exp(2.323400), kappa=exp(-1.507136), n=12, μ, S0, I0, ts, T)
-sigr6 <- sinnerFlow(β=exp(-1.614899), D=exp(2.319774), kappa=exp(-1.478050), n=6, μ, S0, I0, ts, T)
-
-time <- timeSeq(ts, T)
-
-plot(time, diff(sigr12[,"inc"]), main = "Pseudo Erlang (n=12,6), with slightly different parameters (post fit)")
-lines(time, diff(sigr6[,"inc"]), type='l', col="red", lwd = 3)
+nfit <- 6 
+startPar <- list(logβ=-1, logD=2, logkappa=-1)
+fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+print(fitW$fit)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=6)")
 
 ######################################################################
 # check shape difference (while maintaining mean) influence simulation
+
 β <- 0.2
 D <- 10
-n <- 4
-μ <- 0.01  
-S0 <- 999
-I0 <- 1
+μ <- 0.01 
+N <- 10000
+I0 <- 10
 ts <- 1
 T <- 400
 
-sinr4 <- SInRFlow(β, D, n=4, μ, S0, I0, ts, T)
-sinr8 <- SInRFlow(β, D, n=8, μ, S0, I0, ts, T)
+sinr2 <- SInRFlow(β, D, n=2, μ, N, I0, ts, T)
+sinr8 <- SInRFlow(β, D, n=8, μ, N, I0, ts, T)
 time <- timeSeq(ts, T)
-plot(time, diff(sinr4[,"inc"]), 
-     main = "Erlang (n=4,8): how changes in substages affect incidence", 
+plot(time, diff(sinr2[,"Cinc"]), 
+     main = "Erlang (n=2,8): how changes in substages affect incidence", 
      type="l")
-lines(time, diff(sinr8[,"inc"]), col="red")
+lines(time, diff(sinr8[,"Cinc"]), col="red")
 
-# Fit Erlang with Pseudo Erlang
 ######################################################################
+# Fit Erlang with Pseudo Erlang
 ######################################################################
 β <- 0.2
 D <- 10
-n <- 4
+n <- 2
 μ <- 0.01  
-S0 <- 999
-I0 <- 1
+N <- 10000
+I0 <- 10
 ts <- 1
 T <- 200
 
-sinr <- SInRFlow(β, D, n, μ, S0, I0, ts, T)
+sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
 df = simObs(sinr, arp, nbs, seed = 71)
 
-nfit <- 12
-startPar <- list(βe=-1, De=2, kappae=-0.1)
-fixedPar <- list(n = nfit, μ = μ, S0 = S0, I0 = I0, ts = ts, T = T) 
+######################################################################
+# show that changing the nfix won't affect fitting
 
-fitW <- simplFit(startPar, fixedPar, df, sir.nll.g, "Nelder-Mead")
-plotFit(fitW, df, fixedPar, title = paste0("Fitting Erlang (n=4) with Pseudo Erlang n=",nfit))
-plotTrace(fitW)
+nfit <- 6
+startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=2) -> PE (n=6)")
+
+nfit <- 12
+startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=2) -> PE (n=12)")
+
+######################################################################
+# show that the observed data, when changed, can also be fitted using nfix=12
+
+n <- 10
+sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
+df = simObs(sinr, arp, nbs, seed = 60)
+
+nfit <- 12
+startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=10) -> PE (n=12)")
 
 
 
@@ -257,7 +254,6 @@ quit()
 
 # In mle2(likelihood.m, data = list(obs = obs), start = startPar,  :
 # convergence failure: code=10 (degenerate Nelder-Mead simplex)
-
 
 
 
