@@ -30,11 +30,13 @@ SeIR.Rout: Code/SeIR.R
 fitting.Rout: Code/fitting.R
 	$(pipeR)
 
-## JD
+######################################################################
+
+## JD stuff
+
 multiFit.Rout: Code/multiFit.R
 	$(pipeR)
 
-## JD
 oneFit.Rout: Code/oneFit.R
 	$(pipeR)
 
@@ -43,7 +45,7 @@ compare.Rout: Code/compare.R
 
 ######################################################################
 
-## JD side projects
+## JD older
 
 simulate.Rout: jd/simulate.R
 	$(pipeR)
