@@ -18,7 +18,7 @@ Sources += $(wildcard *.md)
 
 ## Code
 
-Sources += $(wildcard Code/*.R)
+Sources += $(wildcard Code/*.R Code/*.md)
 
 ## Depends on package
 simulation.Rout: Code/simulation.R
@@ -28,6 +28,10 @@ SeIR.Rout: Code/SeIR.R
 	$(pipeR)
 
 fitting.Rout: Code/fitting.R
+	$(pipeR)
+
+## foFits.md Notes about attempts to use fitode
+foFits.Rout: Code/foFits.R
 	$(pipeR)
 
 ######################################################################

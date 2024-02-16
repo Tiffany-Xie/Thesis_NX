@@ -2,6 +2,7 @@ library(fitode)
 library(deSolve)
 library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
+library(purrr)
 library(pseudoErlang)
 
 #######################################################################
@@ -33,7 +34,7 @@ sinrFG <- function(n) {
             sprintf("%s - μ*R", Itrans(n)),
             incidence)
   
-  fs <- purrr::map2(resp, vars, ~reformulate(.x, response = .y))
+  fs <- map2(resp, vars, ~reformulate(.x, response = .y))
   fs <- lapply(fs, function(f) { environment(f) <- NULL; f })
   
   return(fs)
@@ -49,7 +50,7 @@ iniVG <- function(n) {
             "i0",
             rep(0, n+1))
   
-  Ini <- purrr::map2(inip, vars, ~reformulate(.x, response = .y))
+  Ini <- map2(inip, vars, ~reformulate(.x, response = .y))
   Ini <- lapply(Ini, function(f) { environment(f) <- NULL; f })
   
   return(Ini)
@@ -60,7 +61,6 @@ iniVG <- function(n) {
 n <- 4
 
 # include into a function ##
-SIR_model
 SIR_model <- odemodel(
   name="SInR (nbinom)",
   model=sinrFG(n),

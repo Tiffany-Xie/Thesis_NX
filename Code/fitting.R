@@ -20,8 +20,7 @@ simObs <- function(sinr, arp, nbs, seed=NULL) {
 
 ######################################################################
 
-## likelihood function with parameter-trajectory tracing 🙂
-## FIXME: size needs to be _passed_ to this function √
+## likelihood function with parameter-trajectory tracing
 sir.nll <- function(logβ, logD, n, μ, N, I0, ts, T, nbs, obs) {
   trace_logbeta <<- c(trace_logbeta, logβ)
   trace_logD <<- c(trace_logD, logD)
@@ -123,7 +122,6 @@ nbs <- 1000
 sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
 df = simObs(sinr, arp, nbs, seed = 73)
 
-## FIXME: don't call log β βe!! etc!! √
 startPar <- list(logβ=-1.5, logD=2)
 fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T)
 # Consider estimating I0 (while fixing total pop size)
