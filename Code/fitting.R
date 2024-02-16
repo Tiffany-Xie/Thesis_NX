@@ -1,8 +1,8 @@
 library(deSolve)
 library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
-
-## install_github("Tiffany-Xie/pseudoErlang")
+##library(devtools)
+##install_github("Tiffany-Xie/pseudoErlang")
 library(pseudoErlang)
 
 ######################################################################
