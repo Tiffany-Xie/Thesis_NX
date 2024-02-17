@@ -19,7 +19,7 @@
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0pt}
 
-
+\newcommand{\perday}{\ensuremath{/mathrm{day}}
 
 \begin{document}
 \title{Mathematical Approaches for Simulating Epidemic Progression: Addressing Limitations of the Linear Chain Trick in ODE Models}
@@ -128,22 +128,25 @@ For consistency, we focused exclusively on the dynamics of the recovered compart
     \frac{dR}{dt} &= ar^n I_n - \mu R
 \end{align*}
 
+JD: It would be good to have a clearer explanation of the goal. “Effective” is not very explicit here.
 We aim to determine if altering the parameter $a$ and $r$ is more effective than changing the number of substages. Our starting point involves keeping the mean stage duration $(M)$ constant while varying $r$ to explore the possibility of a match between the SI$^n$R and SIgR models. This match will be assessed both by the mean $(M)$ and by the shape parameter, which is the coefficient of variation squared $(\kappa = \frac{\sigma^2}{M^2})$.
+JD: Not sure why you're using $M$, and whether you really mean the mean “stage” duration. We should be focused on the mean total duration, and call it $D$, I think.
 
 After determining the potential match, we have formulated the formulas for $M$ and $\kappa$ in terms of $a$ and $r$. Utilizing the geometric distribution of rates in the ODE model allows for independent changes in $M$ and $\kappa$. This enables us to achieve the desired value of $\kappa$ without altering the mean, and vice versa. Our goal is to reverse the method: starting with given values of $M$ and $\kappa$, we aim to find specific values of $a$ and $r$ that will let the model generate the stage duration distribution that satisfies these properties. Due to the complexity introduced by the high powers in the formula, solving it explicitly is challenging. To address this, we have developed a system of functions in the R programming language, employing the uniroot() function to obtain a numerical solution for r. We then reintegrate this parameter value into the SIgR model and compare it with the SInR model, using the same $M$ and $\kappa$ values. Subsequently, the mean and the shape parameter of both simulation results are calculated numerically to confirm the validity of the match.
 
-After confirming that the newly proposed model can effectively replace the SI$^n$R model by encompassing the same infectious stage duration distributions, we will proceed to empirically test the enhanced performance of the model through data fitting. This process will be divided into two phases and will be conducted in R using the \textbf{bbmle} package. As the starting point, we will employ a deterministic model and assume only observation noise. Our first step involves coding to generate a 'fake' dataset, treating the disease incidence time series from the SIgR model as the actual case, and introducing deviations (noises) into them using a mean reporting ratio and a negative binomial dispersion parameter. The model parameters will then be estimated using the Maximum Likelihood Estimation (MLE) method, applied to the fake dataset. The objective here is to accurately recover the original parameter values that were used to generate the disease incidence data. In the next phase of the study, we will fit the model using an real-world dataset. We plan to compare the fitting results obtained from both the SI$^n$R and SIgR models. This will allow us to quantitatively assess the efficacy of our proposed method in improving the model's accuracy in reflecting actual epidemiological scenarios.
+After confirming that the newly proposed model can effectively replace the SI$^n$R model by encompassing the same infectious stage duration distributions, we will proceed to empirically test the enhanced performance of the model through data fitting. This process will be divided into two phases and will be conducted in R using the \textbf{bbmle} package. As the starting point, we will employ a deterministic model and assume only observation noise. Our first step involves coding to generate a `fake' dataset, treating the disease incidence time series from the SIgR model as the actual case, and introducing deviations (noises) into them using a mean reporting ratio and a negative binomial dispersion parameter. The model parameters will then be estimated using the Maximum Likelihood Estimation (MLE) method, applied to the fake dataset. The objective here is to accurately recover the original parameter values that were used to generate the disease incidence data. In the next phase of the study, we will fit the model using an real-world dataset. We plan to compare the fitting results obtained from both the SI$^n$R and SIgR models. This will allow us to quantitatively assess the efficacy of our proposed method in improving the model's accuracy in reflecting actual epidemiological scenarios.
 
 
 
 
 \section{Results}
-In Figure 1, we present the comparison plots between the infectious stage duration distribution generated by the SI$^n$R model with the Erlang distribution. In this model, the mean recovery time is set to be 10 days $(\gamma = \frac{1}{10})$ and the infectious stage is divided into $n$ substages $(n = 4, 8, 12, 18)$, with each substage having a rate of $\frac{n}{10}$. The corresponding shape and scale parameters for the gamma distribution are $n$ and $\frac{n}{10}$, respectively. The plot demonstrates a perfect match between the two distributions, despite being generated by different methods. In the subsequent sections, we will refer to these two distributions interchangeably.
+In Figure 1, we present the comparison plots between the infectious stage duration distribution generated by the SI$^n$R model with the Erlang distribution. In this model, the mean recovery time is set to be 10 days $(\gamma = \frac{1}{10})$ and the infectious stage is divided into $n$ substages $(n = 4, 8, 12, 18)$, with each substage having a rate of $\frac{n}{10}$. The corresponding shape and scale parameters for the gamma distribution are $n$ and $\frac{n}{10\perday}$, respectively. The plot demonstrates a perfect match between the two distributions, despite being generated by different methods. In the subsequent sections, we will refer to these two distributions interchangeably.
 \begin{figure}[h]
     \centering
     \includegraphics[width= 0.9\textwidth]{4.png}
     \caption{Probability Distribution Comparison Between Erlang and SI$^n$R Model}
 \end{figure}
+JD: Respect the units!
 
 \subsection{Possible match between SI$^n$R and SIgR}
 In the initial step following the successful construction of the SIgR model, which employs a fixed number of substages and a geometrically distributed substage rate, we want to evaluate the theoretical possibility of a match between the stage duration distribution produced by the SIgR model and that of the traditional SInR model. This match is defined in terms of two key parameters: the mean $(M)$ and the shape parameter $(\kappa)$.
@@ -182,6 +185,7 @@ The shape parameter $\kappa$, determined by $\frac{\sigma^2}{M}$, can thus be si
 \end{align}
 This simplification reveals that the value of $\kappa$ is exclusively dependent on the parameter $r$, thereby granting the model independence in property changes. This independence allows for the alignment of $\kappa$ without altering the Mean, achievable through adjustments to parameter $a$. Similarly, the Mean can be scaled to a desired value without impacting $\kappa$.
 
+JD: I would frame this differently. Both PE and Erlang \emph{can} change the value of $n$; the real difference is that PE can be flexible even when $n$ doesn't change.
 Importantly, it should be noted that the value of $\kappa$ is not affected by changes in the number of substages, as $n_f$ is fixed. Consequently, $\kappa$ can be any real number within the range $[\frac{1}{n_f}, 1)$, thereby significantly enhancing the model's flexibility. In contrast, in the SI$^n$R model, the value of $\kappa$ depends on how the substages are partitioned. Following the same steps of calculation, we obtain: $\kappa = \frac{1}{n}$. The shape parameter $\kappa$ in the SI$^n$R model is therefore restricted to a set of discrete values:
 \begin{align*}
     \kappa \in \left\{1, \frac{1}{2}, \frac{1}{3}, \dots \right\}
@@ -210,6 +214,8 @@ Utilizing formulas (4) and (6), we have developed a computational system to reve
     \end{tabular}
     \caption{Numerically Calculated Parameter Values From the SIgR Model}
 \end{table}
+
+JD: A table caption should have a clear explanation of what's in the table for people who are skimming (your figure captions should probably be improved, too). It's not clear what you're showing here, or whether it's right. Maybe show target values as well as observed values? Also, there seems to be a mismatch between $n=12$ and the corresponding $\kappa$? Also, there are too many significant figures here. We don't need to fix this table, since we don't need it moving forward, these are just general tips.
 
 By incorporating the infectious stage duration distribution back into the entire SI$^n$R and SIgR models, we also present the dynamics of the infectious population density generated directly from the simulations. In Figure 4, using $n=2$ and $n=4$ for the SI$^n$R model and corresponding $a$ and $r$ values ( $r_2=2.9999604, a_2=0.1500007, r_4 = 1.6626998, a_4 = 0.2503359$) for the SIgR model, a close match is observed between the results generated by the two different methods. This indicates that the results of the SInR model are reproducible using the SIgR model, but with enhanced flexibility in parameter value changes.
 \begin{figure}[h]
