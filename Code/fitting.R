@@ -70,8 +70,8 @@ plotFit <- function(fitW, df, fPar, type="SInR", title = "Fitting Result") {
   else if (type=="SIgR") {
     logkappa <- coef(fitW$fit)[["logkappa"]]
     mod.prep <- as.data.frame(as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa),
-                                                     n=fPar$n, μ=fPar$μ, N=fPar$N, 
-                                                     I0=fPar$I0, ts=fPar$ts, T=fPar$T)))
+                                                       n=fPar$n, μ=fPar$μ, N=fPar$N, 
+                                                       I0=fPar$I0, ts=fPar$ts, T=fPar$T)))
   }
   
   df["fitInc"] = diff(mod.prep$Cinc)
@@ -122,7 +122,7 @@ nbs <- 1000
 sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
 df = simObs(sinr, arp, nbs, seed = 73)
 
-startPar <- list(logβ=-1.5, logD=2)
+startPar <- list(logβ=-1, logD=2)
 fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T)
 # Consider estimating I0 (while fixing total pop size)
 
@@ -204,19 +204,19 @@ ts <- 1
 T <- 200
 
 sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
-df = simObs(sinr, arp, nbs, seed = 71)
+df = simObs(sinr, arp, nbs, seed = 73)
 
 ######################################################################
 # show that changing the nfix won't affect fitting
 
 nfit <- 6
-startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+startPar <- list(logβ=-1, logD=2, logkappa=-0.2)
 fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
 plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=2) -> PE (n=6)")
 
 nfit <- 12
-startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+startPar <- list(logβ=-1, logD=2, logkappa=-0.2)
 fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
 plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=2) -> PE (n=12)")
@@ -224,15 +224,40 @@ plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=2) -> PE (n=12)")
 ######################################################################
 # show that the observed data, when changed, can also be fitted using nfix=12
 
-n <- 10
+n <- 7
 sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
-df = simObs(sinr, arp, nbs, seed = 60)
+df = simObs(sinr, arp, nbs, seed = 1001)
 
 nfit <- 12
 startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
 fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
-plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=10) -> PE (n=12)")
+plotFit(fitW, df, fixedPar, type="SIgR", title = "E (n=7) -> PE (n=12)")
+
+
+######################################################################
+# hard test (large kappa) 
+
+kappa <- 0.97 # maximum = 0.97
+nfix <- 12
+
+sigr <- sinnerFlow(β, D, kappa, nfix, μ, N, I0, ts, T)
+df <- simObs(sigr, arp, nbs, seed = 72)
+
+nfit <- 12  
+startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+print(fitW$fit) 
+plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=12)")
+
+
+nfit <- 6
+startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
+fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+print(fitW$fit)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=6)")
 
 
 
@@ -252,7 +277,6 @@ quit()
 
 # In mle2(likelihood.m, data = list(obs = obs), start = startPar,  :
 # convergence failure: code=10 (degenerate Nelder-Mead simplex)
-
 
 
 
