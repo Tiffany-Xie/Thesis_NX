@@ -259,6 +259,31 @@ fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
 print(fitW$fit)
 plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=6)")
 
+######### error bar
+
+# Assuming you have these values
+estimate_logD <- 2.2893632
+std_error_logD <- 0.0136403
+lower_limit <- estimate_logD - 1.96 * std_error_logD
+upper_limit <- estimate_logD + 1.96 * std_error_logD
+
+# Create a data frame
+data <- data.frame(
+  variable = "logD",
+  estimate = estimate_logD,
+  lower = lower_limit,
+  upper = upper_limit
+)
+
+# Plotting
+ggplot(data, aes(x = variable, y = estimate)) +
+  geom_point() + # Plot the estimate as a point
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.2) + # Add error bars
+  theme_minimal() + # Use a minimal theme
+  labs(title = "Estimate of logD with Error Bar",
+       y = "Estimate Value",
+       x = "") + # Customize labels
+  ylim(c(min(data$lower), max(data$upper))) # Adjust y-axis limits
 
 
 quit()
