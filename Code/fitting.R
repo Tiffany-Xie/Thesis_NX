@@ -165,12 +165,12 @@ print(fitW$fit)
 plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=12)")
 
 
-nfit <- 6 
-startPar <- list(logβ=-1, logD=2, logkappa=-1)
+nfit <- 2
+startPar <- list(logβ=-1, logD=2, logkappa=-0.3)
 fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
 print(fitW$fit)
-plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=6)")
+plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=2)")
 
 ######################################################################
 # check shape difference (while maintaining mean) influence simulation
@@ -259,6 +259,50 @@ fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
 print(fitW$fit)
 plotFit(fitW, df, fixedPar, type="SIgR", title = "PE (n=12) -> PE (n=6)")
 
+######################################################################
+# error bar plot
+
+β <- 0.2
+D <- 10
+n <- 2
+μ <- 0.01  
+N <- 10000
+I0 <- 10
+ts <- 1
+T <- 200
+
+errplot <- function(kappa, nfix, cnfit) { # cofInterv=0.95
+  sigr <- sinnerFlow(β, D, kappa, nfix, μ, N, I0, ts, T)
+  df <- simObs(sigr, arp, nbs, seed = 73)
+  startPar <- list(logβ=-1, logD=2, logkappa=-0.5)
+  data <- data.frame(variable = integer(),
+                   estimate = numeric(),
+                   lower = numeric(),
+                   upper = numeric())
+  print(data)
+
+  for (n in cnfit) {
+      fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+      fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+      
+      log_est_k <- coef(fitW$fit)[["logkappa"]]
+      log_stde_k <- coef(summary(fitW$fit))['logkappa', 'Std. Error']
+      lower <- exp(log_est_k - 1.96*log_stde_k)
+      upper <- exp(log_est_k + 1.96*log_stde_k)
+      data <- rbind(data, data.frame(variable=n, estimate=exp(log_est_k), lower=lower, upper=upper))
+      print(data)
+    }
+  return(data)
+}  
+
+data <- errplot(2/9, 12, c(6,8,10,12))
+
+ggplot(data, aes(x=variable, y=estimate)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
+  geom_hline(yintercept=2/9, col='red', linewidth=1)
+
+
 ######### error bar
 
 # Assuming you have these values
@@ -282,8 +326,8 @@ ggplot(data, aes(x = variable, y = estimate)) +
   theme_minimal() + # Use a minimal theme
   labs(title = "Estimate of logD with Error Bar",
        y = "Estimate Value",
-       x = "") + # Customize labels
-  ylim(c(min(data$lower), max(data$upper))) # Adjust y-axis limits
+       x = "what do you want to do") #+ # Customize labels
+  #ylim(c(min(data$lower), max(data$upper))) # Adjust y-axis limits
 
 
 quit()
