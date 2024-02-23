@@ -36,6 +36,9 @@ foFits.Rout: Code/foFits.R
 
 ######################################################################
 
+## intervals.md
+intervals.Rout: intervals.R
+
 ## JD stuff
 
 multiFit.Rout: Code/multiFit.R
