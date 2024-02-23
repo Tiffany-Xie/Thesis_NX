@@ -1,5 +1,6 @@
 
 library(shellpipes)
+rpcall("tempfunc.Rout .pipestar Code/tempfunc.R")
 
 simObs <- function(sinr, arp, nbs, seed=NULL) {
   if(!is.null(seed)) set.seed(seed)

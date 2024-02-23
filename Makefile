@@ -39,7 +39,7 @@ foFits.Rout: Code/foFits.R
 tempfunc.Rout: Code/tempfunc.R
 	$(pipeR)
 
-Code/hardtest_error.Rout: Code/hardtest_error.R tempfunc.rda
+hardtest_error.Rout: Code/hardtest_error.R tempfunc.rda
 	$(pipeR)
 
 ######################################################################
