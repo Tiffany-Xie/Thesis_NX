@@ -36,8 +36,17 @@ foFits.Rout: Code/foFits.R
 
 ######################################################################
 
+tempfunc.Rout: Code/tempfunc.R
+	$(pipeR)
+
+Code/hardtest_error.Rout: Code/hardtest_error.R tempfunc.rda
+	$(pipeR)
+
+######################################################################
+
 ## intervals.md
-intervals.Rout: intervals.R
+intervals.Rout: code/intervals.R
+	$(pipeR)
 
 ## JD stuff
 

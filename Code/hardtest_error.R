@@ -1,9 +1,14 @@
 library(deSolve)
 library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
+
 ##library(devtools)
 ##install_github("Tiffany-Xie/pseudoErlang")
 library(pseudoErlang)
+
+library(shellpipes)
+
+loadEnvironments()
 
 ######################################################################
  
