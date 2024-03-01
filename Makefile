@@ -47,6 +47,9 @@ oneFit.Rout: Code/oneFit.R
 compare.Rout: Code/compare.R
 	$(pipeR)
 
+interval0.Rout: Code/interval0.R
+	$(pipeR)
+
 ######################################################################
 
 ## JD older
