@@ -19,3 +19,8 @@ print(var(v)/mean(v)^2)
 ## start is a uniform
 ## end is start + v [above]
 ## round them both before subtracting
+
+gammaDelay <- function(n, mean, kappa){
+	
+}
+

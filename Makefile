@@ -44,10 +44,6 @@ hardtest_error.Rout: Code/hardtest_error.R tempfunc.rda
 
 ######################################################################
 
-## intervals.md
-intervals.Rout: code/intervals.R
-	$(pipeR)
-
 ## JD stuff
 
 multiFit.Rout: Code/multiFit.R
@@ -59,7 +55,8 @@ oneFit.Rout: Code/oneFit.R
 compare.Rout: Code/compare.R
 	$(pipeR)
 
-interval0.Rout: Code/interval0.R
+## intervals.md
+intervals.Rout: Code/intervals.R
 	$(pipeR)
 
 ######################################################################
