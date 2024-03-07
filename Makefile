@@ -52,7 +52,7 @@ Sources += $(wildcard thesis/*.tex)
 
 thesis/example.pdf: thesis/example.tex
 
-alwayspipeR = defined
+autopipeR = defined
 
 Sources += $(wildcard figures/*.R)
 figures/test.Rout: figures/test.R
