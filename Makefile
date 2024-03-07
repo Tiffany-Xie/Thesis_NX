@@ -57,6 +57,8 @@ alwayspipeR = defined
 Sources += $(wildcard figures/*.R)
 figures/test.Rout: figures/test.R
 
+Ignore += subdirs
+
 ######################################################################
 
 ## JD stuff
