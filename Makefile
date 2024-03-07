@@ -44,6 +44,19 @@ hardtest_error.Rout: Code/hardtest_error.R tempfunc.rda
 
 ######################################################################
 
+## latex making example
+
+Sources += $(wildcard thesis/*.tex)
+
+thesis/example.pdf: thesis/example.tex
+
+alwayspipeR = defined
+
+Sources += $(wildcard figures/*.R)
+figures/test.Rout: figures/test.R
+
+######################################################################
+
 ## JD stuff
 
 multiFit.Rout: Code/multiFit.R
@@ -117,6 +130,7 @@ makestuff/%.stamp:
 -include makestuff/os.mk
 
 -include makestuff/pipeR.mk
+-include makestuff/texi.mk
 
 -include makestuff/git.mk
 -include makestuff/visual.mk
