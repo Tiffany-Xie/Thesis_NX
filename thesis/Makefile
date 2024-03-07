@@ -12,7 +12,7 @@ vim_session:
 ######################################################################
 
 pardirs += figures
-alwayspipeR = defined
+autopipeR = defined
 
 ## example.pdf: example.tex
 
