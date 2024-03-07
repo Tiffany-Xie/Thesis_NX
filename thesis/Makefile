@@ -16,6 +16,10 @@ autopipeR = defined
 
 ## example.pdf: example.tex
 
+## figures/test.Rout: figures/test.R
+
+## figures/excellent.Rout: figures/excellent.R
+
 ######################################################################
 
 ### Makestuff
@@ -36,6 +40,7 @@ makestuff/%.stamp:
 -include makestuff/os.mk
 
 -include makestuff/texi.mk
+-include makestuff/pdfpages.mk
 -include makestuff/pipeR.mk
 
 -include makestuff/git.mk
