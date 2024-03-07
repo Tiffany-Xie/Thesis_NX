@@ -46,6 +46,8 @@ hardtest_error.Rout: Code/hardtest_error.R tempfunc.rda
 
 ## latex making example
 
+subdirs += thesis
+
 Sources += $(wildcard thesis/*.tex)
 
 thesis/example.pdf: thesis/example.tex
