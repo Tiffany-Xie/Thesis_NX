@@ -2,11 +2,13 @@ library(deSolve)
 library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
 
-##library(devtools)
+##library(remotes)
 ##install_github("Tiffany-Xie/pseudoErlang")
 library(pseudoErlang)
 
 library(shellpipes)
+## This statement will do nothing inside the pipeline, but allows to run this script interactively
+rpcall("hardtest_error.Rout .pipestar Code/hardtest_error.R tempfunc.rda")
 
 loadEnvironments()
 
