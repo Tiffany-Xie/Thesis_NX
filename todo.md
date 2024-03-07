@@ -1,7 +1,10 @@
-## JD
 
-Find heffernan-group papers
+0318: Practice talk
 
-Find out about SIR fitting from here
+0323: OBD (if accepted‽)
 
-## NX
+0328: Thesis draft
+
+0411: BUS
+
+0423: Thesis submission
