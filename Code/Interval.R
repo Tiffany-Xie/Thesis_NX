@@ -38,6 +38,7 @@ gammaDis <- function(time, mean, kappa) {
 
 
 sir.nll <- function(logmean, logkappa, ts,T, obs) {
+  #obs = round(obs)
   out <- gammaDis(timeSeq(ts, T, FALSE), exp(logmean), exp(logkappa))
   nll <- -sum(dnorm(x=obs, mean=out, sd=1, log=TRUE))
 }
