@@ -1,6 +1,4 @@
 
-library(shellpipes)
-rpcall("tempfunc.Rout .pipestar Code/tempfunc.R")
 
 simObs <- function(sinr, arp, nbs, seed=NULL) {
   if(!is.null(seed)) set.seed(seed)
@@ -96,4 +94,7 @@ plotTrace <- function(fitW) {
     labs(x = "log(D)", y = "log(beta)", color = "Time")
 }
 
-saveEnvironment()
+######################################################################
+
+
+
