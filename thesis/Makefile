@@ -20,6 +20,8 @@ Sources += $(wildcard *.tex)
 Sources += $(wildcard *.R)
 ## figures/test.Rout: figures/test.R
 ## figures/excellent.Rout: figures/excellent.R
+figures/newtest.Rout: figures/test.R
+	$(pipeR)
 
 ######################################################################
 
