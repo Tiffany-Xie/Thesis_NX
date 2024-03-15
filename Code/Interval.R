@@ -64,15 +64,22 @@ ggplot(df) +
   geom_line(aes(x=Time, y=fit_gamma, color="Gamma after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "gamma -> gamma")
 
+quit()
 ######################################################################
 ## gamma -> Erlang
 ######################################################################
-gE.nll <- function(logmean, logkappa, interval) { 
-  ts=max(interval)/length(interval)
+count_interval <- as.data.frame(table(g_interval))
+names(count_interval) <- c("Interval", "Count")
+count_interval$Interval <- as.numeric(count_interval$Interval)
+count_interval <- rbind(data.frame(Interval=0, Count=0), count_interval)
+
+ts=max(count_interval$Interval)/dim(count_interval)[1]
+tmax= max(count_interval$Interval)
+gE.nll <- function(logmean, logkappa, c_interval) { 
   sinr <- as.data.frame(SInRFlow(β=0, D=exp(logmean), n=round(1/exp(logkappa)), μ=0, 
                                  N=1, I0=1, 
-                                 ts=ts, T=max(interval)))
-  -sum(dnorm(x=interval, mean=diff(sinr$R)/ts*1000, log=TRUE))
+                                 ts=ts, T=tmzx))
+  -sum(dnorm(x=c_interval, mean=diff(sinr$R)/ts*1000, log=TRUE))
 }
 
 #sinr = as.data.frame(SInRFlow(0,7,4,0,1,1,ts,25))
@@ -80,7 +87,7 @@ gE.nll <- function(logmean, logkappa, interval) {
 
 startPar = list(logmean = 2, logkappa = -1)
 fit <- mle2(gE.nll, 
-            data = list(interval = g_interval),
+            data = list(interval = count_interval$Interval),
             start = startPar,
             method = "Nelder-Mead",
             control = list(maxit = 10000))
