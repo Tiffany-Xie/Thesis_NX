@@ -15,9 +15,7 @@ pardirs += figures
 autopipeR = defined
 
 ## example.pdf: example.tex
-
 ## figures/test.Rout: figures/test.R
-
 ## figures/excellent.Rout: figures/excellent.R
 
 ######################################################################
