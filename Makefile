@@ -52,6 +52,7 @@ figures/mytest2.Rout: figures/mytest2.R tempfunc.rda
 ######################################################################
 
 ## latex making example
+Sources += $(wildcard *.tex)
 
 subdirs += thesis figures
 
