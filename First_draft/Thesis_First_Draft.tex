@@ -26,7 +26,7 @@
 
 \author{Submitted to\\ Dr. Jonathan Dushoff 
 \\McMaster University\\Hamiltion, Ontario, Canada L8S 4K1}
-\date {January 1, 2024}
+\date {March 22, 2024}
 \maketitle
 
 
@@ -42,16 +42,35 @@
 %Ordinary Differential Equations (ODEs) are a popular choice fo...
 \textbf{This is a test file!} 
 
-This is a citation \cite{Feng2016} 
+This is a citation \cite{Feng2016}
 
 Another citation \cite{Anderson1991} 
 
-Here's a plot (haven't added yet)
-%begin{figure}[h]
-%    centering
-%    includegraphics[width= 0.9\textwidth]{4.png}
-%    caption{Probability Distribution Comparison Between Erlang and SI$^n$R Model}
-%end{figure}
+Here's a simple plot (with no dependence)
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{mytest1.Rout.pdf}
+    \caption{Mytest1 plot}
+\end{figure}
+
+
+Another plot (depend on tempfunc.R)
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{mytest2.Rout.pdf}
+    \caption{Mytest2 plot}
+\end{figure}
+
+Maybe another plot from a different folder:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{figures/test.Rout.pdf}
+    \caption{test plot}
+\end{figure}
+
 
 
 
