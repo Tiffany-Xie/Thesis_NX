@@ -1,8 +1,13 @@
+library(pseudoErlang)
+library(deSolve)
+library(bbmle)
+library(ggplot2)
+
 library(shellpipes)
 startGraphics()
-library(pseudoErlang)
 
-# loadEnvironments()
+loadEnvironments()
+
 ######################################################################
 
 β <- 0.2

@@ -36,10 +36,17 @@ foFits.Rout: Code/foFits.R
 
 ######################################################################
 
+autopipeR = defined
+
 tempfunc.Rout: Code/tempfunc.R
 	$(pipeR)
 
 hardtest_error.Rout: Code/hardtest_error.R tempfunc.rda
+	$(pipeR)
+
+## figures/mytest1.Rout: figures/mytest1.R
+
+figures/mytest2.Rout: figures/mytest2.R tempfunc.rda
 	$(pipeR)
 
 ######################################################################
@@ -50,9 +57,10 @@ subdirs += thesis figures
 
 Sources += $(wildcard thesis/*.tex)
 
-thesis/example.pdf: thesis/example.tex
+## thesis/example.pdf: thesis/example.tex
+## thesis/draft.pdf: thesis/draft.tex
 
-
+thesis.pdf: thesis.tex
 
 autopipeR = defined
 
