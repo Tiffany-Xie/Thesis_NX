@@ -1,4 +1,5 @@
 
+library(shellpipes)
 
 simObs <- function(sinr, arp, nbs, seed=NULL) {
   if(!is.null(seed)) set.seed(seed)
@@ -96,5 +97,6 @@ plotTrace <- function(fitW) {
 
 ######################################################################
 
+saveEnvironment()
 
 
