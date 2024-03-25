@@ -110,7 +110,8 @@ Ignore += .DS_Store
 ## Docs subdirectory
 ## docs/Makefile
 
-pdirs += Proposal Midyear docs
+Ignore += docs
+pdirs += Proposal Midyear
 
 ## Outdated
 Ignore += *.docs.pdf
