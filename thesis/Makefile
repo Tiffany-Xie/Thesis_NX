@@ -14,8 +14,11 @@ vim_session:
 pardirs += figures
 autopipeR = defined
 
+Sources += Reference.bib
 Sources += $(wildcard *.tex)
 ## example.pdf: example.tex
+
+## draft.pdf: draft.tex
 
 Sources += $(wildcard *.R)
 ## figures/test.Rout: figures/test.R

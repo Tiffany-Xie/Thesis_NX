@@ -1,0 +1,81 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+\pagenumbering{arabic}
+\linespread{1.5}
+\setlength{\parskip}{12pt}
+\pagestyle{fancy}
+\fancyhf{}
+
+\lhead{Ningrui Xie}
+\chead{Thesis First Draft}
+\rhead{ID: 400323416}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\newcommand{\perday}{\ensuremath{\mathrm{/day}}}
+
+\begin{document}
+
+\title{Mathematical Approaches for Simulating Epidemic Progression: Addressing Limitations of the Linear Chain Trick in ODE Models}
+
+\author{Submitted to\\ Dr. Jonathan Dushoff 
+\\McMaster University\\Hamiltion, Ontario, Canada L8S 4K1}
+\date {March 22, 2024}
+\maketitle
+
+
+\centerline{Reported by}
+\centerline{\textbf{Ningrui Xie}}
+\centerline{\textbf{400323416}}
+
+
+\newpage
+\section{Abstract}
+
+\section{Introduction}
+%Ordinary Differential Equations (ODEs) are a popular choice fo...
+\textbf{This is a test file!} 
+
+This is a citation \cite{Feng2016}
+
+Another citation \cite{Anderson1991} 
+
+Here's a simple plot (with no dependence)
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{figures/mytest1.Rout.pdf}
+    \caption{Mytest1 plot}
+\end{figure}
+
+
+Another plot (depend on tempfunc.R)
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{figures/mytest2.Rout.pdf}
+    \caption{Mytest2 plot}
+\end{figure}
+
+Maybe another plot from a different folder:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{figures/test.Rout.pdf}
+    \caption{test plot}
+\end{figure}
+
+
+
+
+
+\bibliographystyle{unsrt}
+\bibliography{Reference} 
+
+\end{document}
