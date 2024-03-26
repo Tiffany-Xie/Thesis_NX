@@ -1,6 +1,6 @@
 library(ggplot2)
 library(shellpipes)
-startGraphics(height=4)
+startGraphics(height=1, width=1)
 
 
 df <- data.frame(A = seq(1,10), B = seq(1,10)^2)
