@@ -62,11 +62,66 @@ The Linear Chain Trick (LCT) is extensively employed in modeling biological proc
 The recently proposed Generalized Linear Chain Trick (GLCT) enhances the Linear Chain Trick (LCT) by enabling models to incorporate a broader phase-type family of distributions \cite{hurtado2019generalizations}\cite{hurtado2021building}\cite{bladt2017phase}, which includes exponential, Erlang, hypoexponential, and Coxian distributions, thus allowing for greater flexibility and the ability to capture more complexity. The GLCT achieves this by creating a higher-dimensional Markov chain, enabling a more accurate representation of the complex nature of dwell time distributions. However, this process can be mathematically heavy and challenging to interpret. Additionally, this approach may lead to a increase in the number of variables or states within the model, potentially escalating computational demands. Therefore, finding a simpler and more efficient method to enhance the flexibility of the ODE model remains essential.
 
 In this study, we focused on one particular direction: generalizing the Erlang distribution of stage durations currently present in the model. The goals were to have a more effective way for parameter estimation and to allow for a more diverse range of shapes, achieved by eliminating the constraints imposed by the shape parameter ($\kappa$). To address these limitations, we proposed the Geometric Chain Trick (GCT). Instead of having a variable number of substages $(n)$ with a constant transition rate between them $(\gamma_i = n\gamma)$, we fix $n$ to a specific integer value and use a series of rates that follow a geometric pattern. This series is represented by the formula $\gamma_i = ar^{i-1}$, governed by parameters $a$ and $r$. This approach enables a uniform model structure with the parameter of interest transitioning from discrete values $(n$ and $ng)$ to continuous values $(a$ and $r)$, thereby enhancing the model's adaptability (details in Section 4.x).
- 
 
+To illustrate this point, consider that the Gamma distribution can be parameterized in terms of its mean $(D)$ and shape parameter (quadratic coefficient of variation, $\kappa$), which determine the overall shape and position of the distribution. As mentioned above, in subdividing a single stage into n substages, each exponentially distributed substage must have a rate of $n\gamma$ to maintain the overall rate of that stage. While the mean of the Erlang distribution in the ODE system can be chosen freely, $\kappa$ is constrained to discrete values, shown as follows:
+\begin{align*}
+    Mean: \quad &\sum_{i=1}^{n_f} \frac{1}{n\gamma} = \frac{1}{\gamma}\\
+    Variance: \quad &\sum_{i=1}^{n_f} \frac{1}{n^2\gamma^2} = \frac{1}{n\gamma^2} \\
+    \kappa: \quad &\frac{\sigma^2}{M^2} = \frac{1}{n} \quad n \in \mathbb{N}
+\end{align*}
+Our approach, using a geometric series of rates, addresses this issue by allowing $\kappa$ to take any value within the range $\left[\ \frac{1}{n}, 1 \right)$. A detailed explanation and the derivation process are provided in section $4.2$. Another advantage of this method is that it enables a fixed model structure where only the parameters change, eliminating the need to determine optimal substage numbers through the construction of multiple models, a process currently required in the ODE model that employs the LCT.
+
+Throughout this research, we primarily focused on the application of the LCT in the epidemic SIR model, which we refer to as the SI$^n$R model (or LCT model), where $n$ represents the number of substages divided. The objective of our study is to develop and evaluate the method of using a fixed model structure and a geometrically distributed substage rate as a replacement for the constant rate, aiming to enhance flexibility and efficiency. We have named the model that utilizes this method the GCT model. We anticipate that this approach will not only be computationally efficient but also provide a better fit to real-world data. In the following sections, we first analyze the model parameters by calculating the formulae for two essential properties: the mean and shape parameter. We then invert the process: given a desired $D$ and $\kappa$, we develop a computational system to determine the parameter values $(a and r)$ that enable the model to produce a stage duration distribution with these properties. The obtained parameter values are then used to compare the GCT model with the LCT model through simulation. Subsequently, we conduct empirical validation of our model through data fitting. This fitting confirmed that the GCT model enables the use of a uniform model structure with enhanced flexibility and practicality, thus paving the way for the development of user-friendly software tools that empower modelers to efficiently select and employ the most suitable models for describing and predicting future epidemic scenarios.
 
 
 \section{Method}
+Several assumptions have been made for the unforced SIR model (Susceptible, Infectious, and Recovered) that our study is based on: 
+\begin{enumerate}
+    \item \textbf{Closed Population}: A constant population size with equal birth and death rates and no disease-related mortalities.
+    \item \textbf{Homogeneous mixing}: Individuals have an equal chance of coming into contact with any other individual in the population. 
+    \item \textbf{Ignoring Latency}: Individuals move immediately from a susceptible state to an infected state, ignoring any incubation period associated with the disease.
+    \item \textbf{Lifelong immunity}: Once an individual recovers, they do not become susceptible or infectious again.
+    \item \textbf{Fixed rate of transmission and recovery}: The rate of disease spread and the rate at which infected individuals recover and become immune are constant over time.
+\end{enumerate}
+
+The dynamic of the population within the three compartment can be expressed as a system of nonlinear ordinary differential equations:
+\begin{align}
+    \frac{dS}{dt} &= \mu N - \frac{\beta SI}{N} - \mu S \\
+    \frac{dI}{dt} &= \frac{\beta SI}{N} - \gamma I - \mu I \\
+    \frac{dR}{dt} &= \gamma I - \mu R
+\end{align}
+where $S$, $I$, and $R$ represent the susceptible, recovered, and infectious population. $N$ is the size of the total population, and in this case $S + I + R = N$. The $\mu$, $\beta$ and $\gamma$ are the rates of natural birth (death), transmission and recovery, respectively. $\beta$ is the rate of new infections per unit time, so $\beta SI$ is the number of new infections that occur per unit time (the incidence rate). Here, the mean recovery time for an infected individual is $\frac{1}{\gamma}$. By assuming that the entire population was infected at the onset and considering a zero natural birth (death) rate, we can focus solely on the dynamics of the recovered population, as indicated by formula (1). 
+
+The idea of dividing the infectious stage into $n$ sub-stages exploits the fact that the sum of a sequence of independent, exponentially distributed random variables follows an Erlang distribution (i.e. gamma distributed with integer shape parameter) \cite{therrien2018probability}
+\begin{equation}
+    f(x; n,n\gamma) = \frac{(n\gamma)^n}{(n-1)!} x^{n-1} e^{-n\gamma x} \quad x>0, n \in \mathbb{N}
+\end{equation}
+Utilizing the principle of the Linear Chain Trick (LCT), we divide the single infectious stage into $n$ substages, each with a constant rate of $n\gamma$. Therefore, formula (1) will be replaced by the following set of equations, which we refer to as the cohort model:
+\begin{align}
+    \frac{dI_1}{dt} &= - n \gamma I_1 \\
+    \frac{dI_2}{dt} &= n\gamma I_1 - n \gamma I_2 \\
+    &\vdots \\
+    \frac{dI_n}{dt} &= n\gamma I_{n-1} - n \gamma I_n \\
+    \frac{dR}{dt} &= n \gamma I_n
+\end{align}
+Note that this decomposition process will not change the mean stage duration, as the sum of the means of the $n$ exponentially distributed random variables still equals $\frac{1}{\gamma}$
+\begin{align*}
+    \sum_{i=1}^{n} \frac{1}{n\gamma} = \frac{1}{\gamma}
+\end{align*}
+
+The Geometric Chain Trick (GCT), on the other hand, features a fixed number of substages along with a set of inter-substage transition rates characterized by a geometric series, rather than a constant rate, as illustrated below:
+\begin{align}
+    \frac{dI_1}{dt} &= - a I_1 \\
+    \frac{dI_2}{dt} &= a I_1 - ar I_2 \\
+    \frac{dI_3}{dt} &= ar I_2 - ar^2 I_3 \\
+    &\vdots \\
+    \frac{dI_n}{dt} &= ar^{n-2} I_{n-1} - ar^{n-1} I_n \\
+    \frac{dR}{dt} &= ar^{n-1} I_n
+\end{align}
+
+Having established the model, our initial step involved analyzing the parameters within the GCT model. Our objective is to ascertain whether employing a fixed model structure (i.e., a fixed number of substages) and manipulating the parameters $a$ and $r$, which define the geometric transition rate, can replicate the effects of varying the number of substages. Additionally, we aim to evaluate whether the GCT structure offers greater flexibility in the choice of $\kappa$ (CV). By calculating the mean, variance, and $\kappa$, we are able to represent all these properties of the infectious stage duration distribution in terms of a and r. Similar to the LCT, utilizing the GCT facilitates independent alterations in the mean and $\kappa$. Given this, we can invert the process: starting with specific values of mean and $\kappa$, we can identify the corresponding a and r that imbue the model with such characteristics. However, due to the complexity of the formula, solving it explicitly poses a challenge. To overcome this, we have developed a system of functions in the R programming language, employing uniroot() to determine the values of a and r. These parameters are then reapplied to the GCT model to compare simulation outcomes with those of the LCT model, examining alignment in both the infectious stage duration distribution and the incidence over time.
+
+
 
 \section*{Results}
 
