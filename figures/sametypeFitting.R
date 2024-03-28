@@ -82,7 +82,7 @@ parEd <- onetimeParE(fitW, fitPar)
 row1 <- (incs | (parEs[[1]] | parEs[[2]]))
 row2 <- (incd | (parEd[[1]] | parEd[[2]]))
 
-row1 / row2
+print(row1 / row2)
 
 
 
