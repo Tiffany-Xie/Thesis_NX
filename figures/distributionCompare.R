@@ -1,5 +1,5 @@
 library(deSolve)
-library(ggplot2); theme_set(theme_minimal(base_size = 17))
+library(ggplot2); theme_set(theme_minimal(base_size = 12))
 library(bbmle)
 library(pseudoErlang)
 library(gridExtra) #

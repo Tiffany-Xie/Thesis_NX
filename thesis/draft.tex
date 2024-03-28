@@ -151,6 +151,12 @@ The transition from discrete to continuous values in kappa significantly enhance
 
 Using formulas (18) and (20), we developed code to reverse-engineer the process: given specific values of D and kappa, we can identify the corresponding $a$ and $r$ that endow the model with such characteristics. These $a$ and $r$ values were subsequently integrated into the GCT model. Our initial goal was to determine if the stage duration distribution could match between the two models, assuming identical $D$ and $\kappa$ values. The number of substages in the LCT model was set to 2, 4, 6, and 8, while the substage number for the GCT model was fixed at 12. We selected a mean of 10 days. Applying the mean and kappa values $\left( \frac{1}{2}, \frac{1}{4}, \frac{1}{6}, \frac{1}{8} \right)$ to the system, we plotted the stage duration distributions generated from the LCT cohort model alongside those from the GCT with the corresponding a and r values. As depicted in Figure x.x, the stage duration distributions exhibit slightly different shapes, despite having identical mean and shape parameters. To further examine the match of properties, D and kappa were numerically calculated from the output distributions, revealing identical values across both models. This indicates that while the distributions' shapes may not completely match, they can possess the same properties.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width= \textwidth]{figures/distributionCompare.Rout.pdf}
+    \caption{IMPORTANT}
+\end{figure}
+
 By reintegrating the infectious stage duration distribution into the whole dynamic system, we present the dynamics of newly infected cases (incidence) as simulated by the transmission model. Figure x.x illustrates the incidence time series for the LCT model with 4 and 8 substages, represented by yellow and blue lines, respectively. The corresponding kappa values of the stage duration distribution for them are $\frac{1}{4}$ and $\frac{1}{8}$. Employing the GCT model with a fixed 12 substages and utilizing $a$ and $r$ values derived from the reverse-engineering system for the targeted kappa values, we successfully approximate the incidence patterns observed in the LCT model across different substage configurations, as shown by the black dashed line. This demonstrates the GCT model's capability to emulate the LCT model's performance by adjusting parameters within a constant structural framework. Compared to modifying the model structure to achieve desired kappa values, the GCT model simplifies parameter estimation and model fitting processes. 
 
 
@@ -184,16 +190,11 @@ In conclusion, this study suggests that our method simplifies the application of
 
 %%%%%%%%
 
-
-This is a citation \cite{Feng2016}
-
-Another citation \cite{Anderson1991} 
-
 Here's a simple plot (with no dependence)
 
 \begin{figure}[h!]
     \centering
-    \includegraphics{figures/mytest1.Rout.pdf}
+    \includegraphics[width= \textwidth]{figures/mytest1.Rout.pdf}
     \caption{Mytest1 plot (are you working??)}
 \end{figure}
 
