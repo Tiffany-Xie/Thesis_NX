@@ -52,8 +52,8 @@ figures/mytest2.Rout: figures/mytest2.R tempfunc.rda
 figures/sametypeFitting.Rout: figures/sametypeFitting.R tempfunc.rda
 	$(pipeR)
 
-figures/sametypeFitting.Rout: figures/difftypeFitting.R tempfunc.rda
-	$(pipeR)
+#figures/sametypeFitting.Rout: figures/difftypeFitting.R tempfunc.rda
+#	$(pipeR)
 
 ######################################################################
 
