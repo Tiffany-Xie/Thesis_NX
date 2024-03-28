@@ -2,6 +2,7 @@ library(deSolve)
 library(ggplot2); theme_set(theme_minimal(base_size = 12))
 library(bbmle)
 library(pseudoErlang)
+library(patchwork)
 
 library(shellpipes)
 startGraphics(height=5, width=9)
