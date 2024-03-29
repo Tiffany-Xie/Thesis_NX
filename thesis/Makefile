@@ -16,14 +16,30 @@ autopipeR = defined
 
 Sources += Reference.bib
 Sources += $(wildcard *.tex)
-## example.pdf: example.tex
 
 ## draft.pdf: draft.tex
 
+######################################################################
+
 Sources += $(wildcard *.R)
-## figures/test.Rout: figures/test.R
-## figures/excellent.Rout: figures/excellent.R
+
+tempfunc.Rout: ../Code/tempfunc.R
+	$(pipeR)
+
 figures/newtest.Rout: figures/test.R
+	$(pipeR)
+
+## It would be fun to write a pattern instead of repeating all of these rules
+figures/difftypeFitting.Rout: figures/difftypeFitting.R tempfunc.rda #
+	$(pipeR)
+
+figures/sametypeFittingL.Rout: figures/sametypeFittingL.R tempfunc.rda #
+	$(pipeR)
+
+figures/sametypeFittingG.Rout: figures/sametypeFittingG.R tempfunc.rda #
+	$(pipeR)
+
+figures/parEst.Rout: figures/parEst.R tempfunc.rda #
 	$(pipeR)
 
 ######################################################################
