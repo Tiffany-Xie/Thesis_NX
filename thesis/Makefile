@@ -22,6 +22,7 @@ Sources += $(wildcard *.tex)
 ######################################################################
 
 Sources += $(wildcard *.R)
+Sources += $(wildcard figures/*.R)
 
 tempfunc.Rout: ../Code/tempfunc.R
 	$(pipeR)
