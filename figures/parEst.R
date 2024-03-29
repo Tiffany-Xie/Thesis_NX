@@ -53,7 +53,7 @@ parEst <- function(nfix, cnfit, fitPar) {
       coord_flip()+
       geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
       geom_hline(yintercept=fitPar[[i]], col='red', linewidth=1) + 
-      labs(x="Fitting Substages", y = paste0("Estimate ", i))
+      labs(x="Fitting Substages", y = paste0("Estimate ", ifelse(i == "β", "beta", i)))
     plots <- c(plots, list(p))
   }
   return(plots)

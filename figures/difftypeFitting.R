@@ -1,5 +1,5 @@
 library(deSolve)
-library(ggplot2); theme_set(theme_minimal(base_size = 12))
+library(ggplot2); theme_set(theme_minimal(base_size = 9))
 library(bbmle)
 library(pseudoErlang)
 library(patchwork)
@@ -18,6 +18,8 @@ N <- 10000
 I0 <- 10
 ts <- 1
 T <- 200
+arp <- 0.9
+nbs <- 1000
 
 sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
 df = simObs(sinr, arp, nbs, seed = 73)

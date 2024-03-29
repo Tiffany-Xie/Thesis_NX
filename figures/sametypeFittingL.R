@@ -5,7 +5,7 @@ library(pseudoErlang)
 library(patchwork)
 
 library(shellpipes)
-startGraphics(height=5, width=9)
+startGraphics(height=7, width=9)
 
 loadEnvironments()
 
@@ -38,7 +38,7 @@ onetimeParE <- function(fit, fitPar) { # fitPar = c(N = 1, D = 10)
     lower <- exp(log_est - 1.96*log_stde)
     upper <- exp(log_est + 1.96*log_stde)
     
-    df <- data.frame(variable = i,
+    df <- data.frame(variable = ifelse(i == "β", "beta", i),
                      estimate = exp(log_est),
                      lower = lower,
                      upper = upper)

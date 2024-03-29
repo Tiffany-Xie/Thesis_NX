@@ -5,7 +5,7 @@ library(pseudoErlang)
 library(patchwork)
 
 library(shellpipes)
-startGraphics(height=5, width=9)
+startGraphics(height=7, width=9)
 
 loadEnvironments()
 
@@ -22,7 +22,7 @@ onetimeParE <- function(fit, fitPar) { # fitPar = c(N = 1, D = 10)
     lower <- exp(log_est - 1.96*log_stde)
     upper <- exp(log_est + 1.96*log_stde)
     
-    df <- data.frame(variable = i,
+    df <- data.frame(variable = ifelse(i == "β", "beta", i),
                      estimate = exp(log_est),
                      lower = lower,
                      upper = upper)
@@ -82,7 +82,7 @@ incd <- plotFit(fitW, df, fixedPar, type="SIgR", title = "GCT (n=12) -> GCT (n=6
 
 parEd <- onetimeParE(fitW, fitPar)
 
-row1 <- (incs | (parEs[[1]] | parEs[[2]]))
-row2 <- (incd | (parEd[[1]] | parEd[[2]]))
+row1 <- (incs | (parEs[[1]] | parEs[[2]] | parEs[[3]]))
+row2 <- (incd | (parEd[[1]] | parEd[[2]] | parEd[[3]]))
 
 print(row1 / row2)
