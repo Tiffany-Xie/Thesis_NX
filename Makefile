@@ -68,14 +68,13 @@ Sources += $(wildcard *.tex)
 
 subdirs += thesis figures
 
-Sources += $(wildcard thesis/*.tex)
-
-## thesis/example.pdf: thesis/example.tex
-## thesis/draft.pdf: thesis/draft.tex
-
-thesis.pdf: thesis.tex
+## Thesis is now made in thesis/ directory
 
 autopipeR = defined
+
+######################################################################
+
+## Probably not making stuff here anymore 2024 Apr 05 (Fri)
 
 Sources += $(wildcard figures/*.R)
 figures/test.Rout: figures/test.R
