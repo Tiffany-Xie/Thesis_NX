@@ -69,13 +69,14 @@ plotFit <- function(fitW, df, fPar, type="SInR", title = "Fitting Result") {
   }
   
   df["fitInc"] = diff(mod.prep$Cinc)
-  mse <- mean((df$inc - df$fitInc)^2)
+  #mse <- mean((df$inc - df$fitInc)^2)
+  RMSLE <- sqrt(sum(log((df$fitInc+1)/(df$inc+1))^2)/dim(df)[1])
   
   p <- ggplot(df, aes(x=Time)) +
     geom_line(aes(y=obs, color='Observed')) +
     geom_line(aes(y=inc, color = 'Incidence'), linewidth=1) +
     geom_line(aes(y=fitInc, color = 'Fit Incidence'), linewidth=1.5, alpha=0.8) +
-    labs(title = paste(title, "| MSE =", round(mse, digits=3)), x = "Time, (days)", y = "Incidence")
+    labs(title = paste0(title, " | RMSLE = ", round(RMSLE*100, digits=2), "%"), x = "Time, (days)", y = "Incidence")
   return(p)
 }
 
@@ -98,5 +99,4 @@ plotTrace <- function(fitW) {
 ######################################################################
 
 saveEnvironment()
-
 
