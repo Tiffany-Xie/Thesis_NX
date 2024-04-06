@@ -1,5 +1,5 @@
 library(deSolve)
-library(ggplot2); theme_set(theme_minimal(base_size = 17))
+library(ggplot2); theme_set(theme_minimal(base_size = 18))
 library(bbmle)
 ##library(devtools)
 ##install_github("Tiffany-Xie/pseudoErlang")
@@ -106,36 +106,47 @@ I0 = 0.01
 
 n <- 4
 kappa <- 1/n
-time <- timeSeq(ts, T, FALSE)
+time <- timeSeq(ts, T)
 sinner <- sinnerFlow(β, D, kappa, fixn, μ, N=N, I0=I0, ts, T)
 sinr <- SInRFlow(β, D, n, μ, N=N, I0=I0, ts, T)
 dfn4 <- data.frame(Time = time, 
-                   Flat = rowSums(sinr[,3:(ncol(sinr)-2)]),
-                   Geom = rowSums(sinner[,3:(ncol(sinner)-2)]))
+                   LCT = diff(sinr[,"Cinc"])/ts,
+                   GCT = diff(sinner[,"Cinc"])/ts)
 n <- 8
 kappa <- 1/n
-time <- timeSeq(ts, T, FALSE)
+time <- timeSeq(ts, T)
 sinner <- sinnerFlow(β, D, kappa, fixn, μ, N=N, I0=I0, ts, T)
 sinr <- SInRFlow(β, D, n, μ, N=N, I0=I0, ts, T)
 dfn8 <- data.frame(Time = time, 
-                   Flat = rowSums(sinr[,3:(ncol(sinr)-2)]),
-                   Geom = rowSums(sinner[,3:(ncol(sinner)-2)]))
+                   LCT = diff(sinr[,"Cinc"])/ts,
+                   GCT = diff(sinner[,"Cinc"])/ts)
 
+#####
+df <- data.frame(Time = time, LCT4 = dfn4$LCT, LCT8 = dfn8$LCT,
+                 GCT4 = dfn4$GCT, GCT8 = dfn8$GCT)
+ggplot(df, aes(x=Time)) +
+  geom_line(aes(y=LCT4, color = "n = 4"), linewidth=1) +
+  geom_line(aes(y=LCT8, color = "n = 8"), linewidth=1) +
+  scale_color_manual(values = c("n = 4" = "blue", "n = 8" = "orange")) +
+  labs(color = "LCT", x = "Time, days",
+       y = "Newly Infected Cases (proportion)") +
+  geom_line(aes(y=GCT4, color = "black"), linewidth=1, linetype="dashed") +
+  geom_line(aes(y=GCT8, color = "black"), linewidth=1, linetype="dashed")
+#####
 dfn4$id <- 'n=4'
 dfn8$id <- 'n=8'
 combined_df <- rbind(dfn4, dfn8)
 long_df <- combined_df %>% 
-  pivot_longer(cols = c(Flat, Geom), names_to = "variable", values_to = "value")
+  pivot_longer(cols = c(LCT, GCT), names_to = "variable", values_to = "value")
 
 
 ggplot(long_df, aes(x = Time, y = value, color = id, linetype = variable)) +
   geom_line(linewidth=1) +
   scale_color_manual(values = c('n=4' = 'blue', 'n=8' = 'orange')) +
-  scale_linetype_manual(values = c("solid", "dashed")) +
+  scale_linetype_manual(values = c("dashed", "solid")) +
   labs(color = "n", linetype = "Model Type",
-       x = "Time, (days)",
-       y = "Population Density",
-       title = "Infctious Population Dynamics")
+       x = "Time, days",
+       y = "Newly Infected Cases (proportion)")
 
 ######################################################################
 # Fit Erlang with Erlang
@@ -165,7 +176,7 @@ fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T)
 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll)
 #plotTrace(fitW)
-plotFit(fitW, df, fixedPar, title = "SInR (n=2) -> SInR (n=2)")
+plotFit(fitW, df, fixedPar, title = "LCT (n=2) -> LCT (n=2)")
 #print(fitW$fit)
 
 # fit with different n
@@ -173,7 +184,7 @@ plotFit(fitW, df, fixedPar, title = "SInR (n=2) -> SInR (n=2)")
 
 fixedPar <- list(n = 6, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) # what if: initial pop <<>> actual pop
 fitW <- simplFit(startPar, fixedPar, df, sir.nll)
-plotFit(fitW, df, fixedPar, title = "SInR (n=2) -> SInR (n=6)")
+plotFit(fitW, df, fixedPar, title = "LCT (n=2) -> LCT (n=6)")
 
 fixedPar <- list(n = 10, μ = μ, N = N, I0 = I0, ts = ts,  nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll)
@@ -181,32 +192,32 @@ plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=10)")
 
 fixedPar <- list(n = 12, μ = μ, N = N, I0 = I0, ts = ts,  nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll)
-plotFit(fitW, df, fixedPar, title = "E (n=2) -> E (n=12)")
+plotFit(fitW, df, fixedPar, title = "LCT (n=2) -> LCT (n=12)")
 
 ######################################################################
 # Fit Pseudo Erlang with Pseudo Erlang
 ###################################################################### 
 
-kappa <- 2/9
-nfix <- 12
+kappa <- 5/9
+nfix <- 2
 
 sigr <- sinnerFlow(β, D, kappa, nfix, μ, N, I0, ts, T)
 df <- simObs(sigr, arp, nbs, seed = 72)
 
-nfit <- 12  
-startPar <- list(logβ=-1, logD=2, logkappa=-1)
-fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
-fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
-#print(fitW$fit)
-plotFit(fitW, df, fixedPar, type="SIgR", title = "SIgR (n=12) -> SIgR (n=12)")
-
-# should I be worried?
-nfit <- 6
+nfit <- 2
 startPar <- list(logβ=-1, logD=2, logkappa=-0.5)
 fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
 #print(fitW$fit)
-plotFit(fitW, df, fixedPar, type="SIgR", title = "SIgR (n=12) -> SIgR (n=6)")
+plotFit(fitW, df, fixedPar, type="SIgR", title = "GCT (n=2) -> GCT (n=2)")
+
+# should I be worried?
+nfit <- 12
+startPar <- list(logβ=-1, logD=2, logkappa=-0.5)
+fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
+#print(fitW$fit)
+plotFit(fitW, df, fixedPar, type="SIgR", title = "GCT (n=2) -> GCT (n=12)")
 
 
 ######################################################################
@@ -231,13 +242,13 @@ nfit <- 6
 startPar <- list(logβ=-1, logD=2, logkappa=-0.2)
 fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
-plotFit(fitW, df, fixedPar, type="SIgR", title = "SInR (n=2) -> SIgR (n=6)")
+plotFit(fitW, df, fixedPar, type="SIgR", title = "LCT (n=2) -> GCT (n=6)")
 
 nfit <- 12
 startPar <- list(logβ=-1, logD=2, logkappa=-0.2)
 fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
-plotFit(fitW, df, fixedPar, type="SIgR", title = "SInR (n=2) -> SIgR (n=12)")
+plotFit(fitW, df, fixedPar, type="SIgR", title = "LCT (n=2) -> GCT (n=12)")
 
 ######################################################################
 # show that the observed data, when changed, can also be fitted using nfix=12
@@ -250,7 +261,7 @@ nfit <- 12
 startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
 fixedPar <- list(n = nfit, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
 fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
-plotFit(fitW, df, fixedPar, type="SIgR", title = "SInR (n=7) -> SIgR (n=12)")
+plotFit(fitW, df, fixedPar, type="SIgR", title = "LCT (n=7) -> GCT (n=12)")
 
 ######################################################################
 β <- 0.2; D <- 10; μ <- 0.01  
@@ -301,8 +312,8 @@ errplot <- function(kappa, nfix, cnfit) { # cofInterv=0.95
     fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
     fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
     
-    log_est_k <- coef(fitW$fit)[["logkappa"]]
-    log_stde_k <- coef(summary(fitW$fit))['logkappa', 'Std. Error']
+    log_est_k <- coef(fitW$fit)[["logD"]]
+    log_stde_k <- coef(summary(fitW$fit))['logD', 'Std. Error']
     lower <- exp(log_est_k - 1.96*log_stde_k)
     upper <- exp(log_est_k + 1.96*log_stde_k)
     data <- rbind(data, data.frame(variable=n, estimate=exp(log_est_k), lower=lower, upper=upper))
@@ -317,10 +328,99 @@ data <- errplot(kappa=2/9, nfix=6, seq(2,10,by=2))
 
 ggplot(data, aes(x=variable, y=estimate)) + 
   geom_point() +
+  theme_minimal(base_size = 19) +
+  coord_flip()+
   geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
-  geom_hline(yintercept=2/9, col='red', linewidth=1) + 
-  labs(x="Fitting Substages", y = "Estimate κ") +
-  annotate("text", x = 2, y = 2/9, label = "2/9", vjust = -1, color = "red", size=5)
+  geom_hline(yintercept=10, col='red', linewidth=1) + 
+  labs(x="Fitting Substages", y = "Estimate D") +
+  annotate("text", x = 2, y = 10, label = "10", vjust = -1, hjust=1.5, color = "red", size=5)
+
+######################################################################
+# new MSE plot ??
+######################################################################
+
+
+β <- 0.2
+D <- 10
+n <- 2
+μ <- 0.01  
+N <- 10000
+I0 <- 10
+ts <- 1
+T <- 200
+
+arp <- 0.9
+nbs <- 1000
+
+###################################################################### 
+# run tempfunc before
+
+sinr <- SInRFlow(β, D, n, μ, N, I0, ts, T)
+df = simObs(sinr, arp, nbs, seed = 73)
+
+
+multRMSLE <- function(data2fit, startPar,type="SInR", n2fit) {
+  rmsledf <- data.frame(n = n2fit)
+  RMSLE <- c()
+  for (n in n2fit) {
+    if (type=="SInR") {
+      fPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T)
+      fitW <- simplFit(startPar, fPar, data2fit, sir.nll)
+      logβ <- coef(fitW$fit)[["logβ"]]
+      logD <- coef(fitW$fit)[["logD"]]
+      mod.prep <- as.data.frame(as.data.frame(SInRFlow(β=exp(logβ), D=exp(logD), 
+                                                       n=fPar$n, μ=fPar$μ, N=fPar$N, 
+                                                       I0=fPar$I0, ts=fPar$ts, T=fPar$T)))
+    }
+    else if (type=="SIgR") {
+      fPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T)
+      fitW <- simplFit(startPar, fPar, df, sir.nll.g)
+      logβ <- coef(fitW$fit)[["logβ"]]
+      logD <- coef(fitW$fit)[["logD"]]
+      logkappa <- coef(fitW$fit)[["logkappa"]]
+      mod.prep <- as.data.frame(as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa),
+                                                         n=fPar$n, μ=fPar$μ, N=fPar$N, 
+                                                         I0=fPar$I0, ts=fPar$ts, T=fPar$T)))
+    }
+    fitInc = diff(mod.prep$Cinc)
+    #mse <- mean((data2fit$inc - fitInc)^2)
+    rmsle <- sqrt(sum(log((fitInc+1)/(df$inc+1))^2)/dim(df)[1])
+    RMSLE <- c(RMSLE, rmsle)
+  }
+  rmsledf["RMSLE"] = RMSLE
+  return(rmsledf)
+}
+
+startPar <- list(logβ=-1, logD=2)
+n2fit <- c(2,4,6,8,10)
+data <- multRMSLE(df, startPar,type="SInR", n2fit) 
+
+ggplot(data, aes(x=n, y = RMSLE*100)) + 
+  geom_hline(yintercept=data$RMSLE[1]*100, color="#0077BB", linewidth=1) +
+  geom_line(color='black') +
+  geom_point(shape=21, color="black", fill="#0077BB", size=3) +
+  labs(title = "LCT", y = "Root Mean Square Log Error (%)", x = "Substage Numbers")
+
+
+#####
+kappa <- 5/9
+nfix <- 2
+
+sigr <- sinnerFlow(β, D, kappa, nfix, μ, N, I0, ts, T)
+df <- simObs(sigr, arp, nbs, seed = 72)
+
+
+startPar <- list(logβ=-1, logD=2, logkappa=-0.5)
+data2 <- multRMSLE(df, startPar,type="SIgR", n2fit) 
+ggplot(data2, aes(x=n, y = RMSLE*100)) + 
+  geom_line(color='black') + #linetype='dashed'
+  geom_point(shape=23, color="black", fill="#FFA500", size=3) + #69b3a2
+  geom_hline(yintercept=data2$RMSLE[1]*100, color="#FFA500", linewidth=1) +
+  geom_hline(yintercept=data$RMSLE[1]*100, color="#0077BB", linewidth=1) +
+  geom_line(data=data, aes(n, y = RMSLE*100), color='black') +
+  geom_point(data=data, aes(n, y = RMSLE*100), shape=21, color="black", fill="#0077BB", size=3) +
+  labs(title = "LCT vs. GCT", y = "Root Mean Square Log Error (%)", x = "Substage Numbers")
+
 
 
 
