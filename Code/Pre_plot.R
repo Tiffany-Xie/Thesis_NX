@@ -308,48 +308,20 @@ parEst <- function(nfix, cnfit, fitPar) {
   startPar_g <- list(logβ=-1, logD=2, logkappa=-0.1)
   startPar_l <- list(logβ=-1, logD=2)
   
-  plots <- list()
-  for (i in names(fitPar)) {
-    data_g <- data.frame(variable = integer(),
+  for (par in names(fitPar)) {
+    data <- data.frame(variable = integer(),
                        estimate_g = numeric(),
                        lower_g = numeric(),
-                       upper_g = numeric())
-    data_l <- data.frame(variable = integer(),
-                         estimate_l = numeric(),
-                         lower_l = numeric(),
-                         upper_l = numeric())
-    for (n in cnfit) {
-      fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
-      fitW_g <- simplFit(startPar_g, fixedPar, df, sir.nll.g)
-      
-      log_est <- coef(fitW_g$fit)[[paste0("log", i)]]
-      log_stde <- coef(summary(fitW_g$fit))[paste0("log", i), 'Std. Error']
-      lower <- exp(log_est - 1.96*log_stde)
-      upper <- exp(log_est + 1.96*log_stde)
-      data_g <- rbind(data_g, data.frame(variable=n, estimate=exp(log_est), lower=lower, upper=upper))
-      
-      if (i != "kappa") {
-        fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
-        fitW_l <- simplFit(startPar_l, fixedPar, df, sir.nll)
-        
-        log_est <- coef(fitW_l$fit)[[paste0("log", i)]]
-        log_stde <- coef(summary(fitW_l$fit))[paste0("log", i), 'Std. Error']
-        lower <- exp(log_est - 1.96*log_stde)
-        upper <- exp(log_est + 1.96*log_stde)
-        data_l <- rbind(data_l, data.frame(variable=n, estimate=exp(log_est), lower=lower, upper=upper)) 
-      }
-    }
-    print(data_g)
-    print(data_l)
-    #p <- ggplot(data, aes(x=variable, y=estimate)) + 
-    #  geom_point() +
-    #  coord_flip()+
-    #  geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
-    #  geom_hline(yintercept=fitPar[[i]], col='red', linewidth=1) + 
-    #  labs(x="Fitting Substages", y = paste0("Estimate ", ifelse(i == "β", "beta", i)))
-    #plots <- c(plots, list(p))
+                       upper_g = numeric(),
+                       estimate_l = numeric(),
+                       lower_l = numeric(),
+                       upper_l = numeric())
+    assign(paste("data", par, sep="_"), data)
   }
-  #return(plots)
+  
+  for (n in cnfit) {
+
+  }
 }
 
 nfix <- 5
