@@ -287,9 +287,10 @@ ggplot(df, aes(x=Time)) +
 # error bar plot
 ######################################################################
 
+## save time version...
+
 β <- 0.2
 D <- 10
-n <- 2
 μ <- 0.01  
 N <- 10000
 I0 <- 10
@@ -297,43 +298,64 @@ ts <- 1
 T <- 200
 nbs<-1000
 arp<-0.9
+kappa=2/9
 
-errplot <- function(kappa, nfix, cnfit) { # cofInterv=0.95
+######################################################################
+
+parEst <- function(nfix, cnfit, fitPar) {
   sigr <- sinnerFlow(β, D, kappa, nfix, μ, N, I0, ts, T)
   df <- simObs(sigr, arp, nbs, seed = 73)
-  startPar <- list(logβ=-1, logD=2, logkappa=-0.1)
-  data <- data.frame(variable = integer(),
-                     estimate = numeric(),
-                     lower = numeric(),
-                     upper = numeric())
-  print(data)
+  startPar_g <- list(logβ=-1, logD=2, logkappa=-0.1)
+  startPar_l <- list(logβ=-1, logD=2)
   
-  for (n in cnfit) {
-    fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
-    fitW <- simplFit(startPar, fixedPar, df, sir.nll.g)
-    
-    log_est_k <- coef(fitW$fit)[["logD"]]
-    log_stde_k <- coef(summary(fitW$fit))['logD', 'Std. Error']
-    lower <- exp(log_est_k - 1.96*log_stde_k)
-    upper <- exp(log_est_k + 1.96*log_stde_k)
-    data <- rbind(data, data.frame(variable=n, estimate=exp(log_est_k), lower=lower, upper=upper))
-    print(data)
+  plots <- list()
+  for (i in names(fitPar)) {
+    data_g <- data.frame(variable = integer(),
+                       estimate_g = numeric(),
+                       lower_g = numeric(),
+                       upper_g = numeric())
+    data_l <- data.frame(variable = integer(),
+                         estimate_l = numeric(),
+                         lower_l = numeric(),
+                         upper_l = numeric())
+    for (n in cnfit) {
+      fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+      fitW_g <- simplFit(startPar_g, fixedPar, df, sir.nll.g)
+      
+      log_est <- coef(fitW_g$fit)[[paste0("log", i)]]
+      log_stde <- coef(summary(fitW_g$fit))[paste0("log", i), 'Std. Error']
+      lower <- exp(log_est - 1.96*log_stde)
+      upper <- exp(log_est + 1.96*log_stde)
+      data_g <- rbind(data_g, data.frame(variable=n, estimate=exp(log_est), lower=lower, upper=upper))
+      
+      if (i != "kappa") {
+        fixedPar <- list(n = n, μ = μ, N = N, I0 = I0, ts = ts, nbs = nbs, T = T) 
+        fitW_l <- simplFit(startPar_l, fixedPar, df, sir.nll)
+        
+        log_est <- coef(fitW_l$fit)[[paste0("log", i)]]
+        log_stde <- coef(summary(fitW_l$fit))[paste0("log", i), 'Std. Error']
+        lower <- exp(log_est - 1.96*log_stde)
+        upper <- exp(log_est + 1.96*log_stde)
+        data_l <- rbind(data_l, data.frame(variable=n, estimate=exp(log_est), lower=lower, upper=upper)) 
+      }
+    }
+    print(data_g)
+    print(data_l)
+    #p <- ggplot(data, aes(x=variable, y=estimate)) + 
+    #  geom_point() +
+    #  coord_flip()+
+    #  geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
+    #  geom_hline(yintercept=fitPar[[i]], col='red', linewidth=1) + 
+    #  labs(x="Fitting Substages", y = paste0("Estimate ", ifelse(i == "β", "beta", i)))
+    #plots <- c(plots, list(p))
   }
-  return(data)
-}  
+  #return(plots)
+}
 
-###
-
-data <- errplot(kappa=2/9, nfix=6, seq(2,10,by=2))
-
-ggplot(data, aes(x=variable, y=estimate)) + 
-  geom_point() +
-  theme_minimal(base_size = 19) +
-  coord_flip()+
-  geom_errorbar(aes(ymin=lower, ymax=upper), width=0.2) +
-  geom_hline(yintercept=10, col='red', linewidth=1) + 
-  labs(x="Fitting Substages", y = "Estimate D") +
-  annotate("text", x = 2, y = 10, label = "10", vjust = -1, hjust=1.5, color = "red", size=5)
+nfix <- 5
+cnfit <- seq(5,10)
+fitPar = c(β=0.2, D=10, kappa=2/9)
+plots <- parEst(nfix, cnfit, fitPar)
 
 ######################################################################
 # new MSE plot ??
