@@ -8,7 +8,7 @@ library(dplyr)
 ## data visualization
 ######################################################################
 
-url <- "https://raw.githubusercontent.com/Tiffany-Xie/Thesis_NX/main/data/WHO-COVID-19-global-data.csv?token=GHSAT0AAAAAACN7IGL2VRCX4IX36MUIQKMMZQZNO2Q"
+url <- "data/WHO-COVID-19-global-data.csv"
 data <- read.csv(url)
 
 data_c <- data %>%

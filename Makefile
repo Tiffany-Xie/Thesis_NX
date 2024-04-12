@@ -34,6 +34,20 @@ fitting.Rout: Code/fitting.R
 foFits.Rout: Code/foFits.R
 	$(pipeR)
 
+realfitting.Rout: Code/realfitting.R
+	$(pipeR)
+
+######################################################################
+
+Sources += $(wildcard data/*.csv)
+data/WHO_covid.csv:
+	wget -O $@ "https://covid19.who.int/WHO-COVID-19-global-data.csv"
+WHO_covid.newdata:
+	$(RM) data/WHO_covid.csv
+
+WHO_covid.Rout: Code/WHO_covid.R data/WHO_covid.csv
+	$(pipeR)
+
 ######################################################################
 
 autopipeR = defined
