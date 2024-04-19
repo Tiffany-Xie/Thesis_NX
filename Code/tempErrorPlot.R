@@ -4,6 +4,10 @@ library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
 library(pseudoErlang)
 
+library(shellpipes)
+
+loadEnvironments()
+
 ######################################################################
 ## save time version...
 

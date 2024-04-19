@@ -34,7 +34,10 @@ fitting.Rout: Code/fitting.R
 foFits.Rout: Code/foFits.R
 	$(pipeR)
 
-realfitting.Rout: Code/realfitting.R
+realfitting.Rout: Code/realfitting.R tempfunc.rda
+	$(pipeR)
+
+tempErrorPlot.Rout: Code/tempErrorPlot.R tempfunc.rda
 	$(pipeR)
 
 ######################################################################
