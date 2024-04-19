@@ -1,9 +1,10 @@
 library(deSolve)
-library(ggplot2); theme_set(theme_minimal())
+library(ggplot2); theme_set(theme_minimal(base_size = 18))
 library(bbmle)
 library(pseudoErlang)
 library(dplyr)
 
+#run temp functions before
 ######################################################################
 ## data visualization
 ######################################################################
@@ -65,17 +66,19 @@ measles_url <- "https://raw.githubusercontent.com/mac-theobio/Disease_data/maste
 data <- read.table(measles_url, header=FALSE, sep=" ")
 names(data) = c("Time", "Cases")
 
-which.min(data$Cases[330:450])
+#which.min(data$Cases[330:450])
+plot(data$Time, log(data$Cases), type="l", xlab="Time", ylab="New Cases", main="Log Scale")
 plot(data$Time, data$Cases, type="l", xlab="Time", ylab="New Cases")
 data <- as.data.frame(data)
 ggplot(data, aes(x=Time, y=Cases)) + 
   geom_line() +
   geom_point(data=data.frame(x=data$Time[c(349, 454)], y=data$Cases[c(349, 454)]), aes(x,y), color="red",size=3)
 
-which.min(subset(data, Time>1956.5 & Time<1957.5)$Cases)
-subset(data, Time>1956.5 & Time<1957.5)[11,]
+#which.min(subset(data, Time>1956.5 & Time<1957.5)$Cases)
+#subset(data, Time>1956.5 & Time<1957.5)[11,]
 onepeak <- data[349:454,] #299:402
-ggplot(onepeak, aes(x=Time, y=Cases)) + geom_line()
+ggplot(onepeak, aes(x=Time, y=Cases)) + geom_line() +
+  labs(title="One of the peaks")
 
 
 nfit <- 12
@@ -107,13 +110,14 @@ df <- data.frame(Time = timeSeq(7/365,7*106/365)+1954.696, trueI = onepeak$Cases
 ggplot(df, aes(x=Time)) +
   geom_line(aes(y=trueI, color = "trueI"), linewidth=1) +
   geom_line(aes(y=fitI, color = "fitI")) +
-  labs(x="Time, weeks", y = "Incidence")
+  labs(x="Time, weeks", y = "Incidence") +
+  labs(title="One of the peaks fitting")
 
 ######################################################################
 ## Measles seasonal 
 ######################################################################
 
-SIR <- function(time, states, params) {
+SIR_s <- function(time, states, params) {
   with(params, {
     stopifnot(length(outrate)==n)
     β <- β0*(1 + sigma*sinpi(2/P*time))
@@ -137,7 +141,7 @@ SIR <- function(time, states, params) {
   })
 }
 
-sinnerFlow <- function(β0, sigma, P, D, kappa, n, μ, N, I0, ts, T) {
+sinnerFlow_s <- function(β0, sigma, P, D, kappa, n, μ, N, I0, ts, T) {
   if (kappa == 1/n) {
     r = n/D
     a = 1
@@ -152,7 +156,7 @@ sinnerFlow <- function(β0, sigma, P, D, kappa, n, μ, N, I0, ts, T) {
   params <- list(β0=β0, sigma=sigma, P=P, n=n, μ=μ, N=N, outrate=outrate)
   states <- c(N-I0, I0, numeric(n-1), 0, 0)
   names(states) <- c("S", paste0("I", 1:n), "R", "Cinc")
-  return(Integration2(params, states, ts, T, SIR))
+  return(Integration2(params, states, ts, T, SIR_s))
 }
 ###
 nfit <- 12
@@ -161,7 +165,7 @@ fixedPar <- list(n = nfit, sigma=0.4, P=365*2, μ = 0.01, N = 160180000, I0 = 37
 
 sir.nll.g <- function(logβ0, logD, logkappa, n, sigma, P, μ, N, I0, ts, T, nbs, obs) {
   
-  out <- as.data.frame(sinnerFlow(β=exp(logβ0), D=exp(logD), kappa=exp(logkappa), sigma=sigma, P=P, n=n, μ=μ, N=N, I0=I0, ts=ts, T=6937))
+  out <- as.data.frame(sinnerFlow_s(β=exp(logβ0), D=exp(logD), kappa=exp(logkappa), sigma=sigma, P=P, n=n, μ=μ, N=N, I0=I0, ts=ts, T=6937))
   nll <- -sum(dnbinom(x=obs, mu=diff(out$Cinc), size=nbs, log=TRUE))
 }
 
@@ -175,7 +179,7 @@ fit0 <- mle2(sir.nll.g,
 logβ0 <- coef(fit0)[["logβ0"]]
 logD <- coef(fit0)[["logD"]]
 logkappa <- coef(fit0)[["logkappa"]]
-mod.prep <- as.data.frame(sinnerFlow(β0=exp(logβ0), D=exp(logD), kappa=exp(logkappa),
+mod.prep <- as.data.frame(sinnerFlow_s(β0=exp(logβ0), D=exp(logD), kappa=exp(logkappa),
                                      n=fixedPar$n, μ=fixedPar$μ, N=fixedPar$N, 
                                      I0=fixedPar$I0, ts=fixedPar$ts, T=fixedPar$T, 
                                      sigma=fixedPar$sigma, P=fixedPar$P))
