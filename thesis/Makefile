@@ -11,8 +11,8 @@ vim_session:
 
 ######################################################################
 
-pardirs += figures
-autopipeR = defined
+pardirs += figures Code
+Ignore += $(pardirs)
 
 Sources += Reference.bib
 Sources += $(wildcard *.tex)
@@ -23,6 +23,8 @@ Sources += $(wildcard *.tex)
 ## draft.ld.pdf: draft.tex draft.ld.tex
 
 ######################################################################
+
+autopipeR = defined
 
 Sources += $(wildcard *.R)
 
