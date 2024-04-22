@@ -99,7 +99,7 @@ parEst <- function(nfix, cnfit, fitPar, seeds) {
 nfix <- 4
 cnfit <- seq(4,12, by=2)
 fitPar = c(β=0.2, D=10, kappa=0.3)
-seeds <- c(71, 77, 121, 123)
+seeds <- 73:76
 
 parEst(nfix, cnfit, fitPar, seeds)
 
