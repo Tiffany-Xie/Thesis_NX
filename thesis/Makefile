@@ -47,6 +47,9 @@ figures/sametypeFittingG.Rout: figures/sametypeFittingG.R tempfunc.rda #
 figures/parEst.Rout: figures/parEst.R tempfunc.rda #
 	$(pipeR)
 
+figures/rmsle.Rout: figures/rmsle.R tempfunc.rda #
+	$(pipeR)
+
 ######################################################################
 
 ### Makestuff
