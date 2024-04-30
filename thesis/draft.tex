@@ -18,7 +18,7 @@
 \fancyhf{}
 
 \lhead{Ningrui Xie}
-\chead{Thesis First Draft}
+\chead{BIO 4C12}
 \rhead{ID: 400323416}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0pt}
@@ -148,7 +148,7 @@ Utilizing the principle of the Linear Chain Trick (LCT), we divide the single in
     \label{LCTdiagram}
 \end{figure}
 
-Therefore, formula (1) will be replaced by the following set of equations, which we refer to as the cohort model:
+Therefore, formula (1) will be replaced by the following set of equations (7-10), which we refer to as the cohort model:
 \begin{align}
     \frac{dI_1}{dt} &= - n \gamma I_1 \\
     \frac{dI_2}{dt} &= n\gamma I_1 - n \gamma I_2 \\
@@ -161,7 +161,7 @@ Note that this decomposition process will not change the mean stage duration, as
     \sum_{i=1}^{n} \frac{1}{n\gamma} = \frac{1}{\gamma}
 \end{align*}
 
-The Geometric Chain Trick (GCT), on the other hand, features a fixed number of substages along with a set of inter-substage transition rates characterized by a geometric series (Figure \ref{GCTdiagram}), rather than a constant rate, as illustrated below:
+The Geometric Chain Trick (GCT), on the other hand, features a fixed number of substages along with a set of inter-substage transition rates characterized by a geometric series $\gamma_i = ar^{i-1}$ (Figure \ref{GCTdiagram}), rather than a constant rate, as illustrated below (12-16):
 \begin{align}
     \frac{dI_1}{dt} &= - a I_1 \\
     \frac{dI_2}{dt} &= a I_1 - ar I_2 \\
@@ -199,7 +199,7 @@ The Geometric Chain Trick (GCT), on the other hand, features a fixed number of s
     \label{GCTdiagram}
 \end{figure}
 
-Having established the model, our initial step involved analyzing the parameters within the GCT model. We aim to determine whether employing a fixed model structure (i.e., a fixed number of substages) and manipulating the parameters $a$ and $r$, which define the geometric transition rate, can replicate the effects of varying the number of substages. Additionally, we aim to evaluate whether the GCT structure offers greater flexibility in the choice of $\kappa$ $(CV^2)$. By calculating the mean $(D)$, variance $(\sigma)$, and shape parameter $(\kappa)$, we are able to represent all these properties of the infectious stage duration distribution in terms of $a$ and $r$. Similar to the LCT, utilizing the GCT facilitates independent alterations in the mean and $\kappa$. Given this, we can invert the process: starting with specific values of $D$ and $\kappa$, we can identify the corresponding $a$ and $r$ that endow the model with such characteristics. However, due to the complexity of the formula, solving it explicitly is challenging. To overcome this, we have developed a system of functions in the \textbf{R} programming language, employing \verb|uniroot()| to determine the values of $a$ and $r$. These parameters are then integrated to the GCT model to compare simulation outcomes with those of the LCT model, examining alignment in both the infectious stage duration distribution and the incidence over time.
+Having established the model, our initial step involved analyzing the parameters within the GCT model. We aim to determine whether employing a fixed model structure (i.e., a fixed number of substages) and manipulating the parameters $a$ and $r$, which define the geometric transition rate, can achieve the same effects as varying the number of substages. Additionally, we aim to evaluate whether the GCT structure offers greater flexibility in the choice of $\kappa$ $(CV^2)$. By calculating the mean $(D)$, variance $(\sigma)$, and shape parameter $(\kappa)$, we are able to represent all these properties of the infectious stage duration distribution in terms of $a$ and $r$. Similar to the LCT, utilizing the GCT facilitates independent alterations in the mean and $\kappa$. Given this, we can invert the process: starting with specific values of $D$ and $\kappa$, we can identify the corresponding $a$ and $r$ that endow the model with such characteristics. However, due to the complexity of the formula, solving it explicitly is challenging. To overcome this, we have developed a system of functions in the \textbf{R} programming language, employing \verb|uniroot()| to determine the values of $a$ and $r$. These parameters are then integrated to the GCT model to compare simulation outcomes with those of the LCT model, examining alignment in both the infectious stage duration distribution and the incidence over time.
 
 After confirming that the GCT model, which employs a fixed structure and varying parameters $a$ and $r$, achieves comparable efficacy to the LCT model, we proceeded to empirically test the model's enhanced performance. Specifically, we focused on its improved flexibility in the kappa parameter through data fitting. Initially, we utilized simulated data as a replacement for actual data. This incidence data was generated through transmission model simulations, with deviations (noise) introduced via a mean reporting ratio and a negative binomial dispersion parameter. We performed model fitting using the \textbf{bbmle} package in R, estimating the model parameters through Maximum Likelihood Estimation (MLE). Our goal was to accurately retrieve the parameter values used to generate the incidence data, assessing the fitting quality through the root mean squared log error (RMSLE).
 
