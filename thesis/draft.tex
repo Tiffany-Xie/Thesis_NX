@@ -7,6 +7,9 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{color}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{arrows.meta,arrows}
 
 \pagenumbering{arabic}
 \linespread{1.5}
@@ -113,7 +116,39 @@ The idea of dividing the infectious stage into $n$ sub-stages exploits the fact 
 \begin{equation}
     f(x; n,n\gamma) = \frac{(n\gamma)^n}{(n-1)!} x^{n-1} e^{-n\gamma x} \quad x>0, n \in \mathbb{N}
 \end{equation}
-Utilizing the principle of the Linear Chain Trick (LCT), we divide the single infectious stage into $n$ substages, each with a constant rate of $n\gamma$. Therefore, formula (1) will be replaced by the following set of equations, which we refer to as the cohort model:
+Utilizing the principle of the Linear Chain Trick (LCT), we divide the single infectious stage into $n$ substages, each with a constant rate of $n\gamma$ (Figure \ref{LCTdiagram}). 
+\begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}[scale=1, transform shape, >={Latex[length=2mm, width=2mm]}]
+        \node (I) at (0,1) [draw, minimum width=1cm, minimum height=1cm] {$I$};
+        
+        % Nodes I1 to In
+        \node at (-4,0) [below, draw, minimum width=1cm, minimum height=1cm] (I1) {$I_1$};
+        \node at (-2,0) [below, draw, minimum width=1cm, minimum height=1cm] (I2) {$I_2$};
+        \node at (0,0) [below, draw, minimum width=1cm, minimum height=1cm] (I3) {$I_3$};
+        \node at (4,0) [below, draw, minimum width=1cm, minimum height=1cm] (In) {$I_n$};
+        
+        % Dots
+        \draw[line width=0.5mm, dotted, dash pattern=on 0.5mm off 0.5mm] (1.7,-0.5) -- (2.3,-0.5);
+        
+        % Arrows
+        \draw[->] (I1.east) -- (I2.west) node[midway, above] {$n\gamma$};
+        \draw[->] (I2.east) -- (I3.west) node[midway, above] {$n\gamma$};
+        \draw[->] (I3.east) -- ([xshift=1cm]I3.east) node[midway, above] {$n\gamma$};
+        \draw[->] ([xshift=-1cm]In.west) -- (In.west) node[midway, above] {$n\gamma$};
+        
+        %\draw[-latex] (In.east) -- ([xshift=2cm]In.west) node[midway, above] {$n\gamma$};
+        
+        % Arrows from I to I1 and In
+        \draw[-] (I.south west) -- (I1.north west);
+        \draw[-] (I.south east) -- (In.north east);
+
+    \end{tikzpicture}
+    \caption{Example diagram of the Linear Chain Trick}
+    \label{LCTdiagram}
+\end{figure}
+
+Therefore, formula (1) will be replaced by the following set of equations, which we refer to as the cohort model:
 \begin{align}
     \frac{dI_1}{dt} &= - n \gamma I_1 \\
     \frac{dI_2}{dt} &= n\gamma I_1 - n \gamma I_2 \\
@@ -126,7 +161,7 @@ Note that this decomposition process will not change the mean stage duration, as
     \sum_{i=1}^{n} \frac{1}{n\gamma} = \frac{1}{\gamma}
 \end{align*}
 
-The Geometric Chain Trick (GCT), on the other hand, features a fixed number of substages along with a set of inter-substage transition rates characterized by a geometric series, rather than a constant rate, as illustrated below:
+The Geometric Chain Trick (GCT), on the other hand, features a fixed number of substages along with a set of inter-substage transition rates characterized by a geometric series (Figure \ref{GCTdiagram}), rather than a constant rate, as illustrated below:
 \begin{align}
     \frac{dI_1}{dt} &= - a I_1 \\
     \frac{dI_2}{dt} &= a I_1 - ar I_2 \\
@@ -135,6 +170,34 @@ The Geometric Chain Trick (GCT), on the other hand, features a fixed number of s
     \frac{dI_n}{dt} &= ar^{n-2} I_{n-1} - ar^{n-1} I_n \\
     \frac{dR}{dt} &= ar^{n-1} I_n
 \end{align}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}[scale=1, transform shape, >={Latex[length=2mm, width=2mm]}]
+        
+        % Nodes I1 to In
+        \node at (-4,0) [below, draw, minimum width=1cm, minimum height=1cm] (I1) {$I_1$};
+        \node at (-2,0) [below, draw, minimum width=1cm, minimum height=1cm] (I2) {$I_2$};
+        \node at (0,0) [below, draw, minimum width=1cm, minimum height=1cm] (I3) {$I_3$};
+        \node at (4,0) [below, draw, minimum width=1cm, minimum height=1cm] (In) {$I_n$};
+        
+        % Dots
+        \draw[line width=0.5mm, dotted, dash pattern=on 0.5mm off 0.5mm] (1.7,-0.5) -- (2.3,-0.5);
+        
+        % Arrows
+        \draw[->] (I1.east) -- (I2.west) node[midway, above] {$\gamma_1$};
+        \draw[->] (I2.east) -- (I3.west) node[midway, above] {$\gamma_2$};
+        \draw[->] (I3.east) -- ([xshift=1cm]I3.east) node[midway, above] {$\gamma_3$};
+        \draw[->] ([xshift=-1cm]In.west) -- (In.west) node[midway, above] {$\gamma_{n-1}$};
+        \draw[->] (In.east) -- ([xshift=1cm]In.east) node[midway, above] {$\gamma_n$};
+        
+        %\draw[-latex] (In.east) -- ([xshift=2cm]In.west) node[midway, above] {$n\gamma$};
+    
+
+    \end{tikzpicture}
+    \caption{Example diagram of the Geometric Chain Trick}
+    \label{GCTdiagram}
+\end{figure}
 
 Having established the model, our initial step involved analyzing the parameters within the GCT model. We aim to determine whether employing a fixed model structure (i.e., a fixed number of substages) and manipulating the parameters $a$ and $r$, which define the geometric transition rate, can replicate the effects of varying the number of substages. Additionally, we aim to evaluate whether the GCT structure offers greater flexibility in the choice of $\kappa$ $(CV^2)$. By calculating the mean $(D)$, variance $(\sigma)$, and shape parameter $(\kappa)$, we are able to represent all these properties of the infectious stage duration distribution in terms of $a$ and $r$. Similar to the LCT, utilizing the GCT facilitates independent alterations in the mean and $\kappa$. Given this, we can invert the process: starting with specific values of $D$ and $\kappa$, we can identify the corresponding $a$ and $r$ that endow the model with such characteristics. However, due to the complexity of the formula, solving it explicitly is challenging. To overcome this, we have developed a system of functions in the \textbf{R} programming language, employing \verb|uniroot()| to determine the values of $a$ and $r$. These parameters are then integrated to the GCT model to compare simulation outcomes with those of the LCT model, examining alignment in both the infectious stage duration distribution and the incidence over time.
 
@@ -176,7 +239,7 @@ Using formulas (18) and (20), we developed code to reverse-engineer the process:
 \end{figure}
 
 
-By reintegrating the infectious stage duration distribution into the whole dynamic system, we present the dynamics of newly infected cases (incidence) as simulated by the transmission model. Figure \ref{incidenceCompare} illustrates the incidence time series for the LCT model with 4 and 8 substages, represented by yellow and blue lines, respectively. The corresponding kappa values of the stage duration distribution for them are $\frac{1}{4}$ and $\frac{1}{8}$. Employing the GCT model with a fixed 12 substages and utilizing $a$ and $r$ values derived from the reverse-engineering system for the targeted kappa values, we successfully approximate the incidence patterns observed in the LCT model across different substage configurations, as shown by the black dashed line. This demonstrates the GCT model's capability to match the LCT model's performance by adjusting parameters within a constant structural framework. Compared to modifying the model structure to achieve desired kappa values, the GCT model simplifies parameter estimation and model fitting processes. 
+By reintegrating the infectious stage duration distribution into the whole dynamic system, we present the dynamics of newly infected cases (incidence) as simulated by the transmission model. Figure \ref{incidenceCompare} illustrates the incidence time series for the LCT model with 4 and 8 substages, represented by yellow and blue lines, respectively. The corresponding kappa values of the stage duration distribution for them are $\frac{1}{4}$ and $\frac{1}{8}$. All other parameters are held constant. All other parameters are identical across the two models. Employing the GCT model with a fixed 12 substages and utilizing $a$ and $r$ values derived from the reverse-engineering system for the targeted kappa values, we successfully approximate the incidence patterns observed in the LCT model across different substage configurations, as shown by the black dashed line. This demonstrates the GCT model's capability to match the LCT model's performance by adjusting parameters within a constant structural framework. Compared to modifying the model structure to achieve desired kappa values, the GCT model simplifies parameter estimation and model fitting processes. 
 
 \begin{figure}[h!]
     \centering
@@ -188,40 +251,72 @@ By reintegrating the infectious stage duration distribution into the whole dynam
 
 \subsection{Substage Configuration Minimally Impacts Model Fitting}
 
-After establishing the theoretical foundation, we proceeded with model fitting to assess the GCT model's performance. The incidence data were obtained from the model simulation, and the noises were added using a mean reporting ratio of 0.9 and a negative binomial dispersion parameter of 1000. Initially, we employed the same model type for both data generation and fitting. In Figure \ref{sametypeFittingL}.A, the data, generated by the LCT model with 2 substages, were fitted using an LCT model of the identical structure, as the plot title indicates. The quality of the fitting was evaluated based on the root mean squared logarithmic error (RMSLE), which measured the percentage errors between the actual and predicted value. With an RMSLE value of 1.64\%, the fitting can be considered satisfactory. Figure \ref{sametypeFittingL}.B showcases the parameters estimated post-fitting. Conversely, employing the same incidence data but altering the fitting model's structure from an LCT with 2 substages to an LCT with 6 substages, as depicted in Figure \ref{sametypeFittingL}.C, resulted in less favorable outcomes, with the RMSLE escalating to 9.30\%. The estimated parameters, displayed in Figure \ref{sametypeFittingL}.D, showed significant discrepancies. 
+After establishing the theoretical foundation, we proceeded with model fitting to assess the GCT model's performance. The incidence data were obtained from the model simulation, and the noises were added using a mean reporting ratio of 0.9 and a negative binomial dispersion parameter of 1000. Initially, we employed the same model type for both data generation and fitting. In Figure \ref{sametypeFittingL}.A, the data, generated by the LCT model with 2 substages, were fitted using an LCT model of the identical structure, as the plot title indicates. The quality of the fitting was evaluated based on the root mean squared logarithmic error (RMSLE), which measured the percentage errors between the actual and predicted value. With an RMSLE value of 1.64\%, the fitting can be considered satisfactory. Figure \ref{sametypeFittingL}.B showcases the parameters estimated post-fitting along with their 95\% confidence intervals, with the target value represented by the red line. Conversely, employing the same incidence data but altering the fitting model's structure from an LCT with 2 substages to an LCT with 6 substages, as depicted in Figure \ref{sametypeFittingL}.C, resulted in less favorable outcomes, with the RMSLE escalating to 9.30\%. The estimated parameters, displayed in Figure \ref{sametypeFittingL}.D, showed significant discrepancies. 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width= \textwidth]{figures/sametypeFittingL.Rout.pdf}
+    \begin{tikzpicture}
+        \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width= \textwidth]{figures/sametypeFittingL.Rout.pdf}};
+        \begin{scope}[x={(image.south east)},y={(image.north west)}]
+            % Add labels at desired positions
+            \node at (0.01,0.95) {\textbf{(A)}};
+            \node at (0.55,0.95) {\textbf{(B)}};
+            \node at (0.01,0.45) {\textbf{(C)}};
+            \node at (0.55,0.45) {\textbf{(D)}};
+        \end{scope}
+    \end{tikzpicture}
     \caption{\textbf{Model fitting and parameter estimation in LCT model.} \\ Data generated form the LCT transmission model featured 2 substages, with $\beta=0.2$, $\mu=0.01$, $N=10000$, $I_0=10$. The parameters fitted are $\beta$ and $D$. Plots A and C show the fitting results (red), alongside the target values (green) and the input data to the model, after adding noise (blue), using 2 and 6 substages, respectively. Plots B and D present the estimated parameters post-fitting. Each parameter's 95\% confidence interval is shown, with the exact values highlighted by a red line.}
     \label{sametypeFittingL}
 \end{figure}
 
-On the other hand, employing the GCT model with 12 substages for both generating and fitting incidence data resulted in a close match, as indicated by an RMSLE of 2.34\% (Figure \ref{sametypeFittingG}.A), and parameters post-fitting were close to the exact values (Figure \ref{sametypeFittingG}.B). In this case, altering the fitting model's structure from 12 substages to 6 substages, the model still exhibited a close match with the original in terms of both shape (Figure \ref{sametypeFittingG}.C) and parameters (Figure \ref{sametypeFittingG}.D). This indicates that the GCT model's fitting performance is minimally impacted by changes in the model structure.
+Not surprisingly, employing the GCT model with 2 substages for both generating and fitting incidence data also resulted in a close match, as indicated by an RMSLE of 2.34\% (Figure \ref{sametypeFittingG}.A), and parameters post-fitting were close to the exact values (Figure \ref{sametypeFittingG}.B). Unlike the case with the LCT model, when the structure of the fitting model was altered from 2 substages to 6, the model still exhibited a close match with the original in terms of both shape (Figure \ref{sametypeFittingG}.C) and parameters (Figure \ref{sametypeFittingG}.D). This indicates that the GCT model's fitting performance is minimally impacted by changes in the model structure.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width= \textwidth]{figures/sametypeFittingG.Rout.pdf}
+    \begin{tikzpicture}
+        \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width= \textwidth]{figures/sametypeFittingG.Rout.pdf}};
+        \begin{scope}[x={(image.south east)},y={(image.north west)}]
+            % Add labels at desired positions
+            \node at (0.01,0.95) {\textbf{(A)}};
+            \node at (0.55,0.95) {\textbf{(B)}};
+            \node at (0.01,0.45) {\textbf{(C)}};
+            \node at (0.55,0.45) {\textbf{(D)}};
+        \end{scope}
+    \end{tikzpicture}
     \caption{\textbf{Model fitting and parameter estimation in GCT model.} \\ Data generated from the GCT model featured 12 substages, with $\beta=0.2$, $\mu=0.01$, $N=10000$, $I_0=10$ and $\kappa=\frac{2}{9}$. Remaining details are as described in Figure \ref{sametypeFittingL}.}
     \label{sametypeFittingG}
 \end{figure}
 
+%%%%%%%%
+% Here
+%%%%%%%%
+To more clearly illustrate the performance differences between the LCT and GCT models, fittings with various model structures were conducted to assess changes in percentage error. The percentage error from the fitting result, where the model generating the incidence data and the model for fitting are exactly the same, has been used as the baseline (red line). As shown in Figure X, when using the same input data, varying the fitting model shape causes the LCT model to experience a surge in RMSLE values, while the GCT model maintains its error rate close to the baseline. This result, once again, confirms that the structure of the GCT model merely affects the fitting results, indicating that changes in structure to optimize model performance are no longer necessary.
+
+To inllstriate more clear about the performance difference between LCT and GCT, fittings using different model structure have been done to see how the error would change. As shown in Figure x, when treating the percentage error from the the fitting result where the model to generate the incidence data and the model for fitting are exactly the same, varying the fitting model shape by using a different number of substages from the model used to generate the data causes the LCT model to experience a surge in RMSLE values, while the GCT model maintains its error rate close to the baseline. This result, once again, confirmed that the structure of the GCT model merely affect the model fitting result, showing that changing in structure in order to find the optimized performance of the model is no longer necessary.
 
 \subsection{Adaptability of the GCT Model to Data Input and Structural Changes in Fitting}
 Proceeding to a more challenging test, we utilized a different model type for data generation and model fitting. As demonstrated in Figure \ref{difftypeFitting}.A, the data generated by the LCT model with 2 substages were fitted using the GCT model with 12 substages. Despite the significant difference in model structure, the fitting results were reasonably favorable, with an RMSLE of 2.44\%. Altering the fitting model from a GCT with 2 substages to a GCT with 6 substages had negligible impact on the fitting outcomes (Figure \ref{difftypeFitting}.B). Similarly, changing the input data from an LCT with 2 substages to an LCT with 7 substages resulted in slightly improved fitting, though the difference was not substantial (Figure \ref{difftypeFitting}.C). These findings suggest that regardless of changes to the fitting model structure or the data used, the GCT model is capable of adapting to these variations, providing satisfactory fitting results.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width= \textwidth]{figures/difftypeFitting.Rout.pdf}
+    \begin{tikzpicture}
+        \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width= \textwidth]{figures/difftypeFitting.Rout.pdf}};
+        \begin{scope}[x={(image.south east)},y={(image.north west)}]
+            % Add labels at desired positions
+            \node at (0.01,0.95) {\textbf{(A)}};
+            \node at (0.65,0.95) {\textbf{(B)}};
+            \node at (0.65,0.45) {\textbf{(C)}};
+        \end{scope}
+    \end{tikzpicture}
     \caption{\textbf{Model fitting using different model types.} \\  Input data for Plots A and B were generated using a 2-substages LCT transmission model simulation with $\beta=0.2$, $\mu=0.01$, $N=10000$, $I_0=10$. The parameter fitted include $\beta$, $D$, and $\kappa$. Model fitting for Plot A utilized a GCT model with 12 substages, while Plot B also using GCT but with 6 substages. For Plot C, data derived from an LCT model with 7 substages were fitted using a GCT model with 12 substages.}
     \label{difftypeFitting}
 \end{figure}
 
 \subsection{Parameter Estimation}
 \label{parm est}
-In this section, we discuss the parameter estimation results obtained through model fitting. The true incidence data were generated using the GCT model with 5 substages, setting the $D$ to 10 and $\kappa$ to $\frac{2}{9}$. Random noise was added to the true incidence data using a negative binomial distribution, resulting in four different input datasets (a number we specifically set for this analysis). The model was fitted using both the GCT and LCT frameworks with 5 to 10 substages using the 4 sets of data. As depicted in Figure \ref{parEst}, the precise values for each parameter are marked by a red line, with post-fitting parameter values displayed alongside their 95\% confidence intervals. It can be observed that the estimated parameter values derived from the LCT model, using different input data, tend to cluster together but on average vary across different substage numbers. These estimates could deviate substantially from the accurate parameter if an inappropriate structure is chosen. On the other hand, although the parameter estimation using the GCT model is not perfect—with kappa and beta being overestimated and D underestimated—the estimated values are less fluctuating across substage numbers, closer to the target values, and consistently include the target values within the 95\% confidence interval. The discrepancies in parameter estimation counterbalance each other, resulting in a fitting outcome characterized by a low root mean squared logarithmic error (RMSLE).
+In this section, we discuss the parameter estimation results obtained through model fitting. The true incidence data were generated using the GCT model with 5 substages, setting the $D$ to 10 and $\kappa$ to $\frac{3}{10}$. Random noise was added to the true incidence data using a negative binomial distribution, resulting in four different input datasets (a number we specifically set for this analysis). The model was fitted using both the GCT and LCT frameworks with 4 to 12 substages using the 4 sets of data. As depicted in Figure \ref{parEst}, the precise values for each parameter are marked by a red line, with post-fitting parameter values displayed alongside their 95\% confidence intervals. It can be observed that the estimated parameter values derived from the LCT model, using different input data, tend to cluster together but on average vary across different substage numbers. These estimates could deviate substantially from the accurate parameter if an inappropriate structure is chosen. On the other hand, although the parameter estimation using the GCT model is not perfect—with kappa and beta being overestimated and D underestimated—the estimated values are less fluctuating across substage numbers, closer to the target values, and generally include the target values within the 95\% confidence interval. The discrepancies in parameter estimation counterbalance each other, resulting in a fitting outcome characterized by a low root mean squared logarithmic error (RMSLE).
 
-Notice that it is possible for the parameter to lack confidence intervals, which could be attributed to structural inadequacies. As previously mentioned, the minimum possible value for kappa in the model with $n$ substages is $\frac{1}{n}$. The model encounters limitations when aligning with a kappa value of less than $\frac{1}{n}$. Overall, it is important to acknowledge the imprecision of parameter estimation, which will be a focus of our subsequent efforts.
+Notice that it is possible for the parameter to lack confidence intervals, which could be attributed to structural inadequacies. As previously mentioned, the minimum possible value for kappa in the model with $n$ substages is $\frac{1}{n}$. The model encounters limitations when aligning with a kappa value of less than $\frac{1}{n}$. Overall, the result demonstrates that the GCT model estimates more accurate and less fluctuating parameters. Moreover, it is important to acknowledge the imprecision in parameter estimation, which will be the focus of our subsequent studies.
 
 \begin{figure}[h!]
     \centering
