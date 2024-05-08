@@ -9,69 +9,6 @@ library(patchwork)
 
 ######################################################################
 
-set.seed(5132)
-k <- 250
-vi <- c(0.2, 1) #rchisq(k, df=1) * .03
-yi <- c(3,7) #rnorm(k, rnorm(k, 0.5, 0.4), sqrt(vi))
-
-### fit RE model
-res <- rma(yi, vi)
-
-### create plot
-forest(yi, vi,
-       xlim=c(2,8),        ### adjust horizontal plot region limits
-       order="obs",             ### order by size of yi
-       slab=NA, annotate=FALSE, ### remove study labels and annotations
-       efac=0,                  ### remove vertical bars at end of CIs
-       pch=19,                  ### changing point symbol to filled circle
-       col="gray40",            ### change color of points/CIs
-       psize=2,                 ### increase point size
-       cex.lab=1, cex.axis=1,   ### increase size of x-axis title/labels
-       lty=c("solid","blank"))  ### remove horizontal line at top of plot)
-abline(v=4, lty=2)
-
-### draw points one more time to make them easier to see
-points(sort(yi), k:1, pch=19, cex=0.5)
-
-### add summary polygon at bottom and text
-addpoly(res, mlab="", cex=1)
-text(-2, -2, "RE Model", pos=4, offset=0, cex=1)
-
-######################################################################
-### simulate data for the first set
-set.seed(5132)
-k <- 250
-vi1 <- rchisq(k, df=1) * .03
-yi1 <- rnorm(k, rnorm(k, 0.5, 0.4), sqrt(vi1))
-
-### simulate data for the second set
-set.seed(1234)  # set a different seed for reproducibility
-vi2 <- rchisq(k, df=1) * .03
-yi2 <- rnorm(k, rnorm(k, 0.7, 0.3), sqrt(vi2))
-
-### combine the data
-vi <- c(vi1, vi2)
-yi <- c(yi1, yi2)
-
-### fit RE model
-res <- rma(yi, vi)
-
-group <- rep(c("Group 1", "Group 2"), each = k)
-### create plot
-forest(yi, vi,
-       xlim=c(-2.5,3.5),
-       #order="obs",
-       slab=group,  # use the group vector to label the studies
-       annotate=TRUE,  # show study labels
-       efac=0,
-       pch=19,
-       col=rep(c("red", "blue"), each = k),  # specify colors for each data point
-       psize=2,
-       cex.lab=1, cex.axis=1,
-       lty=c("solid","blank"))
-
-######################################################################
-
 cVarEst <- function(sigr, sParL, sParG, fPar, seeds, par) {
   data_l <- list()
   for (seed in seeds) {
