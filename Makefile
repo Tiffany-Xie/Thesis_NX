@@ -40,6 +40,9 @@ realfitting.Rout: Code/realfitting.R tempfunc.rda
 tempErrorPlot.Rout: Code/tempErrorPlot.R tempfunc.rda
 	$(pipeR)
 
+Interval.Rout: Code/Interval.R
+	$(pipeR)
+
 ######################################################################
 
 Sources += $(wildcard data/*.csv)
