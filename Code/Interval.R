@@ -68,45 +68,38 @@ quit()
 ######################################################################
 ## gamma -> Erlang
 ######################################################################
-count_interval <- as.data.frame(table(g_interval))
-names(count_interval) <- c("Interval", "Count")
-count_interval$Interval <- as.numeric(count_interval$Interval)
-count_interval <- rbind(data.frame(Interval=0, Count=0), count_interval)
-
-ts=max(count_interval$Interval)/dim(count_interval)[1]
-tmax= max(count_interval$Interval)
-gE.nll <- function(logmean, logkappa, c_interval) { 
-  sinr <- as.data.frame(SInRFlow(β=0, D=exp(logmean), n=round(1/exp(logkappa)), μ=0, 
-                                 N=1, I0=1, 
-                                 ts=ts, T=tmzx))
-  -sum(dnorm(x=c_interval, mean=diff(sinr$R)/ts*1000, log=TRUE))
+derlang <- function(x, shape, rate, log=TRUE) { # shape = n; rate = lambda
+  density <- rate^shape * x^(shape-1) * exp(-rate*x) / factorial(shape-1)
+  if (log) {
+    density <- log(density)
+  }
+  return(density)
 }
 
-#sinr = as.data.frame(SInRFlow(0,7,4,0,1,1,ts,25))
-#plot(timeSeq(ts,25), diff(sinr$R)/ts*n)
+ge.nll <- function(logmean, logkappa, interval) {
+  -sum(derlang(interval, shape = 1/exp(logkappa), rate = 1/exp(logmean), log=TRUE))
+}
 
 startPar = list(logmean = 2, logkappa = -1)
-fit <- mle2(gE.nll, 
-            data = list(interval = count_interval$Interval),
+fit <- mle2(ge.nll, 
+            data = list(interval = g_interval),
             start = startPar,
             method = "Nelder-Mead",
             control = list(maxit = 10000))
 
-time = seq(0, max(g_interval), length.out=n)
+time = seq(min(g_interval), max(g_interval), length.out=n)
 fitmean = exp(coef(fit)[["logmean"]])
 fitkappa = exp(coef(fit)[["logkappa"]])
-ts = max(g_interval)/length(g_interval)
 df <- data.frame(Time = time,
                  interval = g_interval,
                  gamma = dgamma(time, shape=1/kappa, scale=mean*kappa)*n,
-                 fit_gamma = diff(SInRFlow(β=0, D=fitmean, n=round(1/fitkappa), μ=0, 
-                                      N=1, I0=1, 
-                                      ts=ts, T=max(g_interval))[,"R"])/ts*1000)
+                 fit_gamma = derlang(time, shape=1/fitkappa, rate=1/fitmean)*n)
 ggplot(df) + 
   geom_histogram(aes(x=interval)) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
-  geom_line(aes(x=Time, y=fit_gamma, color="Gamma after fit"), linewidth=1.5) +
+  geom_line(aes(x=Time, y=fit_gamma, color="Erlang after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "gamma -> Erlang")
+
 
 ######################################################################
 ## gamma -> Pseudo Erlang
