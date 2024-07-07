@@ -80,7 +80,7 @@ ge.nll <- function(logmean, logkappa, interval) {
   -sum(derlang(interval, shape = round(1/exp(logkappa)), rate = 1/exp(logmean)*round(1/exp(logkappa)), log=TRUE))
 }
 
-startPar = list(logmean = 2, logkappa = -1) # 2 -1
+startPar = list(logmean = 2.5, logkappa = -2) # 2 -1
 fit <- mle2(ge.nll, 
             data = list(interval = g_interval),
             start = startPar,
@@ -100,6 +100,42 @@ ggplot(df) +
   labs(x = "Interval", y = "Count", title = "gamma -> Erlang")
 
 #quit()
+######################################################################
+## gamma -> Erlang (2)
+######################################################################
+derlang2 <- function(x, D, shape=4, log=FALSE) { # shape = n; rate = lambda
+  rate <- shape * 1/D
+  density <- rate^shape * x^(shape-1) * exp(-rate*x) / factorial(shape-1)
+  if (log) {
+    density <- log(density)
+  }
+  return(density)
+}
+
+ge.nll2 <- function(logmean, interval) {
+  -sum(derlang2(interval, D = exp(logmean), log=TRUE))
+}
+
+startPar = list(logmean = 1) # 2 -1
+fit <- mle2(ge.nll2, 
+            data = list(interval = g_interval),
+            start = startPar,
+            method = "Brent",
+            lower = c(logmean = 0.1),
+            upper = c(logmean = 10))
+
+fitmean = exp(coef(fit)[["logmean"]])
+df <- data.frame(Time = time,
+                 interval = g_interval,
+                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa)*n,
+                 fit_gamma = derlang2(time, D=fitmean)*n)
+ggplot(df) + 
+  geom_histogram(aes(x=interval)) +
+  geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
+  geom_line(aes(x=Time, y=fit_gamma, color="Erlang after fit (2)"), linewidth=1.5) +
+  labs(x = "Interval", y = "Count", title = "gamma -> Erlang")
+
+
 ######################################################################
 ## gamma -> Pseudo Erlang
 ######################################################################
@@ -130,7 +166,7 @@ gPE.nll <- function(logmean, logkappa, interval) {
   -sum(dperlang(interval, mean = exp(logmean), kappa = exp(logkappa), log=TRUE))
 }
 
-startPar = list(logmean = 2.6, logkappa = -0.3)
+startPar = list(logmean = 2, logkappa = -1)
 fit <- mle2(gPE.nll, 
             data = list(interval = g_interval),
             start = startPar,
@@ -150,7 +186,8 @@ ggplot(df) +
   labs(x = "Interval", y = "Count", title = "gamma -> PErlang")
 
 ## lager n -> (optim) function cannot be evaluated at initial parameters?
-
+## shape difference between Gamma and Pseudo Erlang (same mean & kappa)
+## PErlang fit ~= Erlang < Gamma
 quit()
 ###############
 kappa=0.3
