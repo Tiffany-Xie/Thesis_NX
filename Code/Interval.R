@@ -5,12 +5,27 @@ library(pseudoErlang)
 
 ######################################################################
 
+## Continuous data should be fitted with derlang and dperlang
 gammaDelay <- function(n, mean, kappa){
-  set.seed(223)
+  v <- rgamma(n, shape=1/kappa, scale=mean*kappa)
+  print(c(mean = mean, kappa = kappa,
+          Dmean = mean(v), Dkappa = sd(v)^2/mean(v)^2))
+  return(v)
+}
+
+## Discrete data should be fitted another way (make boxed likelihood functions)
+gammaDelayDiscrete <- function(n, mean, kappa){
   v <- round(rgamma(n, shape=1/kappa, scale=mean*kappa))
   print(c(mean = mean, kappa = kappa,
           Dmean = mean(v), Dkappa = sd(v)^2/mean(v)^2))
   return(v)
+}
+
+## Boxed likelihood example (not working yet!!!)
+blgamma <- function(n){
+	## Do we need a special case for n=0?
+	## should we check that it's an integer and/or round?
+	return(pgamma(n+1/2, log=TRUE) - pgamma(n-1/2, log=TRUE))
 }
 
 ######################################################################
@@ -84,6 +99,7 @@ gPE.nll <- function(logmean, logkappa, interval) {
 ## end is start + v [above]
 ## round them both before subtracting
 
+set.seed(223)
 mean = 7
 kappa = 0.3
 n = 2000
