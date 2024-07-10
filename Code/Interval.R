@@ -73,7 +73,7 @@ gPE.nll <- function(logmean, logkappa, interval) {
 }
 
 ######################################################################
-## gamma -> gamma
+## Gamma -> Gamma
 ######################################################################
 
 ## k = 1/shape
@@ -112,7 +112,7 @@ ggplot(df) +
 
 
 ######################################################################
-## gamma -> Erlang
+## Gamma -> Erlang
 ######################################################################
 
 startPar = list(logmean = 2.5, logkappa = -2) # 2 -1
@@ -135,7 +135,7 @@ ggplot(df) +
   labs(x = "Interval", y = "Count", title = "gamma -> Erlang (shape parameter included)")
 
 ######################################################################
-## gamma -> Erlang (2)
+## Gamma -> Erlang (2)
 ######################################################################
 
 startPar = list(logmean = 1) # 2 -1
@@ -159,7 +159,7 @@ ggplot(df) +
 
 
 ######################################################################
-## gamma -> Pseudo Erlang
+## Gamma -> Pseudo Erlang
 ######################################################################
 
 startPar = list(logmean = 2, logkappa = -1)
@@ -181,11 +181,21 @@ ggplot(df) +
   geom_line(aes(x=Time, y=fit_gamma, color="Pseudo Erlang after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "gamma -> PErlang")
 
+######################################################################
+## Pseudo Erlang -> Gamma
+######################################################################
+
+# hold
+temp <- 2
+if (temp != 3) {
+  print("no")
+}
+
 ## lager n -> (optim) function cannot be evaluated at initial parameters?
 ## shape difference between Gamma and Pseudo Erlang (same mean & kappa)
 ## PErlang fit ~= Erlang < Gamma
 
-quit()
+
 ############### check
 kappa=0.3
 mean=7
@@ -195,8 +205,10 @@ df <- data.frame(Time = time,
                  perlang = dperlang(time, mean, kappa))
 ggplot(df, aes(x=Time)) +
   geom_line(aes(y=gamma, color='Gamma'), linewidth=1) +
-  geom_line(aes(y=perlang, color='Pseudo Erlang'), linewidth=1)
+  geom_line(aes(y=perlang, color='Pseudo Erlang'), linewidth=1) +
+  labs(title="Check: same mean & kappa")
 
+quit()
 num_mean <- sum(df$Time * df$perlang * 1) # ts = 1
 num_var <- sum(df$Time^2 * df$perlang * 1) - num_mean^2
 num_kappa <- num_var / num_mean^2
