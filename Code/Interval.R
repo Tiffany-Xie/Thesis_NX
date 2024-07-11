@@ -185,8 +185,8 @@ fit <- mle2(gPE.nll,
             method = "Nelder-Mead",
             control = list(maxit = 10000))
 
-fitmean = exp(coef(fit)[["logmean"]])
-fitkappa = exp(coef(fit)[["logkappa"]])
+fitmean = print(exp(coef(fit)[["logmean"]]))
+fitkappa = print(exp(coef(fit)[["logkappa"]]))
 df <- data.frame(Time = time,
                  interval = g_interval,
                  gamma = dgamma(time, shape=1/kappa, scale=mean*kappa)*n,
@@ -215,7 +215,7 @@ if (temp != 3) {
 ############### check
 kappa=0.3
 mean=7
-time <- timeSeq(1, 50, FALSE)
+time <- timeSeq(0.005, 50, FALSE)
 df <- data.frame(Time = time,
                  gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
                  perlang = dperlang(time, mean, kappa))
@@ -224,11 +224,16 @@ ggplot(df, aes(x=Time)) +
   geom_line(aes(y=perlang, color='Pseudo Erlang'), linewidth=1) +
   labs(title="Check: same mean & kappa")
 
+## area under the curve
+sum(df$gamma*0.005)
+sum(df$perlang*0.005)
+
 quit()
 num_mean <- sum(df$Time * df$perlang * 1) # ts = 1
 num_var <- sum(df$Time^2 * df$perlang * 1) - num_mean^2
 num_kappa <- num_var / num_mean^2
 num_kappa
+
 
 
 
