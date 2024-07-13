@@ -169,7 +169,7 @@ df <- data.frame(Time = time,
                  fit_gamma = derlang2(time, D=fitmean)*n)
 ggplot(df) + 
   geom_histogram(aes(x=interval)) +
-  geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
+  geom_line(aes(x=Time, y=gamma*10, color="Gamma"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_gamma, color="Erlang after fit (2)"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "gamma -> Erlang (shape parameter excluded)")
 
@@ -201,16 +201,30 @@ ggplot(df) +
 ## Pseudo Erlang -> Gamma
 ######################################################################
 
-# hold
-temp <- 2
-if (temp != 3) {
-  print("no")
+rperlang <- function(n, mean, kappa, shape=12) {
+  c <- 10 # gamma * 10  <<need to be improved>>
+  samples <- numeric(n)
+  i <- 1
+  
+  while (i<=n) {
+    x <- rgamma(n=1, shape=1/kappa, scale=mean*kappa)
+    u <- runif(1) # uniform(0,1)
+    
+    if (u <= dperlang(x, mean, kappa, shape=shape) / (c*dgamma(x, 1/kappa, scale=kappa*mean))) {
+      samples[i] <- x
+      i <- i + 1
+    }
+  }
+  return(samples)
 }
 
-## lager n -> (optim) function cannot be evaluated at initial parameters?
-## shape difference between Gamma and Pseudo Erlang (same mean & kappa)
-## PErlang fit ~= Erlang < Gamma
-
+pe_interval <- rperlang(1000, 7, 0.3) # <<slow>>
+time = seq(0, max(pe_interval), length.out=1000)
+df <- data.frame(Time=time, interval=pe_interval,
+                 perlang=dperlang(time, 7, 0.3)*1000)
+ggplot(df) + 
+  geom_histogram(aes(x=interval)) +
+  geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5)
 
 ############### check
 kappa=0.3
@@ -234,7 +248,18 @@ num_var <- sum(df$Time^2 * df$perlang * 1) - num_mean^2
 num_kappa <- num_var / num_mean^2
 num_kappa
 
+temp <- dperlang(time, 7, 0.02)
+temp2 <- dgamma(time, shape=1/0.02, scale=7*0.02)
 
+temp_df <- data.frame(Time=time, gamma=temp2, perlang=temp)
+ggplot(temp_df, aes(x=Time)) +
+  geom_line(aes(y=gamma,color='gamma')) +
+  geom_line(aes(y=perlang,color='perlang'))
+
+tempmean <- sum(temp2 * time * 0.012776)
+tempvar <- sum(time^2 * temp2 * 0.012776) - tempmean^2
+tempkappa <- tempvar/tempmean^2
+tempkappa
 
 
 
