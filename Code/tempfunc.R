@@ -97,6 +97,85 @@ plotTrace <- function(fitW) {
 }
 
 ######################################################################
+######################################################################
+
+derlang <- function(x, shape, rate, log=FALSE) { # shape = n; rate = lambda
+  density <- rate^shape * x^(shape-1) * exp(-rate*x) / factorial(shape-1)
+  if (log) {
+    density <- log(density)
+  }
+  return(density)
+} 
+
+derlang2 <- function(x, D, shape=3, log=FALSE) { # shape = n; rate = lambda
+  rate <- shape * 1/D
+  density <- rate^shape * x^(shape-1) * exp(-rate*x) / factorial(shape-1)
+  if (log) {
+    density <- log(density)
+  }
+  return(density)
+}
+
+dperlang <- function(x, mean, kappa, shape=12, log=FALSE) { # shape=n; mean=D
+  r <- kappa2r(kappa, shape)
+  a <- (1-1/r^shape)/(mean*(1-1/r))
+  density <- 0
+  
+  for (i in 1:shape) {
+    innerp <- 1
+    
+    for (j in 1:shape) {
+      if (j != i) {
+        innerp <- innerp * r^(j-1)/(r^(j-1) - r^(i-1))
+      }
+    }
+    density <- density + innerp * a * r^(i-1) * exp(-x*a*r^(i-1))
+  }
+  
+  if (log) {
+    density <- log(density)
+  }
+  return(density)
+} 
+
+######################################################################
+
+gg.nll <- function(logmean, logkappa, interval) {
+  -sum(dgamma(interval, shape = 1/exp(logkappa), scale = exp(logmean+logkappa), log=TRUE))
+}
+
+ge.nll <- function(logmean, logkappa, interval) {
+  -sum(derlang(interval, shape = round(1/exp(logkappa)), rate = 1/exp(logmean)*round(1/exp(logkappa)), log=TRUE))
+}
+
+ge.nll2 <- function(logmean, interval) {
+  -sum(derlang2(interval, D = exp(logmean), log=TRUE))
+}
+
+gPE.nll <- function(logmean, logkappa, interval) {
+  -sum(dperlang(interval, mean = exp(logmean), kappa = exp(logkappa), log=TRUE))
+}
+
+######################################################################
+
+rperlang <- function(n, mean, kappa, shape=12) {
+  c <- 10 # gamma * 10  <<need to be improved>>
+  samples <- numeric(n)
+  i <- 1
+  
+  while (i<=n) {
+    x <- rgamma(n=1, shape=1/kappa, scale=mean*kappa)
+    u <- runif(1) # uniform(0,1)
+    
+    if (u <= dperlang(x, mean, kappa, shape=shape) / (c*dgamma(x, 1/kappa, scale=kappa*mean))) {
+      samples[i] <- x
+      i <- i + 1
+    }
+  }
+  return(samples)
+}
+
+######################################################################
 
 saveEnvironment()
 

@@ -3,6 +3,7 @@ library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
 library(pseudoErlang)
 
+# source("./tempfunc.R")
 ######################################################################
 
 ## Continuous data should be fitted with derlang and dperlang
@@ -26,65 +27,6 @@ blgamma <- function(n){
 	## Do we need a special case for n=0?
 	## should we check that it's an integer and/or round?
 	return(pgamma(n+1/2, log=TRUE) - pgamma(n-1/2, log=TRUE))
-}
-
-######################################################################
-
-derlang <- function(x, shape, rate, log=FALSE) { # shape = n; rate = lambda
-  density <- rate^shape * x^(shape-1) * exp(-rate*x) / factorial(shape-1)
-  if (log) {
-    density <- log(density)
-  }
-  return(density)
-} 
-
-derlang2 <- function(x, D, shape=3, log=FALSE) { # shape = n; rate = lambda
-  rate <- shape * 1/D
-  density <- rate^shape * x^(shape-1) * exp(-rate*x) / factorial(shape-1)
-  if (log) {
-    density <- log(density)
-  }
-  return(density)
-}
-
-dperlang <- function(x, mean, kappa, shape=12, log=FALSE) { # shape=n; mean=D
-  r <- kappa2r(kappa, shape)
-  a <- (1-1/r^shape)/(mean*(1-1/r))
-  density <- 0
-  
-  for (i in 1:shape) {
-    innerp <- 1
-    
-    for (j in 1:shape) {
-      if (j != i) {
-        innerp <- innerp * r^(j-1)/(r^(j-1) - r^(i-1))
-      }
-    }
-    density <- density + innerp * a * r^(i-1) * exp(-x*a*r^(i-1))
-  }
-  
-  if (log) {
-    density <- log(density)
-  }
-  return(density)
-} 
-
-######################################################################
-
-gg.nll <- function(logmean, logkappa, interval) {
-  -sum(dgamma(interval, shape = 1/exp(logkappa), scale = exp(logmean+logkappa), log=TRUE))
-}
-
-ge.nll <- function(logmean, logkappa, interval) {
-  -sum(derlang(interval, shape = round(1/exp(logkappa)), rate = 1/exp(logmean)*round(1/exp(logkappa)), log=TRUE))
-}
-
-ge.nll2 <- function(logmean, interval) {
-  -sum(derlang2(interval, D = exp(logmean), log=TRUE))
-}
-
-gPE.nll <- function(logmean, logkappa, interval) {
-  -sum(dperlang(interval, mean = exp(logmean), kappa = exp(logkappa), log=TRUE))
 }
 
 ######################################################################
@@ -151,30 +93,6 @@ ggplot(df) +
   labs(x = "Interval", y = "Count", title = "gamma -> Erlang (shape parameter included)")
 
 ######################################################################
-## Gamma -> Erlang (2)
-######################################################################
-
-startPar = list(logmean = 1) # 2 -1
-fit <- mle2(ge.nll2, 
-            data = list(interval = g_interval),
-            start = startPar,
-            method = "Brent",
-            lower = c(logmean = 0.1),
-            upper = c(logmean = 10))
-
-fitmean = exp(coef(fit)[["logmean"]])
-df <- data.frame(Time = time,
-                 interval = g_interval,
-                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa)*n,
-                 fit_gamma = derlang2(time, D=fitmean)*n)
-ggplot(df) + 
-  geom_histogram(aes(x=interval)) +
-  geom_line(aes(x=Time, y=gamma*10, color="Gamma"), linewidth=1.5) +
-  geom_line(aes(x=Time, y=fit_gamma, color="Erlang after fit (2)"), linewidth=1.5) +
-  labs(x = "Interval", y = "Count", title = "gamma -> Erlang (shape parameter excluded)")
-
-
-######################################################################
 ## Gamma -> Pseudo Erlang
 ######################################################################
 
@@ -198,34 +116,77 @@ ggplot(df) +
   labs(x = "Interval", y = "Count", title = "gamma -> PErlang")
 
 ######################################################################
+## Random Pseudo Erlang numbers
+######################################################################
+
+set.seed(1001)
+n <- 1000
+mean <- 7
+kappa <- 0.3
+
+pe_interval <- rperlang(n, mean, kappa) # <<slow if c->inf>>
+time = seq(0, max(pe_interval), length.out=n)
+df <- data.frame(Time=time, interval=pe_interval,
+                 perlang=dperlang(time, mean, kappa)*n,
+                 gamma=dgamma(time, 1/kappa, scale=mean*kappa)*n)
+ggplot(df) + 
+  geom_histogram(aes(x=interval)) +
+  geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
+  geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
+  labs(title="Random PErlang")
+
+## sometimes higher than curve?
+## count/curve inconsistency when using >><< kappa (similar with rgamma)
+
+######################################################################
+## Pseudo Erlang -> Pseudo Erlang
+######################################################################
+
+startPar = list(logmean = 2.5, logkappa = -0.5)
+
+fit <- mle2(gPE.nll, 
+            data = list(interval = pe_interval),
+            start = startPar,
+            method = "Nelder-Mead",
+            control = list(maxit = 10000))
+
+fitmean = print(exp(coef(fit)[["logmean"]]))
+fitkappa = print(exp(coef(fit)[["logkappa"]]))
+df <- data.frame(Time = time,
+                 interval = pe_interval,
+                 perlang = dperlang(time, mean, kappa)*n,
+                 fit_perlang = dperlang(time, fitmean, fitkappa)*n)
+ggplot(df) + 
+  geom_histogram(aes(x=interval)) +
+  geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
+  geom_line(aes(x=Time, y=fit_perlang, color="PErlang after fit"), linewidth=1.5) +
+  labs(x = "Interval", y = "Count", title = "PErlang -> PErlang")
+
+######################################################################
 ## Pseudo Erlang -> Gamma
 ######################################################################
 
-rperlang <- function(n, mean, kappa, shape=12) {
-  c <- 10 # gamma * 10  <<need to be improved>>
-  samples <- numeric(n)
-  i <- 1
-  
-  while (i<=n) {
-    x <- rgamma(n=1, shape=1/kappa, scale=mean*kappa)
-    u <- runif(1) # uniform(0,1)
-    
-    if (u <= dperlang(x, mean, kappa, shape=shape) / (c*dgamma(x, 1/kappa, scale=kappa*mean))) {
-      samples[i] <- x
-      i <- i + 1
-    }
-  }
-  return(samples)
-}
+startPar = list(logmean = 2.5, logkappa = -0.5)
 
-pe_interval <- rperlang(1000, 7, 0.3) # <<slow>>
-time = seq(0, max(pe_interval), length.out=1000)
-df <- data.frame(Time=time, interval=pe_interval,
-                 perlang=dperlang(time, 7, 0.3)*1000)
+fit <- mle2(gg.nll, 
+            data = list(interval = pe_interval),
+            start = startPar,
+            method = "Nelder-Mead",
+            control = list(maxit = 10000))
+
+fitmean = print(exp(coef(fit)[["logmean"]]))
+fitkappa = print(exp(coef(fit)[["logkappa"]]))
+df <- data.frame(Time = time,
+                 interval = pe_interval,
+                 perlang = dperlang(time, mean, kappa)*n,
+                 fit_gamma = dgamma(time, 1/kappa, scale=mean*kappa)*n)
 ggplot(df) + 
   geom_histogram(aes(x=interval)) +
-  geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5)
+  geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
+  geom_line(aes(x=Time, y=fit_gamma, color="Gamma after fit"), linewidth=1.5) +
+  labs(x = "Interval", y = "Count", title = "PErlang -> Gamma")
 
+quit()
 ############### check
 kappa=0.3
 mean=7
