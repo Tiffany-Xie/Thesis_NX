@@ -116,6 +116,26 @@ derlang2 <- function(x, D, shape=3, log=FALSE) { # shape = n; rate = lambda
   return(density)
 }
 
+######################################################################
+
+gg.nll <- function(logmean, logkappa, interval) {
+  -sum(dgamma(interval, shape = 1/exp(logkappa), scale = exp(logmean+logkappa), log=TRUE))
+}
+
+ge.nll <- function(logmean, logkappa, interval) {
+  -sum(derlang(interval, shape = round(1/exp(logkappa)), rate = 1/exp(logmean)*round(1/exp(logkappa)), log=TRUE))
+}
+
+ge.nll2 <- function(logmean, interval) {
+  -sum(derlang2(interval, D = exp(logmean), log=TRUE))
+}
+
+gPE.nll <- function(logmean, logkappa, interval) {
+  -sum(dperlang(interval, mean = exp(logmean), kappa = exp(logkappa), log=TRUE))
+}
+
+###################################################################### Pseudo Erlang
+
 dperlang <- function(x, mean, kappa, shape=12, log=FALSE) { # shape=n; mean=D
   r <- kappa2r(kappa, shape)
   a <- (1-1/r^shape)/(mean*(1-1/r))
@@ -138,26 +158,6 @@ dperlang <- function(x, mean, kappa, shape=12, log=FALSE) { # shape=n; mean=D
   return(density)
 } 
 
-######################################################################
-
-gg.nll <- function(logmean, logkappa, interval) {
-  -sum(dgamma(interval, shape = 1/exp(logkappa), scale = exp(logmean+logkappa), log=TRUE))
-}
-
-ge.nll <- function(logmean, logkappa, interval) {
-  -sum(derlang(interval, shape = round(1/exp(logkappa)), rate = 1/exp(logmean)*round(1/exp(logkappa)), log=TRUE))
-}
-
-ge.nll2 <- function(logmean, interval) {
-  -sum(derlang2(interval, D = exp(logmean), log=TRUE))
-}
-
-gPE.nll <- function(logmean, logkappa, interval) {
-  -sum(dperlang(interval, mean = exp(logmean), kappa = exp(logkappa), log=TRUE))
-}
-
-######################################################################
-
 rperlang <- function(n, mean, kappa, shape=12) {
   c <- 10 # gamma * 10  <<need to be improved>>
   samples <- numeric(n)
@@ -173,6 +173,24 @@ rperlang <- function(n, mean, kappa, shape=12) {
     }
   }
   return(samples)
+}
+
+pperlang <- function(x, mean, kappa, shape=12, log=FALSE) {
+  r <- kappa2r(kappa, shape)
+  a <- (1-1/r^shape)/(mean*(1-1/r))
+  cdensity <- 0
+  
+  for (i in 1:shape) {
+    innerp <- 1
+    
+    for (j in 1:shape) {
+      if (j != i) {
+        innerp <- innerp * r^(j-1) / (r^(j-1) - r^(i-1))
+      }
+    }
+    cdensity <- cdensity + innerp * (1-exp(-x*a*r^(i-1)))
+  }
+  return(cdensity)
 }
 
 ######################################################################

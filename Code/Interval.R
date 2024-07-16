@@ -186,6 +186,29 @@ ggplot(df) +
   geom_line(aes(x=Time, y=fit_gamma, color="Gamma after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "PErlang -> Gamma")
 
+######################################################################
+## Test Pseudo Erlang CDF
+######################################################################
+
+mean <- 7
+kappa <- 0.3
+ts <- 0.1
+
+time <- timeSeq(ts, 30)
+perlangPDF <- dperlang(time, mean, kappa)
+perlangCDF <- pperlang(time, mean, kappa)
+numCDF <- numeric(length(time))
+for (i in 1:length(time)) {
+  numCDF[i] <- sum(ts * perlangPDF[1:i])
+}
+
+df <- data.frame(Time=time, numCDF=numCDF, aCDF=perlangCDF)
+ggplot(df, aes(x=Time)) +
+  geom_line(aes(y=numCDF, color='numeric CDF'), linewidth=1) +
+  geom_line(aes(y=aCDF, color='actual CDF'), linewidth=1.5, linetype='dashed') +
+  labs(title='Pseudo Erlang actual vs. numeric CDF', y="CD")
+
+
 quit()
 ############### check
 kappa=0.3
