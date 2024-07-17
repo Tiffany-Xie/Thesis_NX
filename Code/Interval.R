@@ -3,6 +3,8 @@ library(ggplot2); theme_set(theme_minimal())
 library(bbmle)
 library(pseudoErlang)
 
+library(shellpipes)
+loadEnvironments()
 # source("./tempfunc.R")
 ######################################################################
 
@@ -137,6 +139,7 @@ ggplot(df) +
 
 ## sometimes higher than curve?
 ## count/curve inconsistency when using >><< kappa (similar with rgamma)
+## best way to find the proposal distribution
 
 ######################################################################
 ## Pseudo Erlang -> Pseudo Erlang
@@ -179,7 +182,7 @@ fitkappa = print(exp(coef(fit)[["logkappa"]]))
 df <- data.frame(Time = time,
                  interval = pe_interval,
                  perlang = dperlang(time, mean, kappa)*n,
-                 fit_gamma = dgamma(time, 1/kappa, scale=mean*kappa)*n)
+                 fit_gamma = dgamma(time, 1/fitkappa, scale=fitmean*fitkappa)*n)
 ggplot(df) + 
   geom_histogram(aes(x=interval)) +
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +

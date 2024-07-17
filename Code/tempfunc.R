@@ -190,6 +190,9 @@ pperlang <- function(x, mean, kappa, shape=12, log=FALSE) {
     }
     cdensity <- cdensity + innerp * (1-exp(-x*a*r^(i-1)))
   }
+  if (log) {
+    cdensity <- log(cdensity)
+  }
   return(cdensity)
 }
 
