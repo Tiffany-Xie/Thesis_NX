@@ -45,7 +45,7 @@ blgamma <- function(n){
 
 set.seed(223)
 mean = 7
-kappa = 0.3
+kappa = 0.1
 n = 2000
 
 g_interval = gammaDelay(n,mean,kappa) # v

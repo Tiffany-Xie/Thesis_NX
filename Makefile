@@ -40,7 +40,6 @@ realfitting.Rout: Code/realfitting.R tempfunc.rda
 tempErrorPlot.Rout: Code/tempErrorPlot.R tempfunc.rda
 	$(pipeR)
 
-
 ## Compare XNR's derived PDF to simulated density
 testPEpdf.Rout: Code/testPEpdf.R
 	$(pipeR)
