@@ -212,7 +212,6 @@ ggplot(df, aes(x=Time)) +
   labs(title='Pseudo Erlang actual vs. numeric CDF', y="CD")
 
 
-quit()
 ############### check
 kappa=0.3
 mean=7
