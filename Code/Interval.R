@@ -62,14 +62,13 @@ fitmean = print(exp(coef(fit)[["logmean"]]))
 fitkappa = print(exp(coef(fit)[["logkappa"]]))
 df <- data.frame(Time = time,
                  interval = g_interval,
-                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa)*n,
-                 fit_gamma = dgamma(time, shape=1/fitkappa, scale=fitmean*fitkappa)*n)
+                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
+                 fit_gamma = dgamma(time, shape=1/fitkappa, scale=fitmean*fitkappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval)) +
+  geom_histogram(aes(x=interval, y = ..density..)) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_gamma, color="Gamma after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "gamma -> gamma")
-
 
 ######################################################################
 ## Gamma -> Erlang
@@ -86,10 +85,10 @@ fitmean = exp(coef(fit)[["logmean"]])
 fitkappa = exp(coef(fit)[["logkappa"]])
 df <- data.frame(Time = time,
                  interval = g_interval,
-                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa)*n,
-                 fit_gamma = derlang(time, shape=round(1/fitkappa), rate=1/fitmean*round(1/fitkappa))*n)
+                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
+                 fit_gamma = derlang(time, shape=round(1/fitkappa), rate=1/fitmean*round(1/fitkappa)))
 ggplot(df) + 
-  geom_histogram(aes(x=interval)) +
+  geom_histogram(aes(x=interval, y = ..density..)) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_gamma, color="Erlang after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "gamma -> Erlang (shape parameter included)")
@@ -109,10 +108,10 @@ fitmean = print(exp(coef(fit)[["logmean"]]))
 fitkappa = print(exp(coef(fit)[["logkappa"]]))
 df <- data.frame(Time = time,
                  interval = g_interval,
-                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa)*n,
-                 fit_gamma = dperlang(time, mean=fitmean, kappa=fitkappa)*n)
+                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
+                 fit_gamma = dperlang(time, mean=fitmean, kappa=fitkappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval)) +
+  geom_histogram(aes(x=interval, y = ..density..)) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_gamma, color="Pseudo Erlang after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "gamma -> PErlang")
@@ -129,10 +128,10 @@ kappa <- 0.3
 pe_interval <- rperlang(n, mean, kappa) # <<slow if c->inf>>
 time = seq(0, max(pe_interval), length.out=n)
 df <- data.frame(Time=time, interval=pe_interval,
-                 perlang=dperlang(time, mean, kappa)*n,
-                 gamma=dgamma(time, 1/kappa, scale=mean*kappa)*n)
+                 perlang=dperlang(time, mean, kappa),
+                 gamma=dgamma(time, 1/kappa, scale=mean*kappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval)) +
+  geom_histogram(aes(x=interval, y = ..density..)) +
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   labs(title="Random PErlang")
@@ -157,10 +156,10 @@ fitmean = print(exp(coef(fit)[["logmean"]]))
 fitkappa = print(exp(coef(fit)[["logkappa"]]))
 df <- data.frame(Time = time,
                  interval = pe_interval,
-                 perlang = dperlang(time, mean, kappa)*n,
-                 fit_perlang = dperlang(time, fitmean, fitkappa)*n)
+                 perlang = dperlang(time, mean, kappa),
+                 fit_perlang = dperlang(time, fitmean, fitkappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval)) +
+  geom_histogram(aes(x=interval, y = ..density..)) +
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_perlang, color="PErlang after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "PErlang -> PErlang")
@@ -181,10 +180,10 @@ fitmean = print(exp(coef(fit)[["logmean"]]))
 fitkappa = print(exp(coef(fit)[["logkappa"]]))
 df <- data.frame(Time = time,
                  interval = pe_interval,
-                 perlang = dperlang(time, mean, kappa)*n,
-                 fit_gamma = dgamma(time, 1/fitkappa, scale=fitmean*fitkappa)*n)
+                 perlang = dperlang(time, mean, kappa),
+                 fit_gamma = dgamma(time, 1/fitkappa, scale=fitmean*fitkappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval)) +
+  geom_histogram(aes(x=interval, y = ..density..)) +
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_gamma, color="Gamma after fit"), linewidth=1.5) +
   labs(x = "Interval", y = "Count", title = "PErlang -> Gamma")
@@ -215,13 +214,18 @@ ggplot(df, aes(x=Time)) +
 ############### check
 kappa=0.3
 mean=7
-time <- timeSeq(0.005, 50, FALSE)
+time <- timeSeq(1, 1000, FALSE)
 df <- data.frame(Time = time,
                  gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
                  perlang = dperlang(time, mean, kappa))
 ggplot(df, aes(x=Time)) +
-  geom_line(aes(y=gamma, color='Gamma'), linewidth=1) +
+  geom_line(aes(y=gamma, color='Gamma'), linewidth=1.5, linetype='dashed') +
   geom_line(aes(y=perlang, color='Pseudo Erlang'), linewidth=1) +
+  labs(title="Check: same mean & kappa")
+
+ggplot(df[-1,], aes(x=Time)) +
+  geom_line(aes(y=log(gamma), color='Gamma(l)'), linewidth=1.5, linetype='dashed') +
+  geom_line(aes(y=log(perlang), color='Pseudo Erlang(l)'), linewidth=1) +
   labs(title="Check: same mean & kappa")
 
 ## area under the curve
