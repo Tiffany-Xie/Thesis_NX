@@ -175,26 +175,65 @@ rperlang <- function(n, mean, kappa, shape=12) {
   return(samples)
 }
 
-pperlang <- function(x, mean, kappa, shape=12, log=FALSE) {
-  r <- kappa2r(kappa, shape)
-  a <- (1-1/r^shape)/(mean*(1-1/r))
+rperlang2 <- function(n, mean, kappa, box=12) {
+  u <- runif(n)
+  return(qperlang(u, mean, kappa, box=box))
+}
+rperlang2(2, 7, 0.3)
+
+pperlang <- function(x, mean, kappa, box=12, log=FALSE, offset=0) {
+  r <- kappa2r(kappa, box)
+  a <- (1-1/r^box)/(mean*(1-1/r))
   cdensity <- 0
   
-  for (i in 1:shape) {
+  for (i in 1:box) {
     innerp <- 1
     
-    for (j in 1:shape) {
+    for (j in 1:box) {
       if (j != i) {
         innerp <- innerp * r^(j-1) / (r^(j-1) - r^(i-1))
       }
     }
     cdensity <- cdensity + innerp * (1-exp(-x*a*r^(i-1)))
   }
+  
   if (log) {
-    cdensity <- log(cdensity)
+    cdensity <- log(cdensity-offset)
   }
-  return(cdensity)
+  return(cdensity-offset)
 }
+
+qperlang <- function(fx, mean, kappa, box=12, log=FALSE) {
+  #xmax <- exp(1/(1-fx)) # danger
+  #print(xmax)
+  r <- kappa2r(kappa, box)
+  a <- (1-1/r^box)/(mean*(1-1/r))
+  
+  f <- function(fxi) {
+    root <- uniroot(pperlang, interval=c(0, 150), mean=mean, kappa=kappa, box=box, offset=fxi)
+    root$root
+  }
+  
+  x <- sapply(fx, f)
+  return(x)
+}
+       
+## need to find better xmax if possible (by formula / maybe it's not necessary..)
+## R will round 1-1e-7 < # < 1 to 1
+## <1-1e-15 qperlang no longer work; largest x = 120.8907
+## qperlang can only take single fx, not vector
+
+qperlang(c(0.999, 0.77, 0.33), 7, 0.3)
+pperlang(121, 7, 0.3)
+
+qgamma(1e-50, 1/0.3, scale=2.1)
+
+cd <- seq(0.001, 0.999, 0.001)
+inversed_time <- qperlang(cd, 7, 0.3)
+#inversed_time <- numeric(length(cd))
+
+plot(x=cd, y=inversed_time, type="l")
+
 
 ######################################################################
 

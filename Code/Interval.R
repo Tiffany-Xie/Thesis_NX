@@ -131,7 +131,7 @@ df <- data.frame(Time=time, interval=pe_interval,
                  perlang=dperlang(time, mean, kappa),
                  gamma=dgamma(time, 1/kappa, scale=mean*kappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval, y = ..density..)) +
+  geom_histogram(aes(x=interval, y = after_stat(density))) +
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   labs(title="Random PErlang")
@@ -196,7 +196,7 @@ mean <- 7
 kappa <- 0.3
 ts <- 0.1
 
-time <- timeSeq(ts, 30)
+time <- timeSeq(ts, 50)
 perlangPDF <- dperlang(time, mean, kappa)
 perlangCDF <- pperlang(time, mean, kappa)
 numCDF <- numeric(length(time))
@@ -214,7 +214,7 @@ ggplot(df, aes(x=Time)) +
 ############### check
 kappa=0.3
 mean=7
-time <- timeSeq(1, 1000, FALSE)
+time <- timeSeq(1, 500, FALSE)
 df <- data.frame(Time = time,
                  gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
                  perlang = dperlang(time, mean, kappa))
@@ -227,6 +227,8 @@ ggplot(df[-1,], aes(x=Time)) +
   geom_line(aes(y=log(gamma), color='Gamma(l)'), linewidth=1.5, linetype='dashed') +
   geom_line(aes(y=log(perlang), color='Pseudo Erlang(l)'), linewidth=1) +
   labs(title="Check: same mean & kappa")
+
+
 
 ## area under the curve
 sum(df$gamma*0.005)
