@@ -32,7 +32,7 @@ blgamma <- function(n){
 }
 
 ######################################################################
-## Gamma -> Gamma
+## Gamma -> Erlang
 ######################################################################
 
 ## k = 1/shape
@@ -45,14 +45,14 @@ blgamma <- function(n){
 
 set.seed(223)
 mean = 7
-kappa = 0.1
+kappa = 0.3
 n = 2000
 
 g_interval = gammaDelay(n,mean,kappa) # v
-startPar = list(logmean = 2.5, logkappa = -0.5)
 time = seq(0, max(g_interval), length.out=n)
 
-fit <- mle2(gg.nll, 
+startPar = list(logmean = 2.5, logkappa = -2) # 2 -1
+fit <- mle2(ge.nll, 
             data = list(interval = g_interval),
             start = startPar,
             method = "Nelder-Mead",
@@ -63,35 +63,15 @@ fitkappa = print(exp(coef(fit)[["logkappa"]]))
 df <- data.frame(Time = time,
                  interval = g_interval,
                  gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
-                 fit_gamma = dgamma(time, shape=1/fitkappa, scale=fitmean*fitkappa))
+                 fit_gamma = derlang(time, box=round(1/fitkappa), rate=1/fitmean*round(1/fitkappa)))
 ggplot(df) + 
-  geom_histogram(aes(x=interval, y = ..density..)) +
-  geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
-  geom_line(aes(x=Time, y=fit_gamma, color="Gamma after fit"), linewidth=1.5) +
-  labs(x = "Interval", y = "Count", title = "gamma -> gamma")
-
-######################################################################
-## Gamma -> Erlang
-######################################################################
-
-startPar = list(logmean = 2.5, logkappa = -2) # 2 -1
-fit <- mle2(ge.nll, 
-            data = list(interval = g_interval),
-            start = startPar,
-            method = "Nelder-Mead",
-            control = list(maxit = 10000))
-
-fitmean = exp(coef(fit)[["logmean"]])
-fitkappa = exp(coef(fit)[["logkappa"]])
-df <- data.frame(Time = time,
-                 interval = g_interval,
-                 gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
-                 fit_gamma = derlang(time, shape=round(1/fitkappa), rate=1/fitmean*round(1/fitkappa)))
-ggplot(df) + 
-  geom_histogram(aes(x=interval, y = ..density..)) +
+  geom_histogram(aes(x=interval, y = after_stat(density))) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_gamma, color="Erlang after fit"), linewidth=1.5) +
-  labs(x = "Interval", y = "Count", title = "gamma -> Erlang (shape parameter included)")
+  labs(x = "Interval", y = "Count", title = paste0("gamma -> Erlang |", 
+                                                   " fitmean=", round(fitmean, 3), 
+                                                   ", fitkappa=", round(fitkappa, 3),
+                                                   ", Loglik=", round(logLik(fit), 3)))
 
 ######################################################################
 ## Gamma -> Pseudo Erlang
@@ -111,10 +91,14 @@ df <- data.frame(Time = time,
                  gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
                  fit_gamma = dperlang(time, mean=fitmean, kappa=fitkappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval, y = ..density..)) +
+  geom_histogram(aes(x=interval, y = after_stat(density))) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_gamma, color="Pseudo Erlang after fit"), linewidth=1.5) +
-  labs(x = "Interval", y = "Count", title = "gamma -> PErlang")
+  labs(x = "Interval", y = "Count", title = paste0("gamma -> Pseudo Erlang |", 
+                                                   " fitmean=", round(fitmean, 3), 
+                                                   ", fitkappa=", round(fitkappa, 3),
+                                                   ", Loglik=", round(logLik(fit), 3)))
+
 
 ######################################################################
 ## Random Pseudo Erlang numbers
@@ -125,7 +109,7 @@ n <- 1000
 mean <- 7
 kappa <- 0.3
 
-pe_interval <- rperlang(n, mean, kappa) # <<slow if c->inf>>
+pe_interval <- rperlang2(n, mean, kappa) # <<slow if c->inf>>
 time = seq(0, max(pe_interval), length.out=n)
 df <- data.frame(Time=time, interval=pe_interval,
                  perlang=dperlang(time, mean, kappa),
@@ -136,9 +120,19 @@ ggplot(df) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   labs(title="Random PErlang")
 
-## sometimes higher than curve?
-## count/curve inconsistency when using >><< kappa (similar with rgamma)
-## best way to find the proposal distribution
+## best way to find the proposal distribution ?
+
+######################################################################
+## Inverse Pseudo Erlang CDF
+######################################################################
+
+cd <- seq(0.001, 0.999, 0.001)
+inversed_time <- qperlang(cd, mean, kappa)
+
+plot(x=cd, y=inversed_time, type="l",
+     xlab="Interval",
+     ylab="Cumulative Density",
+     main="Inversed Pseudo Erlang CDF")
 
 ######################################################################
 ## Pseudo Erlang -> Pseudo Erlang
@@ -193,7 +187,7 @@ ggplot(df) +
 ######################################################################
 
 mean <- 7
-kappa <- 0.3
+kappa <- 0.23
 ts <- 0.1
 
 time <- timeSeq(ts, 50)
@@ -214,7 +208,9 @@ ggplot(df, aes(x=Time)) +
 ############### check
 kappa=0.3
 mean=7
-time <- timeSeq(1, 500, FALSE)
+t <- 100
+ts <- 0.05
+time <- timeSeq(ts, t)
 df <- data.frame(Time = time,
                  gamma = dgamma(time, shape=1/kappa, scale=mean*kappa),
                  perlang = dperlang(time, mean, kappa))
@@ -223,16 +219,23 @@ ggplot(df, aes(x=Time)) +
   geom_line(aes(y=perlang, color='Pseudo Erlang'), linewidth=1) +
   labs(title="Check: same mean & kappa")
 
-ggplot(df[-1,], aes(x=Time)) +
+ggplot(df, aes(x=Time)) +
   geom_line(aes(y=log(gamma), color='Gamma(l)'), linewidth=1.5, linetype='dashed') +
   geom_line(aes(y=log(perlang), color='Pseudo Erlang(l)'), linewidth=1) +
   labs(title="Check: same mean & kappa")
 
+df_nor <- data.frame(Time = time,
+                     gamma=(df$gamma - sum(df$gamma)/(t/ts))/sd(df$gamma),
+                     perlang=(df$perlang - sum(df$perlang)/(t/ts))/sd(df$perlang))
+ggplot(df_nor, aes(x=Time)) +
+  geom_line(aes(y=gamma, color='Gamma (nor)'), linewidth=1.5, linetype='dashed') +
+  geom_line(aes(y=perlang, color='Pseudo Erlang (nor)'), linewidth=1) +
+  labs(title="Check: same mean & kappa (normalized)")
 
 
 ## area under the curve
-sum(df$gamma*0.005)
-sum(df$perlang*0.005)
+sum(df$gamma*ts)
+sum(df$perlang*ts)
 
 quit()
 num_mean <- sum(df$Time * df$perlang * 1) # ts = 1

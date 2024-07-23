@@ -99,17 +99,17 @@ plotTrace <- function(fitW) {
 ######################################################################
 ######################################################################
 
-derlang <- function(x, shape, rate, log=FALSE) { # shape = n; rate = lambda
-  density <- rate^shape * x^(shape-1) * exp(-rate*x) / factorial(shape-1)
+derlang <- function(x, box, rate, log=FALSE) { # box = n; rate = lambda
+  density <- rate^box * x^(box-1) * exp(-rate*x) / factorial(box-1)
   if (log) {
     density <- log(density)
   }
   return(density)
 } 
 
-derlang2 <- function(x, D, shape=3, log=FALSE) { # shape = n; rate = lambda
-  rate <- shape * 1/D
-  density <- rate^shape * x^(shape-1) * exp(-rate*x) / factorial(shape-1)
+derlang2 <- function(x, D, box=3, log=FALSE) { # box = n; rate = lambda
+  rate <- box * 1/D
+  density <- rate^box * x^(box-1) * exp(-rate*x) / factorial(box-1)
   if (log) {
     density <- log(density)
   }
@@ -123,7 +123,7 @@ gg.nll <- function(logmean, logkappa, interval) {
 }
 
 ge.nll <- function(logmean, logkappa, interval) {
-  -sum(derlang(interval, shape = round(1/exp(logkappa)), rate = 1/exp(logmean)*round(1/exp(logkappa)), log=TRUE))
+  -sum(derlang(interval, box = round(1/exp(logkappa)), rate = 1/exp(logmean)*round(1/exp(logkappa)), log=TRUE))
 }
 
 ge.nll2 <- function(logmean, interval) {
@@ -136,15 +136,15 @@ gPE.nll <- function(logmean, logkappa, interval) {
 
 ###################################################################### Pseudo Erlang
 
-dperlang <- function(x, mean, kappa, shape=12, log=FALSE) { # shape=n; mean=D
-  r <- kappa2r(kappa, shape)
-  a <- (1-1/r^shape)/(mean*(1-1/r))
+dperlang <- function(x, mean, kappa, box=12, log=FALSE) { # box=n; mean=D
+  r <- kappa2r(kappa, box)
+  a <- (1-1/r^box)/(mean*(1-1/r))
   density <- 0
   
-  for (i in 1:shape) {
+  for (i in 1:box) {
     innerp <- 1
     
-    for (j in 1:shape) {
+    for (j in 1:box) {
       if (j != i) {
         innerp <- innerp * r^(j-1)/(r^(j-1) - r^(i-1))
       }
@@ -158,7 +158,7 @@ dperlang <- function(x, mean, kappa, shape=12, log=FALSE) { # shape=n; mean=D
   return(density)
 } 
 
-rperlang <- function(n, mean, kappa, shape=12) {
+rperlang <- function(n, mean, kappa, box=12) {
   c <- 10 # gamma * 10  <<need to be improved>>
   samples <- numeric(n)
   i <- 1
@@ -167,7 +167,7 @@ rperlang <- function(n, mean, kappa, shape=12) {
     x <- rgamma(n=1, shape=1/kappa, scale=mean*kappa)
     u <- runif(1) # uniform(0,1)
     
-    if (u <= dperlang(x, mean, kappa, shape=shape) / (c*dgamma(x, 1/kappa, scale=kappa*mean))) {
+    if (u <= dperlang(x, mean, kappa, box=box) / (c*dgamma(x, 1/kappa, scale=kappa*mean))) {
       samples[i] <- x
       i <- i + 1
     }
@@ -179,7 +179,6 @@ rperlang2 <- function(n, mean, kappa, box=12) {
   u <- runif(n)
   return(qperlang(u, mean, kappa, box=box))
 }
-rperlang2(2, 7, 0.3)
 
 pperlang <- function(x, mean, kappa, box=12, log=FALSE, offset=0) {
   r <- kappa2r(kappa, box)
@@ -221,19 +220,8 @@ qperlang <- function(fx, mean, kappa, box=12, log=FALSE) {
 ## need to find better xmax if possible (by formula / maybe it's not necessary..)
 ## R will round 1-1e-7 < # < 1 to 1
 ## <1-1e-15 qperlang no longer work; largest x = 120.8907
-## qperlang can only take single fx, not vector
-
-qperlang(c(0.999, 0.77, 0.33), 7, 0.3)
-pperlang(121, 7, 0.3)
-
-qgamma(1e-50, 1/0.3, scale=2.1)
-
-cd <- seq(0.001, 0.999, 0.001)
-inversed_time <- qperlang(cd, 7, 0.3)
-#inversed_time <- numeric(length(cd))
-
-plot(x=cd, y=inversed_time, type="l")
-
+## qperlang can only take single fx, not vector  √fixed
+## pperlang x > 60 gives 1
 
 ######################################################################
 
