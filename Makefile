@@ -45,8 +45,10 @@ testPEpdf.Rout: Code/testPEpdf.R
 	$(pipeR)
 
 ## Working on fitting intervals 2024 Jul 03 (Wed)
-Interval.Rout: Code/Interval.R tempfunc.rda
+Interval.Rout: Code/Interval.R
 	$(pipeR)
+
+
 
 ######################################################################
 

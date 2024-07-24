@@ -1,4 +1,17 @@
 
+2024 Jul 24 (Wed)
+=================
+
+inversion-based rperlang is now working.
+
+We no longer need or or want rejection-based rperlang, but note that choosing c is hard, and probably requires some arbitrary limit (choose values where perlang is not too close to 1).
+
+We talked about “normalizing” and “standardizing”. Standardizing in our field is the practice of giving things unit mean and variance (z = (x-μ)/σ). Normalizing is something that maybe we should be doing more: it means calculating a size statistic for a vector and dividing by it, to get a new vector whose size is 1. For densities, we would do something like d = d/(width*sum(d)), so that the new d would satisfy sum(width*d) = 1. It is always a good idea to: normalize vectors when appropriate; check whether the normalizing constant (the calculated size) is within expected limits.
+
+Jonathan is supposed to look for data that we can fit.
+* My Taiwan collaborator Andrei curated [some mpox data](https://github.com/aakhmetz/Mpox-IncubationPeriodSerialInterval-Meta2023/blob/main/SupplementaryFile1.xlsx). I will talk to him about it this week.
+* Here is a [known set of covid interval data](https://zenodo.org/records/3940300)
+
 2024 Jul 17 (Wed)
 =================
 
