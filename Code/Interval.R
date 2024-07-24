@@ -99,6 +99,17 @@ ggplot(df) +
                                                    ", fitkappa=", round(fitkappa, 3),
                                                    ", Loglik=", round(logLik(fit), 3)))
 
+######################################################################
+## Inverse Pseudo Erlang CDF
+######################################################################
+
+cd <- seq(0.001, 0.999, 0.001)
+inversed_time <- qperlang(cd, mean, kappa)
+
+plot(x=cd, y=inversed_time, type="l",
+     xlab="Interval",
+     ylab="Cumulative Density",
+     main="Inversed Pseudo Erlang CDF")
 
 ######################################################################
 ## Random Pseudo Erlang numbers
@@ -118,21 +129,9 @@ ggplot(df) +
   geom_histogram(aes(x=interval, y = after_stat(density))) +
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
-  labs(title="Random PErlang")
+  labs(title="Random PErlang (inversion-based)")
 
 ## best way to find the proposal distribution ?
-
-######################################################################
-## Inverse Pseudo Erlang CDF
-######################################################################
-
-cd <- seq(0.001, 0.999, 0.001)
-inversed_time <- qperlang(cd, mean, kappa)
-
-plot(x=cd, y=inversed_time, type="l",
-     xlab="Interval",
-     ylab="Cumulative Density",
-     main="Inversed Pseudo Erlang CDF")
 
 ######################################################################
 ## Pseudo Erlang -> Pseudo Erlang
@@ -153,10 +152,13 @@ df <- data.frame(Time = time,
                  perlang = dperlang(time, mean, kappa),
                  fit_perlang = dperlang(time, fitmean, fitkappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval, y = ..density..)) +
+  geom_histogram(aes(x=interval, y = after_stat(density))) +
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_perlang, color="PErlang after fit"), linewidth=1.5) +
-  labs(x = "Interval", y = "Count", title = "PErlang -> PErlang")
+  labs(x = "Interval", y = "Count", title = paste0("PErlang -> PErlang |", 
+                                                   " fitmean=", round(fitmean, 3), 
+                                                   ", fitkappa=", round(fitkappa, 3),
+                                                   ", Loglik=", round(logLik(fit), 3)))
 
 ######################################################################
 ## Pseudo Erlang -> Gamma
@@ -177,32 +179,13 @@ df <- data.frame(Time = time,
                  perlang = dperlang(time, mean, kappa),
                  fit_gamma = dgamma(time, 1/fitkappa, scale=fitmean*fitkappa))
 ggplot(df) + 
-  geom_histogram(aes(x=interval, y = ..density..)) +
+  geom_histogram(aes(x=interval, y = after_stat(density))) +
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
   geom_line(aes(x=Time, y=fit_gamma, color="Gamma after fit"), linewidth=1.5) +
-  labs(x = "Interval", y = "Count", title = "PErlang -> Gamma")
-
-######################################################################
-## Test Pseudo Erlang CDF
-######################################################################
-
-mean <- 7
-kappa <- 0.23
-ts <- 0.1
-
-time <- timeSeq(ts, 50)
-perlangPDF <- dperlang(time, mean, kappa)
-perlangCDF <- pperlang(time, mean, kappa)
-numCDF <- numeric(length(time))
-for (i in 1:length(time)) {
-  numCDF[i] <- sum(ts * perlangPDF[1:i])
-}
-
-df <- data.frame(Time=time, numCDF=numCDF, aCDF=perlangCDF)
-ggplot(df, aes(x=Time)) +
-  geom_line(aes(y=numCDF, color='numeric CDF'), linewidth=1) +
-  geom_line(aes(y=aCDF, color='actual CDF'), linewidth=1.5, linetype='dashed') +
-  labs(title='Pseudo Erlang actual vs. numeric CDF', y="CD")
+  labs(x = "Interval", y = "Count", title = paste0("PErlang -> gamma |", 
+                                                   " fitmean=", round(fitmean, 3), 
+                                                   ", fitkappa=", round(fitkappa, 3),
+                                                   ", Loglik=", round(logLik(fit), 3)))
 
 
 ############### check
