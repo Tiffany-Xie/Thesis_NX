@@ -48,8 +48,6 @@ testPEpdf.Rout: Code/testPEpdf.R
 Interval.Rout: Code/Interval.R
 	$(pipeR)
 
-
-
 ######################################################################
 
 Sources += $(wildcard data/*.csv)
