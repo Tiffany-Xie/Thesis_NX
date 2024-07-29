@@ -202,6 +202,23 @@ pperlang <- function(x, mean, kappa, box=12, log=FALSE, offset=0) {
   return(cdensity-offset)
 }
 
+searchBound <- function(targetfx, mean, kappa, span=10, max=1e9, box=12, log=FALSE) {
+  mintry <- 0
+  while (mintry < max) {
+    tseq <- seq(mintry, mintry+1000, by=span)
+    cdseq <- pperlang(tseq, mean, kappa)
+    if (cdseq[length(cdseq)] >= targetfx) {
+      break
+    }
+    mintry <- mintry+1000
+  }
+  temp <- which(cdseq >= targetfx)[1]
+  minindex <- temp - 1
+  maxindex <- temp
+  
+  return(c(tseq[minindex]-1, tseq[maxindex]+1))
+}
+
 qperlang <- function(fx, mean, kappa, box=12, log=FALSE) {
   #xmax <- exp(1/(1-fx)) # danger
   #print(xmax)

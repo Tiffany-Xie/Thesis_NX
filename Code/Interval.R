@@ -98,17 +98,36 @@ ggplot(df) +
                                                    " fitmean=", round(fitmean, 3), 
                                                    ", fitkappa=", round(fitkappa, 3),
                                                    ", Loglik=", round(logLik(fit), 3)))
+# actual data kappa
+p <- ggplot(df) + 
+  geom_histogram(aes(x=interval, y = after_stat(density)), bins=45)
+hist_data <- ggplot_build(p)$data[[1]]
 
+actmean = print(sum(g_interval)/length(g_interval))
+span = (hist_data$xmax[1] + hist_data$xmin[1])/2
+actvar = sum(hist_data$x^2 * hist_data$density * span) - actmean^2
+actkappa = print(actvar/actmean^2)
+
+## mean() vs. sum/n different value
 ######################################################################
 ## Inverse Pseudo Erlang CDF
 ######################################################################
 
 cd <- seq(0.001, 0.999, 0.001)
-inversed_time <- qperlang(cd, mean, kappa)
+inversed_time_pe <- qperlang(cd, mean, kappa)
+inversed_time_g <- qgamma(cd, 1/kappa, scale=mean*kappa)
+df <- data.frame(CD = cd, 
+                 Interval_pe = inversed_time_pe,
+                 Interval_g = inversed_time_g)
+
+ggplot(df, aes(x=CD)) +
+  geom_line(aes(y=Interval_pe^2, color='Pseudo Erlang(sq)'), linewidth=1) +
+  geom_line(aes(y=Interval_g^2, color='Gamma(sq)'), linewidth=1)
+
 
 plot(x=cd, y=inversed_time, type="l",
-     xlab="Interval",
-     ylab="Cumulative Density",
+     xlab="Cumulative Density",
+     ylab="Interval",
      main="Inversed Pseudo Erlang CDF")
 
 ######################################################################
@@ -125,14 +144,31 @@ time = seq(0, max(pe_interval), length.out=n)
 df <- data.frame(Time=time, interval=pe_interval,
                  perlang=dperlang(time, mean, kappa),
                  gamma=dgamma(time, 1/kappa, scale=mean*kappa))
-ggplot(df) + 
-  geom_histogram(aes(x=interval, y = after_stat(density))) +
+p <- ggplot(df) + 
+  geom_histogram(aes(x=interval, y = after_stat(density)))+
   geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
   geom_line(aes(x=Time, y=gamma, color="Gamma"), linewidth=1.5) +
   labs(title="Random PErlang (inversion-based)")
 
-## best way to find the proposal distribution ?
+hist_data <- ggplot_build(p)$data[[1]]
+span <- hist_data$x[2] + hist_data$x[1]
+print(sum(hist_data$density * 1.111401))
 
+## manually
+bins <- 30
+binwidth <- (max(pe_interval) - min(pe_interval))/bins
+breaks <- seq(min(pe_interval), max(pe_interval), by=binwidth)
+binned <- cut(pe_interval, breaks=breaks, include.lowest = TRUE, right = TRUE)
+counts <- table(binned)
+counts_df <- as.data.frame(counts)
+colnames(counts_df) <- c("Days", "Count")
+
+counts_df$Density <- counts_df$Count/(length(pe_interval)*binwidth) 
+counts_df$midpoint <- seq(min(pe_interval)+binwidth/2, max(pe_interval), by=binwidth)
+ggplot(counts_df, aes(x=midpoint, y=Density)) +
+         geom_bar(stat = "identity", width = 1.08)
+
+sum(binwidth*counts_df$Density)
 ######################################################################
 ## Pseudo Erlang -> Pseudo Erlang
 ######################################################################
