@@ -202,24 +202,43 @@ pperlang <- function(x, mean, kappa, box=12, log=FALSE, offset=0) {
   return(cdensity-offset)
 }
 
-searchBound <- function(targetfx, mean, kappa, span=10, max=1e9, box=12, log=FALSE) {
+searchBound <- function(targetfx, mean, kappa, span=10, max=1e6, box=12, log=FALSE) {
   mintry <- 0
   while (mintry < max) {
     tseq <- seq(mintry, mintry+1000, by=span)
     cdseq <- pperlang(tseq, mean, kappa)
-    if (cdseq[length(cdseq)] >= targetfx) {
+    if (cdseq[length(cdseq)] >= targetfx) { # pperlang(1e6, mean, kappa) < 1-1e-16 ??
       break
     }
     mintry <- mintry+1000
+    if (mintry >= max) {
+      return("You've reached the maximum")
+    }
   }
   temp <- which(cdseq >= targetfx)[1]
   minindex <- temp - 1
   maxindex <- temp
   
-  return(c(tseq[minindex]-1, tseq[maxindex]+1))
+  return(c(ifelse(tseq[minindex]<1, tseq[minindex], tseq[minindex]-1), tseq[maxindex]+1))
 }
 
 qperlang <- function(fx, mean, kappa, box=12, log=FALSE) {
+  if (fx < 1-1e-16)
+  r <- kappa2r(kappa, box)
+  a <- (1-1/r^box)/(mean*(1-1/r))
+  
+  f <- function(fxi) {
+    bound <- searchBound(fxi, mean, kappa, box=box,log=log)
+    #print(c(fxi, bound))
+    root <- uniroot(pperlang, interval=c(bound[1], bound[2]), mean=mean, kappa=kappa, box=box, offset=fxi)
+    root$root
+  }
+  
+  x <- sapply(fx, f)
+  return(x)
+}
+
+qperlang_o <- function(fx, mean, kappa, box=12, log=FALSE) {
   #xmax <- exp(1/(1-fx)) # danger
   #print(xmax)
   r <- kappa2r(kappa, box)

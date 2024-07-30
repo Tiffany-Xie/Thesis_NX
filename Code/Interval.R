@@ -108,13 +108,14 @@ span = (hist_data$xmax[1] + hist_data$xmin[1])/2
 actvar = sum(hist_data$x^2 * hist_data$density * span) - actmean^2
 actkappa = print(actvar/actmean^2)
 
-## mean() vs. sum/n different value
 ######################################################################
 ## Inverse Pseudo Erlang CDF
 ######################################################################
-
+mean=7
+kappa=0.3
 cd <- seq(0.001, 0.999, 0.001)
-inversed_time_pe <- qperlang(cd, mean, kappa)
+system.time(inversed_time_pe <- qperlang(cd, mean, kappa))
+#system.time(inversed_time_pe <- qperlang_o(cd, mean, kappa))
 inversed_time_g <- qgamma(cd, 1/kappa, scale=mean*kappa)
 df <- data.frame(CD = cd, 
                  Interval_pe = inversed_time_pe,
@@ -130,7 +131,7 @@ plot(x=cd, y=inversed_time, type="l",
      ylab="Interval",
      main="Inversed Pseudo Erlang CDF")
 
-######################################################################
+#####################################################################
 ## Random Pseudo Erlang numbers
 ######################################################################
 
@@ -222,6 +223,23 @@ ggplot(df) +
                                                    " fitmean=", round(fitmean, 3), 
                                                    ", fitkappa=", round(fitkappa, 3),
                                                    ", Loglik=", round(logLik(fit), 3)))
+
+######################################################################
+## Mpox
+install.packages("readxl")
+install.packages("lubridate")
+
+library(readxl)
+library(lubridate)
+
+data <- read_excel("Desktop/Uni/BIO_4C12/SupplementaryFile1.xlsx", sheet = "3a. Incubation period_Pre-2022")
+ExposureL <- ymd(data$ExposureL)
+ExposureR <- ymd(data$ExposureR)
+
+avgExp <- ifelse(!is.na(ExposureL) & !is.na(ExposureR), ExposureL + days(as.integer((ExposureR-ExposureL)/2)), 
+                 ifelse(!is.na(ExposureL), ExposureL, ExposureR))
+avgExp <- as.Date(avgExp, origin = "1970-01-01")
+######################################################################
 
 
 ############### check
