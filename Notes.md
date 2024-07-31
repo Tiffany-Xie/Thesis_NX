@@ -2,6 +2,8 @@
 2024 Jul 31 (Wed)
 =================
 
+[Here](https://github.com/eliminaterabies/R0paper/blob/main/public_data/intervals.rda) are some data you can try fitting as point data first; we will be curious how well they fit with dperlang, dlnorm, and dgamma. As we try things with real data, we should be making notes in a [stats journal](statsJournal.md) of everything we try, in order to maximize transparency and minimize bias.
+
 Here are some pretty-complicated papers about thinking about intervals and data. You don't need to worry about them too much.
 * [Charniga pre-print](https://arxiv.org/abs/2405.08841)
 * [Park pre-print](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
