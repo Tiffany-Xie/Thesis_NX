@@ -261,14 +261,6 @@ ggplot(df, aes(x=Time)) +
   geom_line(aes(y=log(perlang), color='Pseudo Erlang(l)'), linewidth=1) +
   labs(title="Check: same mean & kappa")
 
-df_nor <- data.frame(Time = time,
-                     gamma=(df$gamma - sum(df$gamma)/(t/ts))/sd(df$gamma),
-                     perlang=(df$perlang - sum(df$perlang)/(t/ts))/sd(df$perlang))
-ggplot(df_nor, aes(x=Time)) +
-  geom_line(aes(y=gamma, color='Gamma (nor)'), linewidth=1.5, linetype='dashed') +
-  geom_line(aes(y=perlang, color='Pseudo Erlang (nor)'), linewidth=1) +
-  labs(title="Check: same mean & kappa (normalized)")
-
 
 ## area under the curve
 sum(df$gamma*ts)
