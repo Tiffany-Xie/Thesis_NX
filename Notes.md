@@ -2,6 +2,10 @@
 2024 Jul 31 (Wed)
 =================
 
+Here are some pretty-complicated papers about thinking about intervals and data. You don't need to worry about them too much.
+* [Charniga pre-print](https://arxiv.org/abs/2405.08841)
+* [Park pre-print](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
+
 Ningrui is working on bounds for qperlang uniroot. A new idea would be to use qperlang with npe boxes and the slowest rate (for upper bound) or the highest rate: this is very non-conservative, but should work. The concern will be if it gives us ∞ more often than we like, but can try first.
 
 In addition to trying that, we can also try to improve the current boundSearch method, which is working well for the parameters that Ningrui is using, but needs to be more flexible (and needs to not have magic numbers 🙂). Jonathan suggests a multiplicative approach with something like mean(exp(something)) where something is a vector symmetric around zero. To avoid ties, lower/upper bound can be multiplied by exp(∓ε).
