@@ -243,9 +243,11 @@ qperlang_o <- function(fx, mean, kappa, box=12, log=FALSE) {
   #print(xmax)
   r <- kappa2r(kappa, box)
   a <- (1-1/r^box)/(mean*(1-1/r))
+  #maxmean <- box/a
   
   f <- function(fxi) {
-    root <- uniroot(pperlang, interval=c(0, 150), mean=mean, kappa=kappa, box=box, offset=fxi)
+    upbound <- qgamma(fxi, box, rate=a)
+    root <- uniroot(pperlang, interval=c(0, upbound), mean=mean, kappa=kappa, box=box, offset=fxi)
     root$root
   }
   
