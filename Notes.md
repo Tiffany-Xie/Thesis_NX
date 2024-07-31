@@ -1,4 +1,15 @@
 
+2024 Jul 31 (Wed)
+=================
+
+Ningrui is working on bounds for qperlang uniroot. A new idea would be to use qperlang with npe boxes and the slowest rate (for upper bound) or the highest rate: this is very non-conservative, but should work. The concern will be if it gives us ∞ more often than we like, but can try first.
+
+In addition to trying that, we can also try to improve the current boundSearch method, which is working well for the parameters that Ningrui is using, but needs to be more flexible (and needs to not have magic numbers 🙂). Jonathan suggests a multiplicative approach with something like mean(exp(something)) where something is a vector symmetric around zero. To avoid ties, lower/upper bound can be multiplied by exp(∓ε).
+
+Ningrui has been looking at the mpox data, and they are confusing. We could use point-based or interval-based estimation. Point-based estimation would involve just getting average dates; interval-based estimation is a little complicated if we have intervals at each end. It might be fun for Ningrui to do some math and write a function to describe the triangular distributions that result. We should also look at work by Abbott and Park and others where they may have code that we can leverage for that. Jonathan is thinking of finding some rabies data that may have a wider distribution and may be less problematic for point-based fitting. Ningrui will also look more at the COVID data.
+
+Triangular distribution is something like Int_min^max of something about possible observation times. The probability of observing the data is then proportional to Int_min^max (pobs(int) * pperlang(int)).
+
 2024 Jul 24 (Wed)
 =================
 
@@ -7,6 +18,8 @@ inversion-based rperlang is now working.
 We no longer need or or want rejection-based rperlang, but note that choosing c is hard, and probably requires some arbitrary limit (choose values where perlang is not too close to 1).
 
 We talked about “normalizing” and “standardizing”. Standardizing in our field is the practice of giving things unit mean and variance (z = (x-μ)/σ). Normalizing is something that maybe we should be doing more: it means calculating a size statistic for a vector and dividing by it, to get a new vector whose size is 1. For densities, we would do something like d = d/(width*sum(d)), so that the new d would satisfy sum(width*d) = 1. It is always a good idea to: normalize vectors when appropriate; check whether the normalizing constant (the calculated size) is within expected limits.
+
+Jonathan suggested some μ/κ-based upper bounds for the qperlang upper bound, these did not work!
 
 Jonathan is supposed to look for data that we can fit.
 * My Taiwan collaborator Andrei curated [some mpox data](https://github.com/aakhmetz/Mpox-IncubationPeriodSerialInterval-Meta2023/blob/main/SupplementaryFile1.xlsx). I will talk to him about it this week.

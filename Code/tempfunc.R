@@ -202,15 +202,16 @@ pperlang <- function(x, mean, kappa, box=12, log=FALSE, offset=0) {
   return(cdensity-offset)
 }
 
-searchBound <- function(targetfx, mean, kappa, span=10, max=1e6, box=12, log=FALSE) {
+## this would be much better if tseq were multiplied by mean (or mean*(1+kappa)) before pperlang
+searchBound <- function(targetfx, mean, kappa, span=1000, step=10, max=1e6, box=12, log=FALSE) {
   mintry <- 0
   while (mintry < max) {
-    tseq <- seq(mintry, mintry+1000, by=span)
+    tseq <- mean*(1+kappa)*seq(mintry, mintry+span, by=step)
     cdseq <- pperlang(tseq, mean, kappa)
     if (cdseq[length(cdseq)] >= targetfx) { # pperlang(1e6, mean, kappa) < 1-1e-16 ??
       break
     }
-    mintry <- mintry+1000
+    mintry <- mintry+span
     if (mintry >= max) {
       return("You've reached the maximum")
     }
