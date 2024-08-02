@@ -115,7 +115,7 @@ mean=7
 kappa=0.3
 cd <- seq(0.001, 0.999, 0.001)
 system.time(inversed_time_pe <- qperlang(cd, mean, kappa))
-#system.time(inversed_time_pe <- qperlang_o(cd, mean, kappa))
+system.time(inversed_time_pe <- qperlang_o(cd, mean, kappa))
 inversed_time_g <- qgamma(cd, 1/kappa, scale=mean*kappa)
 df <- data.frame(CD = cd, 
                  Interval_pe = inversed_time_pe,
@@ -240,6 +240,36 @@ avgExp <- ifelse(!is.na(ExposureL) & !is.na(ExposureR), ExposureL + days(as.inte
                  ifelse(!is.na(ExposureL), ExposureL, ExposureR))
 avgExp <- as.Date(avgExp, origin = "1970-01-01")
 ######################################################################
+# rabies
+load("/Users/ningruixie/Desktop/Uni/BIO_4C12/intervals.rda")
+interval_merge <- as.data.frame(interval_merge)
+SI <- subset(interval_merge, Type=="Serial Interval" & Days <100)
+
+# why can't us use direct calculated mean & kappa?
+interval = SI$Days
+startPar = list(logmean = 3, logkappa = -0.1)
+fit <- mle2(gPE.nll, 
+            data = list(interval = interval),
+            start = startPar,
+            method = "Nelder-Mead",
+            control = list(maxit = 10000))
+
+fitmean = print(exp(coef(fit)[["logmean"]]))
+fitkappa = print(exp(coef(fit)[["logkappa"]]))
+df <- data.frame(Time = time,
+                 interval = pe_interval,
+                 perlang = dperlang(time, mean, kappa),
+                 fit_perlang = dperlang(time, fitmean, fitkappa))
+ggplot(df) + 
+  geom_histogram(aes(x=interval, y = after_stat(density))) +
+  geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
+  geom_line(aes(x=Time, y=fit_perlang, color="PErlang after fit"), linewidth=1.5) +
+  labs(x = "Interval", y = "Count", title = paste0("PErlang -> PErlang |", 
+                                                   " fitmean=", round(fitmean, 3), 
+                                                   ", fitkappa=", round(fitkappa, 3),
+                                                   ", Loglik=", round(logLik(fit), 3)))
+
+
 
 
 ############### check

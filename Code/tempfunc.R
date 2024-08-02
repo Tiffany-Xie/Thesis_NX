@@ -203,12 +203,14 @@ pperlang <- function(x, mean, kappa, box=12, log=FALSE, offset=0) {
 }
 
 ## this would be much better if tseq were multiplied by mean (or mean*(1+kappa)) before pperlang
-searchBound <- function(targetfx, mean, kappa, span=1000, step=10, max=1e6, box=12, log=FALSE) {
+searchBound <- function(targetfx, mean, kappa, span=100, step=1, max=1000, box=12, log=FALSE) {
+  unit <- mean*(1+kappa)
+  span<-span*unit; step<-step*unit; max<-max*unit
   mintry <- 0
   while (mintry < max) {
-    tseq <- mean*(1+kappa)*seq(mintry, mintry+span, by=step)
+    tseq <- seq(mintry, mintry+span, by=step)
     cdseq <- pperlang(tseq, mean, kappa)
-    if (cdseq[length(cdseq)] >= targetfx) { # pperlang(1e6, mean, kappa) < 1-1e-16 ??
+    if (cdseq[length(cdseq)] >= targetfx) {
       break
     }
     mintry <- mintry+span
@@ -220,11 +222,11 @@ searchBound <- function(targetfx, mean, kappa, span=1000, step=10, max=1e6, box=
   minindex <- temp - 1
   maxindex <- temp
   
-  return(c(ifelse(tseq[minindex]<1, tseq[minindex], tseq[minindex]-1), tseq[maxindex]+1))
+  return(c(tseq[minindex]*0.9, tseq[maxindex]/0.9))
 }
 
 qperlang <- function(fx, mean, kappa, box=12, log=FALSE) {
-  if (fx < 1-1e-16)
+  #if (fx < 1-1e-16)
   r <- kappa2r(kappa, box)
   a <- (1-1/r^box)/(mean*(1-1/r))
   
@@ -240,15 +242,13 @@ qperlang <- function(fx, mean, kappa, box=12, log=FALSE) {
 }
 
 qperlang_o <- function(fx, mean, kappa, box=12, log=FALSE) {
-  #xmax <- exp(1/(1-fx)) # danger
-  #print(xmax)
   r <- kappa2r(kappa, box)
   a <- (1-1/r^box)/(mean*(1-1/r))
-  #maxmean <- box/a
   
   f <- function(fxi) {
     upbound <- qgamma(fxi, box, rate=a)
-    root <- uniroot(pperlang, interval=c(0, upbound), mean=mean, kappa=kappa, box=box, offset=fxi)
+    lowbound <- qgamma(fxi, box, rate=a*r^(box-1))
+    root <- uniroot(pperlang, interval=c(lowbound, upbound), mean=mean, kappa=kappa, box=box, offset=fxi)
     root$root
   }
   
