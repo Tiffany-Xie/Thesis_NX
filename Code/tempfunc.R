@@ -98,6 +98,30 @@ plotTrace <- function(fitW) {
 
 ######################################################################
 ######################################################################
+## Continuous data should be fitted with derlang and dperlang
+gammaDelay <- function(n, mean, kappa){
+  v <- rgamma(n, shape=1/kappa, scale=mean*kappa)
+  print(c(mean = mean, kappa = kappa,
+          Dmean = mean(v), Dkappa = sd(v)^2/mean(v)^2))
+  return(v)
+}
+
+## Discrete data should be fitted another way (make boxed likelihood functions)
+gammaDelayDiscrete <- function(n, mean, kappa){
+  v <- round(rgamma(n, shape=1/kappa, scale=mean*kappa))
+  print(c(mean = mean, kappa = kappa,
+          Dmean = mean(v), Dkappa = sd(v)^2/mean(v)^2))
+  return(v)
+}
+
+## Boxed likelihood example (not working yet!!!)
+blgamma <- function(n){
+  ## Do we need a special case for n=0?
+  ## should we check that it's an integer and/or round?
+  return(pgamma(n+1/2, log=TRUE) - pgamma(n-1/2, log=TRUE))
+}
+
+######################################################################
 
 derlang <- function(x, box, rate, log=FALSE) { # box = n; rate = lambda
   density <- rate^box * x^(box-1) * exp(-rate*x) / factorial(box-1)

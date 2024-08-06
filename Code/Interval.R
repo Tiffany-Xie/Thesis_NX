@@ -6,30 +6,6 @@ library(pseudoErlang)
 library(shellpipes)
 loadEnvironments()
 # source("./tempfunc.R")
-######################################################################
-
-## Continuous data should be fitted with derlang and dperlang
-gammaDelay <- function(n, mean, kappa){
-  v <- rgamma(n, shape=1/kappa, scale=mean*kappa)
-  print(c(mean = mean, kappa = kappa,
-          Dmean = mean(v), Dkappa = sd(v)^2/mean(v)^2))
-  return(v)
-}
-
-## Discrete data should be fitted another way (make boxed likelihood functions)
-gammaDelayDiscrete <- function(n, mean, kappa){
-  v <- round(rgamma(n, shape=1/kappa, scale=mean*kappa))
-  print(c(mean = mean, kappa = kappa,
-          Dmean = mean(v), Dkappa = sd(v)^2/mean(v)^2))
-  return(v)
-}
-
-## Boxed likelihood example (not working yet!!!)
-blgamma <- function(n){
-	## Do we need a special case for n=0?
-	## should we check that it's an integer and/or round?
-	return(pgamma(n+1/2, log=TRUE) - pgamma(n-1/2, log=TRUE))
-}
 
 ######################################################################
 ## Gamma -> Erlang
@@ -240,35 +216,6 @@ avgExp <- ifelse(!is.na(ExposureL) & !is.na(ExposureR), ExposureL + days(as.inte
                  ifelse(!is.na(ExposureL), ExposureL, ExposureR))
 avgExp <- as.Date(avgExp, origin = "1970-01-01")
 ######################################################################
-# rabies
-load("/Users/ningruixie/Desktop/Uni/BIO_4C12/intervals.rda")
-interval_merge <- as.data.frame(interval_merge)
-SI <- subset(interval_merge, Type=="Serial Interval" & Days <100)
-
-# why can't us use direct calculated mean & kappa?
-interval = SI$Days
-startPar = list(logmean = 3, logkappa = -0.1)
-fit <- mle2(gPE.nll, 
-            data = list(interval = interval),
-            start = startPar,
-            method = "Nelder-Mead",
-            control = list(maxit = 10000))
-
-fitmean = print(exp(coef(fit)[["logmean"]]))
-fitkappa = print(exp(coef(fit)[["logkappa"]]))
-df <- data.frame(Time = time,
-                 interval = pe_interval,
-                 perlang = dperlang(time, mean, kappa),
-                 fit_perlang = dperlang(time, fitmean, fitkappa))
-ggplot(df) + 
-  geom_histogram(aes(x=interval, y = after_stat(density))) +
-  geom_line(aes(x=Time, y=perlang, color="PErlang"), linewidth=1.5) +
-  geom_line(aes(x=Time, y=fit_perlang, color="PErlang after fit"), linewidth=1.5) +
-  labs(x = "Interval", y = "Count", title = paste0("PErlang -> PErlang |", 
-                                                   " fitmean=", round(fitmean, 3), 
-                                                   ", fitkappa=", round(fitkappa, 3),
-                                                   ", Loglik=", round(logLik(fit), 3)))
-
 
 
 
