@@ -48,6 +48,9 @@ testPEpdf.Rout: Code/testPEpdf.R
 Interval.Rout: Code/Interval.R
 	$(pipeR)
 
+realfitting_interval.Rout: Code/realfitting_interval.R
+	$(pipeR)
+
 ######################################################################
 
 Sources += $(wildcard data/*.csv)
