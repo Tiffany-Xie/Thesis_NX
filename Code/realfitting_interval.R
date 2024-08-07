@@ -135,7 +135,9 @@ quit()
 library(readxl)
 library(lubridate)
 
-data <- read_excel("Desktop/Uni/BIO_4C12/SupplementaryFile1.xlsx", sheet = "3a. Incubation period_Pre-2022")
+## Make a symbolic link to your data directory so that you don't need 
+## an absolute path
+data <- read_excel("BIO_4C12/SupplementaryFile1.xlsx", sheet = "3a. Incubation period_Pre-2022")
 ExposureL <- ymd(data$ExposureL)
 ExposureR <- ymd(data$ExposureR)
 
@@ -154,8 +156,8 @@ gPE.intv.nll <- function(logmean, logkappa, interval) { # interval=c(l,r)
   -sum(log(integrate(f, lower=left, upper=right)))
 }
 
-dtriangular <- function(x, left, right, mode=0) {
-  if (mode==0) mode <- (left+right)/2
+dtriangular <- function(x, left, right, mode=NULL) {
+  if (is.null(mode)) mode <- (left+right)/2
   if (x < left || x > right) return(0)
   if (x <= mode) return((2 * (x - left)) / ((right - left) * (mode - left)))
   return((2 * (right - x)) / ((right - left) * (right - mode)))

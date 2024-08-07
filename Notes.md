@@ -2,6 +2,26 @@
 2024 Aug 07 (Wed)
 =================
 
+qperlang uniroot working well now with idea below 🙂. Can abandon bound search for now.
+
+Investigated rabies data without using statsJournal! Current version of serial intervals has “a lot” of zeroes; Jonathan says this is a data problem, not a coding problem.
+
+In the meantime, Ningrui changed all of the zeroes to 0.01 ☹ and tried to fit... it was good to code this, but we should not even look at results from bad real data. These data are actually not appropriate for current methods because kappa is large; I wonder if this is still true if we clean the data first. Ningrui thinks that even when data are cleaned the outliers will mess things up.
+
+Just for future; Jonathan believes that if you are transforming data (which includes moving things a little away from zero) that you should: think carefully about transformation parameters; and transform all the data.
+
+Ningrui thinks using observed mean and kappa might be better than fitting. It is worth exploring this with some fits and seeing what advantages and disadvantages are.
+
+How to evaluate a fit? Boxes, qqplots (make sure not to renormalize), realized likelihood (deviance), absolute squared difference between ordered vectors, ... ? We can also ask whether the fitted kappa matches the observed kappa; if not, this could be a bad sign about distributional assumptions. Differences may also arise from deep in the tails (stuff that is not observed in data).
+
+So, what to do now? _Simple_ interval-based fitting should be easy to code, but Jonathan hesitates to apply it to the real data, which are usually double-censored (meaning the triangle thing). Maybe read a bit about triangling tools below? Also: Jonathan should try to figure out why rabies data are weird and if they can be fixed reasonably simply.
+
+We can also simulate some double-censored data very easily. Pick uniform start times and gamma interval times and then round them both (probably using floor()) to get double-censored intervals. Try to create a situation where using naive interval likelihood is worse than using triangular interval likelihood.
+
+Jonathan is not in tune with Ningrui's theories about specifying the mode, but also not against the current code. Discuss again if you want to say (mode=).
+
+Ningrui needs to explain triangular code better; it may be better to simplify and drop the mode... Please send _email_ with explanation of logic for calculating left and right.
+
 2024 Jul 31 (Wed)
 =================
 
