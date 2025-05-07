@@ -1,0 +1,90 @@
+\documentclass[12pt]{article}
+\usepackage{amsthm, amsmath, amssymb, amsfonts, mathptmx}
+\usepackage[margin=1in]{geometry}
+\usepackage{subcaption}
+\linespread{1.5}
+\newtheorem{theorem}{Claim}
+
+\title{\textbf{Pseudo Erlang Probability Density Function}}
+\author{Ningrui Xie}
+\date{May 2024}
+
+\begin{document}
+\maketitle
+
+
+\begin{theorem}
+    Given that a singal stage $T$ is divided into $n$ numbers of substages $(T_i)$, each following an exponential distribution with rate $\lambda_i$, where $\lambda_i = ar^{i-1}$. The probability density function (PDF) of $T$ would be the following
+    \begin{align}
+        f_T(t) = \sum_{i=1}^{n} \left( \prod_{j=1, j \ne i}^{n} \frac{r^{j-1}}{r^{j-1} - r^{i-1}} \right) ar^{i-1} e^{-tar^{i-1}}
+    \end{align} 
+\end{theorem}
+
+\vspace{10mm}
+\begin{proof}
+
+    We know that $T = T_1 + T_2 + \dots + T_n$ (hypoexponential, $CV < 1$) 
+
+    $\therefore f_T(t) = (f_{T_1} * f_{T_2} * f_{T_3} * \dots * f_{T_n}) (t)$, where $f_{T_i} (t) = \lambda_i e^{-t \lambda_i}$
+
+    $\therefore$ Use the Laplace transform to convert the convolution into a simpler form (the product of the laplace transforms of individual functions).
+    \[ L_{f_T}(s) = L_{f_{T_1}}(s) \cdot L_{f_{T_2}}(s) \cdot L_{f_{T_3}}(s) \cdots L_{f_{T_n}}(s) \]
+
+    For each $L_{f_{T_i}}(s)$, where $s = \sigma + i \omega$
+    \begin{align*}
+        L_{f_{T_i}}(s) &= \int_{0}^{\infty} \lambda_i e^{-t \lambda_i} e^{-st} dt \\
+        &= \lambda_i \int_{0}^{\infty} e^{-t(\lambda_i + s)} dt \\
+        &= -\frac{\lambda_i}{\lambda_i + s} e^{-t(\lambda_i + s)} \bigg|_{0}^{\infty} \\
+        &= \frac{\lambda_i}{\lambda_i + s}
+    \end{align*}
+
+    $\therefore \displaystyle L_{f_T}(s) = \prod_{i=1}^{n} \frac{\lambda_i}{\lambda_i + s}$
+
+    Since the $L_{f_T}(s)$ in the above form is difficult to invert directly, we decompose it into a sum of the laplace pair $\frac{\lambda_i}{\lambda_i + s}$ because we know
+    \[ L^{-1} \left\{ \frac{\lambda_i}{\lambda_i + s}\right\} (t) = \lambda_i e^{-t\lambda_i}\]
+
+    Assume $n=3$, $T = T_1 + T_2 + T_3$
+    \begin{align*}
+        L_{f_T}(s) &= \prod_{i=1}^{3} \frac{\lambda_i}{\lambda_i + s} \\
+        &= \frac{\lambda_1 \lambda_2 \lambda_3}{(\lambda_1 + s) (\lambda_2 + s) (\lambda_3 + s)} \\
+        &= \frac{A}{\lambda_1 + s} + \frac{B}{\lambda_2 + s} + \frac{C}{\lambda_3 + s}
+    \end{align*}
+
+    $\therefore \lambda_1 \lambda_2 \lambda_3 = A(s+\lambda_2)(s+\lambda_3) + B(s+\lambda_1)(s+\lambda_3) + C(s+\lambda_1)(s+\lambda_2)$
+
+    Let $s = -\lambda_1$
+    \begin{align*}
+        \lambda_1 \lambda_2 \lambda_3 &= A(\lambda_2 - \lambda_1) (\lambda_3 - \lambda_1) \\
+        A &= \frac{\lambda_1 \lambda_2 \lambda_3}{(\lambda_2 - \lambda_1)(\lambda_3 - \lambda_1)}
+    \end{align*}
+
+    Similarly,
+    \begin{align*}
+        B = \frac{\lambda_1 \lambda_2 \lambda_3}{(\lambda_1 - \lambda_2)(\lambda_3 - \lambda_2)} \\
+        C = \frac{\lambda_1 \lambda_2 \lambda_3}{(\lambda_1 - \lambda_3)(\lambda_2 - \lambda_3)}
+    \end{align*}
+    
+    Thus,
+    \begin{align*}
+        L_{f_T}(s) &= \prod_{i=1}^{n} \frac{\lambda_i}{s + \lambda_i} \\
+        &= \frac{\lambda_1 \lambda_2 \lambda_3}{(\lambda_2 - \lambda_1)(\lambda_3 - \lambda_1)(s + \lambda_1)} +  \frac{\lambda_1 \lambda_2 \lambda_3}{(\lambda_1 - \lambda_2)(\lambda_3 - \lambda_2)(s + \lambda_2)} +  \frac{\lambda_1 \lambda_2 \lambda_3}{(\lambda_1 - \lambda_3)(\lambda_2 - \lambda_3)(s + \lambda_3)} \\
+        &= \sum_{i=1}^{n} \left( \prod_{j=1, j \ne i}^{n} \frac{\lambda_j}{\lambda_j - \lambda_i} \right) \frac{\lambda_i}{s + \lambda_i} 
+    \end{align*}
+
+    $f_T(t)$ would be obtained as the invrse of $L_{f_T}(s)$
+    \begin{align*}
+        f_T(t) = L_{f_T}^{-1}(s) = \sum_{i=1}^{n} \left( \prod_{j=1,j \ne i}^{n} \frac{\lambda_j}{\lambda_j - \lambda_i}\right) \lambda_i e^{-t\lambda_i}
+    \end{align*}
+
+    We know that $\lambda_i = ar^{i-1}$
+
+    Therefore, the general form of the probability density function for $T$ is given by 
+    \begin{align*}
+        f_T(t) = \sum_{i=1}^{n} \left( \prod_{j=1,j \ne i}^{n} \frac{r^{j-1}}{r^{j-1} - r^{i-1}}\right) ar^{i-1} e^{-tar^{i-1}}
+    \end{align*}
+\end{proof}
+
+
+
+
+\end{document}

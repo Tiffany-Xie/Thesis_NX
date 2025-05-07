@@ -24,6 +24,12 @@ Sources += $(wildcard *.tex)
 
 ######################################################################
 
+## Distribution draft from summer after thesis
+
+distributions.pdf: distributions.tex
+
+######################################################################
+
 autopipeR = defined
 
 Sources += $(wildcard *.R)
