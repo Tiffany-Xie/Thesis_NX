@@ -40,15 +40,25 @@ realfitting.Rout: Code/realfitting.R tempfunc.rda
 tempErrorPlot.Rout: Code/tempErrorPlot.R tempfunc.rda
 	$(pipeR)
 
+######################################################################
+
+## Distributions
+
 ## Compare XNR's derived PDF to simulated density
 testPEpdf.Rout: Code/testPEpdf.R
 	$(pipeR)
 
+## These are pulling rabies data each time; download some to here
+
 ## Working on fitting intervals 2024 Jul 03 (Wed)
-Interval.Rout: Code/Interval.R
+## Not quite working yet
+## This includes something about perlang, and also some attempt at rerlang!
+## There is a quit() here for now, should probably be broken into components
+Interval.Rout: Code/Interval.R tempfunc.rda
 	$(pipeR)
 
-realfitting_interval.Rout: Code/realfitting_interval.R
+## This does something, should be explored.
+realfitting_interval.Rout: tempfunc.rda Code/realfitting_interval.R
 	$(pipeR)
 
 ######################################################################

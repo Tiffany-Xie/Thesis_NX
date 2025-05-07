@@ -289,4 +289,3 @@ qperlang_o <- function(fx, mean, kappa, box=12, log=FALSE) {
 ######################################################################
 
 saveEnvironment()
-

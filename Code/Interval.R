@@ -5,7 +5,8 @@ library(pseudoErlang)
 
 library(shellpipes)
 loadEnvironments()
-# source("./tempfunc.R")
+
+## objects(); quit()
 
 ######################################################################
 ## Gamma -> Erlang
@@ -101,6 +102,8 @@ ggplot(df, aes(x=CD)) +
   geom_line(aes(y=Interval_pe^2, color='Pseudo Erlang(sq)'), linewidth=1) +
   geom_line(aes(y=Interval_g^2, color='Gamma(sq)'), linewidth=1)
 
+
+quit()
 
 plot(x=cd, y=inversed_time, type="l",
      xlab="Cumulative Density",
