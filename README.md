@@ -1,5 +1,1 @@
-# Thesis_NX
-Temp: Thesis - Ningrui Xie
-Hello World  
-Testing VScode *2  
- 
+Code and drafts for [Ningrui Xie's Senior thesis, 2024](thesis/outputs/draft.pdf). 
