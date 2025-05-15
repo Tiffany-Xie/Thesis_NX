@@ -42,6 +42,27 @@ tempErrorPlot.Rout: Code/tempErrorPlot.R tempfunc.rda
 
 ######################################################################
 
+## Distributions
+
+## Compare XNR's derived PDF to simulated density
+testPEpdf.Rout: Code/testPEpdf.R
+	$(pipeR)
+
+## These are pulling rabies data each time; download some to here
+
+## Working on fitting intervals 2024 Jul 03 (Wed)
+## Not quite working yet
+## This includes something about perlang, and also some attempt at rerlang!
+## There is a quit() here for now, should probably be broken into components
+Interval.Rout: Code/Interval.R tempfunc.rda
+	$(pipeR)
+
+## This does something, should be explored.
+realfitting_interval.Rout: tempfunc.rda Code/realfitting_interval.R
+	$(pipeR)
+
+######################################################################
+
 Sources += $(wildcard data/*.csv)
 data/WHO_covid.csv:
 	wget -O $@ "https://covid19.who.int/WHO-COVID-19-global-data.csv"

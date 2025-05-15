@@ -24,6 +24,12 @@ Sources += $(wildcard *.tex)
 
 ######################################################################
 
+## Distribution draft from summer after thesis
+
+distributions.pdf: distributions.tex
+
+######################################################################
+
 autopipeR = defined
 
 Sources += $(wildcard *.R)
@@ -45,6 +51,9 @@ figures/sametypeFittingG.Rout: figures/sametypeFittingG.R tempfunc.rda #
 	$(pipeR)
 
 figures/parEst.Rout: figures/parEst.R tempfunc.rda #
+	$(pipeR)
+
+figures/rmsle.Rout: figures/rmsle.R tempfunc.rda #
 	$(pipeR)
 
 ######################################################################

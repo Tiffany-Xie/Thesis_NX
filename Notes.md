@@ -1,79 +1,79 @@
-# Proposal
 
-Due 27 October
-
-# Proposed Title
-**Within-host dynamical models of acute respiratory viruses: A review of approaches and methods**
-
-# Readings
-[Adaptive immunity to SARS-CoV-2 and COVID-19](https://pubmed.ncbi.nlm.nih.gov/33497610/)
-
-[Dawn Bowdish grant](https://mcmasteru365-my.sharepoint.com/:b:/g/personal/xien6_mcmaster_ca/EWOYlawx391Gowrq2UV190UB3B_kw_RTMskuOeI9vxClmg?e=3hXkjt)
-
-[Immune boosting bridges leaky and polarized vaccination models (our paper)](https://www.medrxiv.org/content/10.1101/2023.07.14.23292670v2)
-
-**Linear Chain Trick**
-
-[Olga's thesis](https://macsphere.mcmaster.ca/bitstream/11375/11231/1/fulltext.pdf)
-
-[Olga's thesis (view without download)](https://mcmasteru365-my.sharepoint.com/:b:/g/personal/xien6_mcmaster_ca/Efmc21R_qWROkq4QHVNRNZQBUZsCMQQqdSqahHd9SJr3NQ?e=e9bQ1r)
-
-[Generalizations of the ‘Linear Chain Trick’: incorporating more flexible dwell time distributions into mean field ODE models](https://link.springer.com/article/10.1007/s00285-019-01412-w)
-
-[Building mean field ODE models using the generalized linear chain trick & Markov chain theory](https://www.tandfonline.com/doi/full/10.1080/17513758.2021.1912418)
-
-# Ideas
-- Tropism: What do we know about how or whether tetrapods (or mammals?) have evolved various mechanisms to induce a tradeoff between viral success in lower or upper airways
-- Immunity: How do we measure or define immunity? How careful are people in talking about it? We can have protection against infection, the ability to transmit, clinical disease, hospitalization, and death. How do these things wane?
-
-**Mathy stuff:** Simulate, analyze, and fit very simple boxcar models.
-
-# To do (Ningrui)
-
-Let me know what you think of the SARS paper (maybe write a notes document about it on the repo and send me a link or just let me know the name)
-* For now, just spend one hour consolidating your _current_ thoughts and questions ✓
-
-Finally, let JD know thoughts about the Dawn Bowdish grant
-* ~/Downloads/vaccResponseGrant.pdf ✓
-* For now, just spend one hour consolidating your _current_ thoughts and questions ✓
-
-And similarly for [our paper](https://www.medrxiv.org/content/10.1101/2023.07.14.23292670v2)
-* For now, just spend one hour consolidating your _current_ thoughts and questions ✓
-* Also, work on the math and/or simulation side to see what you can learn ✓
-
-* Set up a oneDrive folder, share it with JD, and add the grant pdf ✓
-* This one is very hard, but try to come up with some questions or thoughts ✓
-
-Oct 3, 2023
-* Test Erlang using Gamma ✓
-* Match the Estimated P to the exact P (approximate using small interval OR *other method*) ✓
-* Find better ways to dynamically change the *dI* equations in the model ✓
-
-## 2023 Oct 17 (Tue)
-
-We want to be able to fix the number of boxes and change r and see if that's a better overall approach than changing the number of boxes.
-
-Our starting point is going to be Erlang distributions with n=2, 4 and 8. What values of r match these distributions if we use the pseudo-Erlang with 12 boxes?
-
-We can look both at visual matches and also at shape parameters (for now, we will always keep the mean duration constant).
-
-Our main shape parameter is κ = σ²/μ. We can calculate that analytically from the formulas on the paper. It might be fun to also calculate it numerically from the model output, but that is probably not necessary unless we run into trouble.
-
-After we do visual comparisons, we can also try to go backward. Given a number of boxes and a desired value of κ, it should be possible to numerically find the value of r that matches κ. The best way to do this is probably with the r function `uniroot`. If we do this for κ=1/n_erlang, we can compare pseudo-Erlang and Erlang distributions with the same D and the same κ (we will typically adjust a as the last step to make the values of D match).
-
-2023 Oct 20 (Fri)
+2024 Aug 07 (Wed)
 =================
 
-For proposal: review a little bit about SInR modeling (linear chains). You can rely mostly on the friendly parts of Olga's thesis. Briefly explain your own understanding of what's going on.
+qperlang uniroot working well now with idea below 🙂. Can abandon bound search for now.
 
-Look to see if Gholami and/or Heffernan has done anything with fitting multiple models with different numbers of boxes. See for example https://pubmed.ncbi.nlm.nih.gov/36773843/, there may also be others on archives?
+Investigated rabies data without using statsJournal! Current version of serial intervals has “a lot” of zeroes; Jonathan says this is a data problem, not a coding problem.
 
-Find out about our lab's SIR fitting stuff? https://github.com/bbolker/fitsir/
+In the meantime, Ningrui changed all of the zeroes to 0.01 ☹ and tried to fit... it was good to code this, but we should not even look at results from bad real data. These data are actually not appropriate for current methods because kappa is large; I wonder if this is still true if we clean the data first. Ningrui thinks that even when data are cleaned the outliers will mess things up.
 
-Here is some background about how different kinds of models come together. Do NOT worry about the math details; if the overview helps you, or you find something to cite, that's great. Otherwise you can ignore the whole thing.
+Just for future; Jonathan believes that if you are transforming data (which includes moving things a little away from zero) that you should: think carefully about transformation parameters; and transform all the data.
 
-Biological parameters are D and κ
+Ningrui thinks using observed mean and kappa might be better than fitting. It is worth exploring this with some fits and seeing what advantages and disadvantages are.
 
-Erlang mechanistic parameters are γ and n [clumsy and discrete]
+How to evaluate a fit? Boxes, qqplots (make sure not to renormalize), realized likelihood (deviance), absolute squared difference between ordered vectors, ... ? We can also ask whether the fitted kappa matches the observed kappa; if not, this could be a bad sign about distributional assumptions. Differences may also arise from deep in the tails (stuff that is not observed in data).
 
-PE mechanistic parameters [fix n]: a and r
+So, what to do now? _Simple_ interval-based fitting should be easy to code, but Jonathan hesitates to apply it to the real data, which are usually double-censored (meaning the triangle thing). Maybe read a bit about triangling tools below? Also: Jonathan should try to figure out why rabies data are weird and if they can be fixed reasonably simply.
+
+We can also simulate some double-censored data very easily. Pick uniform start times and gamma interval times and then round them both (probably using floor()) to get double-censored intervals. Try to create a situation where using naive interval likelihood is worse than using triangular interval likelihood.
+
+Jonathan is not in tune with Ningrui's theories about specifying the mode, but also not against the current code. Discuss again if you want to say (mode=).
+
+Ningrui needs to explain triangular code better; it may be better to simplify and drop the mode... Please send _email_ with explanation of logic for calculating left and right.
+
+2024 Jul 31 (Wed)
+=================
+
+[Here](https://github.com/eliminaterabies/R0paper/blob/main/public_data/intervals.rda) are some data you can try fitting as point data first; we will be curious how well they fit with dperlang, dlnorm, and dgamma. As we try things with real data, we should be making notes in a [stats journal](statsJournal.md) of everything we try, in order to maximize transparency and minimize bias.
+
+Here are some pretty-complicated papers about thinking about intervals and data. You don't need to worry about them too much.
+* [Charniga pre-print](https://arxiv.org/abs/2405.08841)
+* [Park pre-print](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
+
+Ningrui is working on bounds for qperlang uniroot. A new idea would be to use qperlang with npe boxes and the slowest rate (for upper bound) or the highest rate: this is very non-conservative, but should work. The concern will be if it gives us ∞ more often than we like, but can try first.
+
+In addition to trying that, we can also try to improve the current boundSearch method, which is working well for the parameters that Ningrui is using, but needs to be more flexible (and needs to not have magic numbers 🙂). Jonathan suggests a multiplicative approach with something like mean(exp(something)) where something is a vector symmetric around zero. To avoid ties, lower/upper bound can be multiplied by exp(∓ε).
+
+Ningrui has been looking at the mpox data, and they are confusing. We could use point-based or interval-based estimation. Point-based estimation would involve just getting average dates; interval-based estimation is a little complicated if we have intervals at each end. It might be fun for Ningrui to do some math and write a function to describe the triangular distributions that result. We should also look at work by Abbott and Park and others where they may have code that we can leverage for that. Jonathan is thinking of finding some rabies data that may have a wider distribution and may be less problematic for point-based fitting. Ningrui will also look more at the COVID data.
+
+Triangular distribution is something like Int_min^max of something about possible observation times. The probability of observing the data is then proportional to Int_min^max (pobs(int) * pperlang(int)).
+
+2024 Jul 24 (Wed)
+=================
+
+inversion-based rperlang is now working.
+
+We no longer need or or want rejection-based rperlang, but note that choosing c is hard, and probably requires some arbitrary limit (choose values where perlang is not too close to 1).
+
+We talked about “normalizing” and “standardizing”. Standardizing in our field is the practice of giving things unit mean and variance (z = (x-μ)/σ). Normalizing is something that maybe we should be doing more: it means calculating a size statistic for a vector and dividing by it, to get a new vector whose size is 1. For densities, we would do something like d = d/(width*sum(d)), so that the new d would satisfy sum(width*d) = 1. It is always a good idea to: normalize vectors when appropriate; check whether the normalizing constant (the calculated size) is within expected limits.
+
+Jonathan suggested some μ/κ-based upper bounds for the qperlang upper bound, these did not work!
+
+Jonathan is supposed to look for data that we can fit.
+* My Taiwan collaborator Andrei curated [some mpox data](https://github.com/aakhmetz/Mpox-IncubationPeriodSerialInterval-Meta2023/blob/main/SupplementaryFile1.xlsx). I will talk to him about it this week.
+* Here is a [known set of covid interval data](https://zenodo.org/records/3940300)
+
+2024 Jul 17 (Wed)
+=================
+
+Ningrui has checked that naive (point-based) interval densities add up very close to 1; consider normalizing inside the code anyway.
+* Or maybe not worry about it for now, since we will be moving on to real interval densities
+
+You should be doing both of these things in many cases: check that it's close _and_ normalize anyway.
+
+rperlang seems clever, but maybe not efficient. You could pick a bunch of parameters and calculate full densities to make a better choice for c.
+c should be greater than max(dperlang(...)/dgamma(...) but not too large.
+
+rperlang is rejection sampling, but there's another method that is often better, which involves inverting an estimated cdf.
+* maybe try to build this with uniroot and pperlang
+
+We should look at likelihoods and estimates of μ and κ, especially for gamma −> Erlang vs. gamma −> pseudoErlang
+
+the density comparisons are cool; we might understand them a bit better if we look at some densities plotted on log scale
+
+formula CDF is amazing, thanks Ningrui for not listening to Jonathan 🙂. We should talk about methods for inversion-based rperlang (although current rperlang seems good enough for now).
+
+formula CDF will give us good interval densities!
+
+Need to set or get histogram breaks and convert densities to counts using the right units – OR, there may be an option to make density-based histograms.

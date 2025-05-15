@@ -6,59 +6,6 @@ library(dplyr)
 
 #run temp functions before
 ######################################################################
-## data visualization
-######################################################################
-
-path <- "https://covid19.who.int/WHO-COVID-19-global-data.csv"
-data <- read.csv(path)
-
-data_c <- data %>% 
-  filter(Country == "China")
-
-plot(seq(0,dim(data_c)[1]-1), data_c$New_cases, type='l', xlab="Time, weeks", ylab="Incidence",
-     main="Until Now (CHINA)")
-plot(seq(0,dim(data_c)[1]-1)[1:50], data_c$New_cases[1:50], type='l', xlab="Time, weeks", ylab="Incidence",
-     main="First 50 Weeks (CHINA)")
-plot(seq(0,dim(data_c)[1]-1)[150:175], data_c$New_cases[150:175], type='l', xlab="Time, weeks", ylab="Incidence",
-     main="Maximum Peak (CHINA)")
-
-######################################################################
-## fitting
-######################################################################
-
-nfit <- 6
-maxpeak <- as.data.frame(data_c[150:175,]) 
-startPar <- list(logβ=-1, logD=2, logkappa=-0.2)
-fixedPar <- list(n = nfit, μ = 0.01, N = 1.4097e9, I0 = 171745, ts = 7, nbs = 1000, T = 7*26) # 171745
-
-sir.nll.g <- function(logβ, logD, logkappa, n, μ, N, I0, ts, T, nbs, obs) {
-  
-  out <- as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa), n=n, μ=μ, N=N, I0=I0, ts=ts, T=T))
-  nll <- -sum(dnbinom(x=obs, mu=diff(out$Cinc), size=nbs, log=TRUE))
-}
-
-fit0 <- mle2(sir.nll.g, 
-             data=list(obs=maxpeak$New_cases),
-             start=startPar, 
-             fixed=fixedPar,
-             method="Nelder-Mead",
-             control=list(trace = 0))
-
-logβ <- coef(fit0)[["logβ"]]
-logD <- coef(fit0)[["logD"]]
-logkappa <- coef(fit0)[["logkappa"]]
-mod.prep <- as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa),
-                                     n=fixedPar$n, μ=fixedPar$μ, N=fixedPar$N, 
-                                     I0=fixedPar$I0, ts=fixedPar$ts, T=fixedPar$T))
-
-df <- data.frame(Time = timeSeq(1,26)+150, trueI = maxpeak$New_cases, fitI = diff(mod.prep$Cinc))
-
-ggplot(df, aes(x=Time)) +
-  geom_line(aes(y=trueI, color = "trueI"), linewidth=1) +
-  geom_line(aes(y=fitI, color = "fitI")) +
-  labs(x="Time, weeks", y = "Incidence", title="COVID19 CHINA (Maxpeak)")
-
-######################################################################
 ## Measles
 ######################################################################
 
@@ -77,13 +24,13 @@ ggplot(data, aes(x=Time, y=Cases)) +
 #which.min(subset(data, Time>1956.5 & Time<1957.5)$Cases)
 #subset(data, Time>1956.5 & Time<1957.5)[11,]
 onepeak <- data[349:454,] #299:402
-ggplot(onepeak, aes(x=Time, y=Cases)) + geom_line() +
+ggplot(onepeak, aes(x=Time, y=Cases)) + geom_point() +
   labs(title="One of the peaks")
 
 
 nfit <- 12
-startPar <- list(logβ=-1, logD=2, logkappa=-0.2)
-fixedPar <- list(n = nfit, μ = 0.01, N = 160180000, I0 = 1, ts = 7, nbs = 1000, T = 742) # 171745
+startPar <- list(logβ=-1, logD=1, logkappa=-0.2) # N = 160180000, I0 = 2 N=162754
+fixedPar <- list(n = nfit, μ = 0.01, N = 162754, I0 = 1, ts = 7, nbs = 1000, T = 742) # 171745
 
 sir.nll.g <- function(logβ, logD, logkappa, n, μ, N, I0, ts, T, nbs, obs) {
   
@@ -101,7 +48,9 @@ fit0 <- mle2(sir.nll.g,
 logβ <- coef(fit0)[["logβ"]]
 logD <- coef(fit0)[["logD"]]
 logkappa <- coef(fit0)[["logkappa"]]
-mod.prep <- as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa),
+#logN <- coef(fit0)[["logN"]]
+#logI0 <- coef(fit0)[["logI0"]]
+mod.prep <- as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD)*7, kappa=exp(logkappa),
                                      n=fixedPar$n, μ=fixedPar$μ, N=fixedPar$N, 
                                      I0=fixedPar$I0, ts=fixedPar$ts, T=fixedPar$T))
 
@@ -113,6 +62,7 @@ ggplot(df, aes(x=Time)) +
   labs(x="Time, weeks", y = "Incidence") +
   labs(title="One of the peaks fitting")
 
+quit()
 ######################################################################
 ## Measles seasonal 
 ######################################################################
@@ -180,9 +130,9 @@ logβ0 <- coef(fit0)[["logβ0"]]
 logD <- coef(fit0)[["logD"]]
 logkappa <- coef(fit0)[["logkappa"]]
 mod.prep <- as.data.frame(sinnerFlow_s(β0=exp(logβ0), D=exp(logD), kappa=exp(logkappa),
-                                     n=fixedPar$n, μ=fixedPar$μ, N=fixedPar$N, 
-                                     I0=fixedPar$I0, ts=fixedPar$ts, T=fixedPar$T, 
-                                     sigma=fixedPar$sigma, P=fixedPar$P))
+                                       n=fixedPar$n, μ=fixedPar$μ, N=fixedPar$N, 
+                                       I0=fixedPar$I0, ts=fixedPar$ts, T=fixedPar$T, 
+                                       sigma=fixedPar$sigma, P=fixedPar$P))
 
 df <- data.frame(Time = timeSeq(7/365,7*991/365)+1948.027, trueI = data$Cases, fitI = diff(mod.prep$Cinc))
 
@@ -190,5 +140,58 @@ ggplot(df, aes(x=Time)) +
   geom_line(aes(y=trueI, color = "trueI"), linewidth=1) +
   geom_line(aes(y=fitI, color = "fitI")) +
   labs(x="Time, weeks", y = "Incidence", title = "Whole Data Fitting")
+
+######################################################################
+## data visualization (covid)
+######################################################################
+
+path <- "https://covid19.who.int/WHO-COVID-19-global-data.csv"
+data <- read.csv(path)
+
+data_c <- data %>% 
+  filter(Country == "China")
+
+plot(seq(0,dim(data_c)[1]-1), data_c$New_cases, type='l', xlab="Time, weeks", ylab="Incidence",
+     main="Until Now (CHINA)")
+plot(seq(0,dim(data_c)[1]-1)[1:50], data_c$New_cases[1:50], type='l', xlab="Time, weeks", ylab="Incidence",
+     main="First 50 Weeks (CHINA)")
+plot(seq(0,dim(data_c)[1]-1)[150:175], data_c$New_cases[150:175], type='l', xlab="Time, weeks", ylab="Incidence",
+     main="Maximum Peak (CHINA)")
+
+######################################################################
+## fitting
+######################################################################
+
+nfit <- 6
+maxpeak <- as.data.frame(data_c[150:175,]) 
+startPar <- list(logβ=-1, logD=2, logkappa=-0.2)
+fixedPar <- list(n = nfit, μ = 0.01, N = 1.4097e9, I0 = 171745, ts = 7, nbs = 1000, T = 7*26) # 171745
+
+sir.nll.g <- function(logβ, logD, logkappa, n, μ, N, I0, ts, T, nbs, obs) {
+  
+  out <- as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa), n=n, μ=μ, N=N, I0=I0, ts=ts, T=T))
+  nll <- -sum(dnbinom(x=obs, mu=diff(out$Cinc), size=nbs, log=TRUE))
+}
+
+fit0 <- mle2(sir.nll.g, 
+             data=list(obs=maxpeak$New_cases),
+             start=startPar, 
+             fixed=fixedPar,
+             method="Nelder-Mead",
+             control=list(trace = 0))
+
+logβ <- coef(fit0)[["logβ"]]
+logD <- coef(fit0)[["logD"]]
+logkappa <- coef(fit0)[["logkappa"]]
+mod.prep <- as.data.frame(sinnerFlow(β=exp(logβ), D=exp(logD), kappa=exp(logkappa),
+                                     n=fixedPar$n, μ=fixedPar$μ, N=fixedPar$N, 
+                                     I0=fixedPar$I0, ts=fixedPar$ts, T=fixedPar$T))
+
+df <- data.frame(Time = timeSeq(1,26)+150, trueI = maxpeak$New_cases, fitI = diff(mod.prep$Cinc))
+
+ggplot(df, aes(x=Time)) +
+  geom_line(aes(y=trueI, color = "trueI"), linewidth=1) +
+  geom_line(aes(y=fitI, color = "fitI")) +
+  labs(x="Time, weeks", y = "Incidence", title="COVID19 CHINA (Maxpeak)")
 
 
