@@ -171,6 +171,7 @@ Ignore += *.docs.pdf
 Ignore += $(pdirs)
 alldirs += $(pdirs) thesis
 
+
 ######################################################################
 
 psync = $(pdirs:%=%.sync) 
