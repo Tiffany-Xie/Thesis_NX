@@ -169,7 +169,7 @@ Ignore += *.docs.pdf
 	$(CP) docs/$*.pdf $@
 
 Ignore += $(pdirs)
-alldirs += $(pdirs) $(subdirs)
+alldirs += $(pdirs) thesis
 
 ######################################################################
 
